@@ -10,7 +10,7 @@ func TestCreateReadUpdateDelete(t *testing.T) {
 	storage, err := getSqliteStorageClient(":memory:")
 	if err != nil {
 		//t.Errorf("Add(2, 3) = %d; want 5", result)
-		t.Error("Error creating storage")
+		t.Errorf("Error creating storage: %s", err.Error())
 		return
 	}
 	res, err := storage.Read(uuid.New())

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -18,7 +19,53 @@ func (stg Sqlite3ActivityStorage) Create(id Activity) (*Activity, error) {
 }
 
 func (stg Sqlite3ActivityStorage) Read(id uuid.UUID) (*Activity, error) {
-	return nil, errors.New("Not implemented")
+	selectSQL := `
+			SELECT 
+				id,
+				userId,
+				name,
+				type,
+				attributes,
+				details,
+				dateTime,
+				timeRelevant,
+				durationMinutes,
+				completed
+			FROM activities 
+			WHERE id = ?;
+	`
+	rows, err := stg.DB.Query(selectSQL, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Print the results of the query
+	if rows.Next() {
+		var activity Activity
+		rawAttributes := "{}"
+		err = rows.Scan(
+			activity.Id,
+			activity.UserId,
+			activity.Name,
+			activity.Type,
+			rawAttributes,
+			activity.Details,
+			activity.DateTime,
+			activity.TimeRelevant,
+			activity.DurationMinutes,
+			activity.Completed,
+		)
+		if err != nil {
+			return nil, err
+		}
+		err := json.Unmarshal([]byte(rawAttributes), &activity.Attributes)
+		if err != nil {
+			return nil, err
+		}
+		return &activity, nil
+	}
+	return nil, nil
 }
 
 func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity, error) {
@@ -35,6 +82,25 @@ func (stg Sqlite3ActivityStorage) Delete(id uuid.UUID) error {
 
 func getSqliteStorageClient(filepath string) (ActivityStorage, error) {
 	db, err := sql.Open("sqlite3", filepath)
+	if err != nil {
+		return nil, err
+	}
+	// Do migrations
+	createTableSQL := `
+	CREATE TABLE IF NOT EXISTS activities (
+			id TEXT PRIMARY KEY,
+			userId TEXT,
+			name TEXT,
+			type TEXT,
+			attributes TEXT,
+			details TEXT NULL,
+			dateTime DATETIME,
+			timeRelevant BOOLEAN,
+			durationMinutes INTEGER NULL,
+			completed BOOLEAN
+	);
+	`
+	_, err = db.Exec(createTableSQL)
 	if err != nil {
 		return nil, err
 	}
