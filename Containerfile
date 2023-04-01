@@ -24,8 +24,6 @@ COPY client/public public
 ARG APP_ENV=production
 ENV APP_ENV ${APP_ENV}
 
-ARG REACT_APP_API_ROOT=/api
-
 RUN npm run build
 
 FROM docker.io/debian:stable-slim as runner

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -39,14 +40,34 @@ func getPublicFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func getHello(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("got /hello request\n")
 	io.WriteString(w, "Hello, HTTP!\n")
+}
+
+type UserInfo struct {
+	UserId string `json:"userId"`
+}
+
+func getUserInfo(w http.ResponseWriter, r *http.Request) {
+	userInfo := UserInfo{
+		UserId: "test-user-id",
+	}
+
+	jsonData, err := json.Marshal(userInfo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
 }
 
 func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/hello", getHello)
+
+	mux.HandleFunc("/api/whoami", getUserInfo)
 
 	mux.HandleFunc("/", getPublicFile)
 	mux.HandleFunc("*", getPublicFile)

@@ -1,10 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { plannerGetRequest } from './utilities/apiRequest'
 
 function App() {
   const [count, setCount] = useState(0)
+
+  const [userId, setUserId] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    plannerGetRequest<{userId: string}>("/whoami").then(res => {
+      setUserId(res.userId)
+    }).catch(() => setUserId("err"))
+  }, [setUserId])
 
   return (
     <div className="App">
@@ -17,6 +26,7 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
+      <h2>{userId ?? "Loading"}</h2>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
