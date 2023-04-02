@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,4 +37,16 @@ type ActivityStorage interface {
 	Query(query ActivityStorageQuery) (*[]Activity, error)
 	Update(activity Activity) error
 	Delete(id uuid.UUID) error
+}
+
+func getStorage() ActivityStorage {
+	// TODO: This is how we should get storage
+	// TODO: When there is more than SQLite3, configure here
+	// TODO: Also probably want to make this something that only
+	// gets generated once
+	strg, err := getSqliteStorageClient(":memory:")
+	if err != nil {
+		os.Exit(500)
+	}
+	return strg
 }
