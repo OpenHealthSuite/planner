@@ -72,6 +72,29 @@ func generateReadActivityHandler(strg storage.ActivityStorage) http.HandlerFunc 
 	}
 }
 
+// TODO: Skipping tests until query gets more complex
+func generateUserQueryActivityHandler(strg storage.ActivityStorage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userId := r.Header.Get(middlewares.VALIDATED_HEADER)
+
+		queried, err := strg.Query(storage.ActivityStorageQuery{UserId: &userId})
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		jsonData, err := json.Marshal(queried)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonData)
+	}
+}
+
 func generateUpdateActivityHandler(strg storage.ActivityStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		activity, err := parseActivity(r.Body)
