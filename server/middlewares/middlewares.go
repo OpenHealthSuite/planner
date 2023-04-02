@@ -4,11 +4,11 @@ import (
 	"net/http"
 )
 
-type middleware func(http.Handler) http.Handler
+type Middleware func(http.Handler) http.Handler
 
 const VALIDATED_HEADER = "x-validated-planner-userid"
 
-func RequiresUserIdHeader(headerName string) middleware {
+func RequiresUserIdHeader(headerName string) Middleware {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			headerValue := r.Header.Get(headerName)

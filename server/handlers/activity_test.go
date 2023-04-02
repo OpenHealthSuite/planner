@@ -36,7 +36,7 @@ func TestHappyPathCreateActivityHandler(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	handler := http.Handler(generateCreateActivityHandler(mockStorage))
+	handler := http.Handler(registerRoot(mockStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -67,7 +67,7 @@ func TestHappyPathUpdateActivityHandler(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	handler := http.Handler(generateUpdateActivityHandler(mockStorage))
+	handler := http.Handler(registerId(mockStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -95,7 +95,7 @@ func TestHappyPathDeleteActivityHandler(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	handler := http.Handler(generateDeleteActivityHandler(mockStorage))
+	handler := http.Handler(registerId(mockStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -120,7 +120,7 @@ func TestMalformedReturns400CreateActivityHandler(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	handler := http.Handler(generateCreateActivityHandler(mockStorage))
+	handler := http.Handler(registerRoot(mockStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
@@ -145,7 +145,7 @@ func TestHappyPathReadActivityHandler(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	handler := http.Handler(generateReadActivityHandler(mockStorage))
+	handler := http.Handler(registerId(mockStorage))
 	handler.ServeHTTP(rr, req)
 
 	expectedBody, err := json.Marshal(returnedActivity)
