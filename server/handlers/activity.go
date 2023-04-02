@@ -39,6 +39,39 @@ func generateCreateActivityHandler(strg storage.ActivityStorage) http.HandlerFun
 	}
 }
 
+func generateReadActivityHandler(strg storage.ActivityStorage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		uuid, err := uuid.Parse(r.URL.Query().Get("activityId"))
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		storedActivity, err := strg.Read(uuid)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		userId := r.Header.Get(middlewares.VALIDATED_HEADER)
+
+		if storedActivity == nil || storedActivity.UserId != userId {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
+		jsonData, err := json.Marshal(storedActivity)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonData)
+	}
+}
+
 func generateUpdateActivityHandler(strg storage.ActivityStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		activity, err := parseActivity(r.Body)

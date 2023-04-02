@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -123,4 +124,32 @@ func TestMalformedReturns400CreateActivityHandler(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestHappyPathReadActivityHandler(t *testing.T) {
+	mockStorage := storage.NewMockActivityStorage(t)
+	testUserId := "some-valid-expected-userid"
+
+	returnedActivity := storage.Activity{
+		Id:     uuid.New(),
+		UserId: testUserId,
+	}
+	mockStorage.EXPECT().Read(returnedActivity.Id).Return(&returnedActivity, nil).Once()
+
+	// We have to use "real" query params here
+	req, err := http.NewRequest("GET", fmt.Sprintf("/activities?activityId=%s", returnedActivity.Id), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set(middlewares.VALIDATED_HEADER, testUserId)
+
+	rr := httptest.NewRecorder()
+
+	handler := http.Handler(generateReadActivityHandler(mockStorage))
+	handler.ServeHTTP(rr, req)
+
+	expectedBody, err := json.Marshal(returnedActivity)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, string(expectedBody), rr.Body.String())
 }
