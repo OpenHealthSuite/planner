@@ -31,6 +31,7 @@ type ActivityStorageQuery struct {
 	UserId *string
 }
 
+//go:generate mockery --name ActivityStorage
 type ActivityStorage interface {
 	Create(activity Activity) (*Activity, error)
 	Read(id uuid.UUID) (*Activity, error)
@@ -39,7 +40,7 @@ type ActivityStorage interface {
 	Delete(id uuid.UUID) error
 }
 
-func getStorage() ActivityStorage {
+func GetStorage() ActivityStorage {
 	// TODO: This is how we should get storage
 	// TODO: When there is more than SQLite3, configure here
 	// TODO: Also probably want to make this something that only
