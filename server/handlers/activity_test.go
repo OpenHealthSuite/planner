@@ -15,7 +15,6 @@ import (
 )
 
 func TestHappyPathCreateActivityHandler(t *testing.T) {
-
 	mockStorage := storage.NewMockActivityStorage(t)
 	returnedActivity := storage.Activity{
 		Id: uuid.New(),
@@ -41,6 +40,65 @@ func TestHappyPathCreateActivityHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Equal(t, fmt.Sprintf(`"%s"`, returnedActivity.Id.String()), rr.Body.String())
+}
+
+func TestHappyPathUpdateActivityHandler(t *testing.T) {
+	mockStorage := storage.NewMockActivityStorage(t)
+	testUserId := "some-valid-expected-userid"
+
+	returnedActivity := storage.Activity{
+		Id:     uuid.New(),
+		UserId: testUserId,
+	}
+	mockStorage.EXPECT().Read(returnedActivity.Id).Return(&returnedActivity, nil).Once()
+
+	mockStorage.EXPECT().Update(mock.Anything).Return(nil).Once()
+
+	updateBody := `{
+		"name": "some activity name update"
+	}`
+	// We have to use "real" query params here
+	req, err := http.NewRequest("PUT", fmt.Sprintf("/activities?activityId=%s", returnedActivity.Id), strings.NewReader(updateBody))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set(middlewares.VALIDATED_HEADER, testUserId)
+
+	rr := httptest.NewRecorder()
+
+	handler := http.Handler(generateUpdateActivityHandler(mockStorage))
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, `{ "status": "ok" }`, rr.Body.String())
+}
+
+func TestHappyPathDeleteActivityHandler(t *testing.T) {
+	mockStorage := storage.NewMockActivityStorage(t)
+	testUserId := "some-valid-expected-userid"
+
+	returnedActivity := storage.Activity{
+		Id:     uuid.New(),
+		UserId: testUserId,
+	}
+	mockStorage.EXPECT().Read(returnedActivity.Id).Return(&returnedActivity, nil).Once()
+
+	mockStorage.EXPECT().Delete(returnedActivity.Id).Return(nil).Once()
+
+	// We have to use "real" query params here
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("/activities?activityId=%s", returnedActivity.Id), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set(middlewares.VALIDATED_HEADER, testUserId)
+
+	rr := httptest.NewRecorder()
+
+	handler := http.Handler(generateDeleteActivityHandler(mockStorage))
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, `{ "status": "ok" }`, rr.Body.String())
 }
 
 func TestMalformedReturns400CreateActivityHandler(t *testing.T) {
