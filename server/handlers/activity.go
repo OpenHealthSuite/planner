@@ -7,13 +7,14 @@ import (
 	"net/http"
 	"planner/middlewares"
 	"planner/storage"
+	"strings"
 
 	"github.com/google/uuid"
 )
 
 func AddActivityHandlers(mux *http.ServeMux, strg storage.ActivityStorage, useridMiddleware middlewares.Middleware) {
 	mux.Handle("/api/activities", useridMiddleware(registerRoot(strg)))
-	mux.Handle("/api/activities/{activityId}", useridMiddleware(registerId(strg)))
+	mux.Handle("/api/activities/", useridMiddleware(registerId(strg)))
 }
 
 func registerRoot(strg storage.ActivityStorage) http.HandlerFunc {
@@ -31,12 +32,22 @@ func registerRoot(strg storage.ActivityStorage) http.HandlerFunc {
 
 func registerId(strg storage.ActivityStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, "/")
+		id := parts[3]
+
+		uuid, err := uuid.Parse(id)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
 		if r.Method == http.MethodPut {
-			handleUpdateActivity(w, r, strg)
+			handleUpdateActivity(w, r, strg, uuid)
 		} else if r.Method == http.MethodGet {
-			handleReadActivity(w, r, strg)
+			handleReadActivity(w, r, strg, uuid)
 		} else if r.Method == http.MethodDelete {
-			handleDeleteActivity(w, r, strg)
+			handleDeleteActivity(w, r, strg, uuid)
 		} else {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			fmt.Fprintf(w, "Invalid method: %s", r.Method)
@@ -60,7 +71,7 @@ func handleCreateActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 		return
 	}
 
-	activity.UserId = r.Header.Get(middlewares.VALIDATED_HEADER)
+	activity.UserId = w.Header().Get(middlewares.VALIDATED_HEADER)
 
 	created, err := strg.Create(activity)
 	jsonData, err := json.Marshal(created.Id.String())
@@ -72,14 +83,7 @@ func handleCreateActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 	w.Write(jsonData)
 }
 
-func handleReadActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage) {
-	uuid, err := uuid.Parse(r.URL.Query().Get("activityId"))
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
+func handleReadActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, uuid uuid.UUID) {
 	storedActivity, err := strg.Read(uuid)
 
 	if err != nil {
@@ -87,7 +91,7 @@ func handleReadActivity(w http.ResponseWriter, r *http.Request, strg storage.Act
 		return
 	}
 
-	userId := r.Header.Get(middlewares.VALIDATED_HEADER)
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
 	if storedActivity == nil || storedActivity.UserId != userId {
 		http.Error(w, "Not Found", http.StatusNotFound)
@@ -105,7 +109,7 @@ func handleReadActivity(w http.ResponseWriter, r *http.Request, strg storage.Act
 
 // TODO: Skipping tests until query gets more complex
 func handleUserQueryActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage) {
-	userId := r.Header.Get(middlewares.VALIDATED_HEADER)
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
 	queried, err := strg.Query(storage.ActivityStorageQuery{UserId: &userId})
 
@@ -125,15 +129,8 @@ func handleUserQueryActivity(w http.ResponseWriter, r *http.Request, strg storag
 
 }
 
-func handleUpdateActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage) {
+func handleUpdateActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, uuid uuid.UUID) {
 	activity, err := parseActivity(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	uuid, err := uuid.Parse(r.URL.Query().Get("activityId"))
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -146,7 +143,7 @@ func handleUpdateActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 		return
 	}
 
-	userId := r.Header.Get(middlewares.VALIDATED_HEADER)
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
 	if storedActivity == nil || storedActivity.UserId != userId {
 		http.Error(w, "Not Found", http.StatusNotFound)
@@ -166,14 +163,7 @@ func handleUpdateActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 
 }
 
-func handleDeleteActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage) {
-	uuid, err := uuid.Parse(r.URL.Query().Get("activityId"))
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
+func handleDeleteActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, uuid uuid.UUID) {
 	storedActivity, err := strg.Read(uuid)
 
 	if err != nil {
@@ -181,7 +171,7 @@ func handleDeleteActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 		return
 	}
 
-	userId := r.Header.Get(middlewares.VALIDATED_HEADER)
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
 	if storedActivity == nil || storedActivity.UserId != userId {
 		http.Error(w, "Not Found", http.StatusNotFound)

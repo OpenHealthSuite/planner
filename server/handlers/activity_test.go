@@ -32,9 +32,9 @@ func TestHappyPathCreateActivityHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Header.Set(middlewares.VALIDATED_HEADER, testUserId)
 
 	rr := httptest.NewRecorder()
+	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
 	handler := http.Handler(registerRoot(mockStorage))
 	handler.ServeHTTP(rr, req)
@@ -59,13 +59,12 @@ func TestHappyPathUpdateActivityHandler(t *testing.T) {
 		"name": "some activity name update"
 	}`
 	// We have to use "real" query params here
-	req, err := http.NewRequest("PUT", fmt.Sprintf("/activities?activityId=%s", returnedActivity.Id), strings.NewReader(updateBody))
+	req, err := http.NewRequest("PUT", fmt.Sprintf("/api/activities/%s", returnedActivity.Id), strings.NewReader(updateBody))
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Header.Set(middlewares.VALIDATED_HEADER, testUserId)
-
 	rr := httptest.NewRecorder()
+	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
 	handler := http.Handler(registerId(mockStorage))
 	handler.ServeHTTP(rr, req)
@@ -87,13 +86,12 @@ func TestHappyPathDeleteActivityHandler(t *testing.T) {
 	mockStorage.EXPECT().Delete(returnedActivity.Id).Return(nil).Once()
 
 	// We have to use "real" query params here
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("/activities?activityId=%s", returnedActivity.Id), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("/api/activities/%s", returnedActivity.Id), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Header.Set(middlewares.VALIDATED_HEADER, testUserId)
-
 	rr := httptest.NewRecorder()
+	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
 	handler := http.Handler(registerId(mockStorage))
 	handler.ServeHTTP(rr, req)
@@ -116,9 +114,8 @@ func TestMalformedReturns400CreateActivityHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Header.Set(middlewares.VALIDATED_HEADER, testUserId)
-
 	rr := httptest.NewRecorder()
+	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
 	handler := http.Handler(registerRoot(mockStorage))
 	handler.ServeHTTP(rr, req)
@@ -137,13 +134,12 @@ func TestHappyPathReadActivityHandler(t *testing.T) {
 	mockStorage.EXPECT().Read(returnedActivity.Id).Return(&returnedActivity, nil).Once()
 
 	// We have to use "real" query params here
-	req, err := http.NewRequest("GET", fmt.Sprintf("/activities?activityId=%s", returnedActivity.Id), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("/api/activities/%s", returnedActivity.Id), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Header.Set(middlewares.VALIDATED_HEADER, testUserId)
-
 	rr := httptest.NewRecorder()
+	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
 	handler := http.Handler(registerId(mockStorage))
 	handler.ServeHTTP(rr, req)

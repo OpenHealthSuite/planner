@@ -7,7 +7,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"planner/handlers"
 	"planner/middlewares"
+	"planner/storage"
 )
 
 func serveFile(w http.ResponseWriter, r *http.Request, f *os.File) {
@@ -68,10 +70,13 @@ func main() {
 
 	// TODO: Drive header value from env
 	useridMiddleware := middlewares.RequiresUserIdHeader("x-planner-userid")
+	storage := storage.GetStorage()
 
 	mux.HandleFunc("/api/hello", getHello)
 
 	mux.Handle("/api/whoami", useridMiddleware(http.HandlerFunc(getUserInfo)))
+
+	handlers.AddActivityHandlers(mux, storage, useridMiddleware)
 
 	mux.HandleFunc("/", getPublicFile)
 	mux.HandleFunc("*", getPublicFile)
