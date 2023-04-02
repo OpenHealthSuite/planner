@@ -3,10 +3,10 @@
 all: build
 
 build:
-	go build -o dist/planner src/main.go
+	go build -o dist/planner main.go
 
 run:
-	go run src/main.go
+	go run main.go
 
 test:
 	go test -v ./...

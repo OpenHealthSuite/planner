@@ -1,4 +1,4 @@
-module planner-server
+module planner
 
 go 1.20
 

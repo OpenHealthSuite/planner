@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"planner/middlewares"
 )
 
 func serveFile(w http.ResponseWriter, r *http.Request, f *os.File) {
@@ -49,7 +50,7 @@ type UserInfo struct {
 
 func getUserInfo(w http.ResponseWriter, r *http.Request) {
 	userInfo := UserInfo{
-		UserId: "test-user-id",
+		UserId: w.Header().Get(middlewares.VALIDATED_HEADER),
 	}
 
 	jsonData, err := json.Marshal(userInfo)
@@ -65,9 +66,12 @@ func getUserInfo(w http.ResponseWriter, r *http.Request) {
 func main() {
 	mux := http.NewServeMux()
 
+	// TODO: Drive header value from env
+	useridMiddleware := middlewares.RequiresUserIdHeader("x-planner-userid")
+
 	mux.HandleFunc("/api/hello", getHello)
 
-	mux.HandleFunc("/api/whoami", getUserInfo)
+	mux.Handle("/api/whoami", useridMiddleware(http.HandlerFunc(getUserInfo)))
 
 	mux.HandleFunc("/", getPublicFile)
 	mux.HandleFunc("*", getPublicFile)
