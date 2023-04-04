@@ -8,6 +8,11 @@ const proxy = {
       changeOrigin: true,
       secure: false,
       ws: true,
+      headers: {
+        "x-planner-userid":
+          process.env.PLANNER_USERID ??
+          "f1750ac3-d6cc-4981-9466-f1de2ebbad33"
+      },
   },
 };
 
