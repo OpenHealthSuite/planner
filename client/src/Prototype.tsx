@@ -110,10 +110,10 @@ const Prototype = () => {
         <Spacer />
         <ButtonGroup size='sm' isAttached>
           <Button 
-            colorScheme={timespan === 'Week' ? 'teal' : undefined} 
+            variant={timespan === 'Week' ? undefined : 'ghost'}
             onClick={() => setTimespan("Week")}>Week</Button>
           <Button 
-            colorScheme={timespan === 'Month' ? 'teal' : undefined} 
+            variant={timespan === 'Month' ? undefined : 'ghost'}
             onClick={() => setTimespan("Month")}>Month</Button>
         </ButtonGroup>
       </Flex>
