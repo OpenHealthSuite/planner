@@ -12,6 +12,7 @@ type ActivityType string
 const (
 	ActivityRunning ActivityType = "running"
 	ActivityCycling ActivityType = "cycling"
+	ActivityOther   ActivityType = "other"
 )
 
 type Activity struct {
