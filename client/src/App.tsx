@@ -1,6 +1,5 @@
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
-import Calendar from './views/Calendar'
-
+import Prototype from './Prototype';
 
 const colors = {
   brand: {},
@@ -8,11 +7,10 @@ const colors = {
 
 const theme = extendTheme({ colors });
 
-
 function App() {
   return (
     <ChakraProvider theme={theme}>
-      <Calendar />
+      <Prototype />
     </ChakraProvider>
   )
 }
