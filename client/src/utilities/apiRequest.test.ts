@@ -1,79 +1,8 @@
 import {
-  plannerUserRouteGetRequest,
   plannerGetRequest,
   plannerPostRequest,
-  plannerUserRoutePostRequest,
   plannerPutRequest,
 } from "./apiRequest";
-
-describe("plannerUserRouteGetRequest", () => {
-  test("Gets user details and prepends to request path", async () => {
-    const authDetails = { userId: "fakeUserId" };
-    const fakeAuthDetails = vi.fn().mockResolvedValue(authDetails);
-    const response = { whoami: "ReturnedSettings" };
-    const fakePlannerGetRequest = vi.fn().mockResolvedValue(response);
-    const fakeRequestRoute = "/fakeRequestRoute";
-
-    const result = await plannerUserRouteGetRequest(
-      fakeRequestRoute,
-      fakeAuthDetails,
-      fakePlannerGetRequest
-    );
-
-    expect(result).toBe(response);
-    expect(fakePlannerGetRequest).toBeCalledWith(
-      "/users/" + authDetails.userId + fakeRequestRoute
-    );
-  });
-});
-
-describe("plannerUserRoutePostRequest", () => {
-  test("Gets user details and prepends to request path", async () => {
-    const authDetails = { userId: "fakeUserId" };
-    const fakeAuthDetails = vi.fn().mockResolvedValue(authDetails);
-    const response = { whoami: "ReturnedSettings" };
-    const fakePlannerPostRequest = vi.fn().mockResolvedValue(response);
-    const fakeRequestRoute = "/fakeRequestRoute";
-    const fakeRequestBody = { whoami: "FakeRequestBody" };
-
-    const result = await plannerUserRoutePostRequest(
-      fakeRequestRoute,
-      fakeRequestBody,
-      fakeAuthDetails,
-      fakePlannerPostRequest
-    );
-
-    expect(result).toBe(response);
-    expect(fakePlannerPostRequest).toBeCalledWith(
-      "/users/" + authDetails.userId + fakeRequestRoute,
-      fakeRequestBody
-    );
-  });
-});
-
-describe("plannerUserRoutePutRequest", () => {
-  test("Gets user details and prepends to request path", async () => {
-    const authDetails = { userId: "fakeUserId" };
-    const fakeAuthDetails = vi.fn().mockResolvedValue(authDetails);
-    const response = { whoami: "ReturnedSettings" };
-    const fakePlannerPutRequest = vi.fn().mockResolvedValue(response);
-    const fakeRequestRoute = "/fakeRequestRoute";
-    const fakeRequestBody = { whoami: "FakeRequestBody" };
-
-    const result = await plannerUserRoutePostRequest(
-      fakeRequestRoute,
-      fakeRequestBody,
-      fakeAuthDetails,
-      fakePlannerPutRequest
-    );
-
-    expect(result).toBe(response);
-    expect(fakePlannerPutRequest).toBeCalledWith(
-      "/users/" + authDetails.userId + fakeRequestRoute,
-      fakeRequestBody
-    );
-  });
-});
 
 describe("plannerGetRequest", () => {
    const { location } = window;
