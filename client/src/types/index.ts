@@ -4,7 +4,7 @@ export type ActivityType = "running" | "cycling" | "other"
 export const activityTypes: ActivityType[] = ["running", "cycling", "other"]
 
 export type Activity = {
-	id: "string"
+	id: string
 	userId: string
 	name: string
 	type: ActivityType

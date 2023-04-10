@@ -1,6 +1,6 @@
-import { Box, Button, Flex, Grid, GridItem, Divider, Center, ButtonGroup, Spacer, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Text, FormControl, FormLabel, Input, FormHelperText, Select, Checkbox } from "@chakra-ui/react";
+import { Box, Button, Flex, Grid, GridItem, Center, ButtonGroup, Spacer } from "@chakra-ui/react";
 import { useState } from "react";
-import { activityTypes } from "./types";
+import { AddActivityInterface } from "./components/AddActivityInterface";
 
 type TimeSpan = "Week" | "Month"
 
@@ -46,55 +46,6 @@ const MonthView = () => {
   </Grid>
 }
 
-const AddActivityInterface = () => {
-
-  const { isOpen, onOpen, onClose } = useDisclosure()
-
-  return <Flex flexDirection={'column'} 
-      padding={'1em'}
-      position={'fixed'}
-      width={'100%'}
-      bottom={0}>
-      <Button onClick={onOpen}>Add Activity</Button>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Adding Activity</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Flex flexDirection={'column'} gap={'1em'}>
-              <FormControl isRequired>
-                <FormLabel>Name</FormLabel>
-                <Input type='text' />
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel>Type</FormLabel>
-                <Select placeholder='Select Type'>
-                  {activityTypes.map(a => <option>{a}</option>)}
-                </Select>
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel>Date</FormLabel>
-                <Input type='date' />
-              </FormControl>
-              <FormControl>
-                <Checkbox>Complete</Checkbox>
-              </FormControl>
-            </Flex>
-          </ModalBody>
-
-          <ModalFooter>
-            <Flex w={'100%'} justifyContent={'space-between'}>
-              <Button variant='ghost'>Cancel</Button>
-              <Button onClick={onClose}>
-                Save
-              </Button>
-            </Flex>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </Flex>
-}
 
 const Prototype = () => {
   const [timespan, setTimespan] = useState<TimeSpan>("Month")
