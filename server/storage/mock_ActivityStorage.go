@@ -21,20 +21,18 @@ func (_m *MockActivityStorage) EXPECT() *MockActivityStorage_Expecter {
 }
 
 // Create provides a mock function with given fields: activity
-func (_m *MockActivityStorage) Create(activity Activity) (*Activity, error) {
+func (_m *MockActivityStorage) Create(activity Activity) (Activity, error) {
 	ret := _m.Called(activity)
 
-	var r0 *Activity
+	var r0 Activity
 	var r1 error
-	if rf, ok := ret.Get(0).(func(Activity) (*Activity, error)); ok {
+	if rf, ok := ret.Get(0).(func(Activity) (Activity, error)); ok {
 		return rf(activity)
 	}
-	if rf, ok := ret.Get(0).(func(Activity) *Activity); ok {
+	if rf, ok := ret.Get(0).(func(Activity) Activity); ok {
 		r0 = rf(activity)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*Activity)
-		}
+		r0 = ret.Get(0).(Activity)
 	}
 
 	if rf, ok := ret.Get(1).(func(Activity) error); ok {
@@ -64,12 +62,12 @@ func (_c *MockActivityStorage_Create_Call) Run(run func(activity Activity)) *Moc
 	return _c
 }
 
-func (_c *MockActivityStorage_Create_Call) Return(_a0 *Activity, _a1 error) *MockActivityStorage_Create_Call {
+func (_c *MockActivityStorage_Create_Call) Return(_a0 Activity, _a1 error) *MockActivityStorage_Create_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockActivityStorage_Create_Call) RunAndReturn(run func(Activity) (*Activity, error)) *MockActivityStorage_Create_Call {
+func (_c *MockActivityStorage_Create_Call) RunAndReturn(run func(Activity) (Activity, error)) *MockActivityStorage_Create_Call {
 	_c.Call.Return(run)
 	return _c
 }

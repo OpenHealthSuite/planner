@@ -34,7 +34,7 @@ type ActivityStorageQuery struct {
 
 //go:generate mockery --name ActivityStorage
 type ActivityStorage interface {
-	Create(activity Activity) (*Activity, error)
+	Create(activity Activity) (Activity, error)
 	Read(id uuid.UUID) (*Activity, error)
 	Query(query ActivityStorageQuery) (*[]Activity, error)
 	Update(activity Activity) error

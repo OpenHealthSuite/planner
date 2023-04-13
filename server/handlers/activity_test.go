@@ -20,7 +20,7 @@ func TestHappyPathCreateActivityHandler(t *testing.T) {
 	returnedActivity := storage.Activity{
 		Id: uuid.New(),
 	}
-	mockStorage.EXPECT().Create(mock.Anything).Return(&returnedActivity, nil).Once()
+	mockStorage.EXPECT().Create(mock.Anything).Return(returnedActivity, nil).Once()
 
 	testUserId := "some-valid-expected-userid"
 

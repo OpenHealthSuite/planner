@@ -10,3 +10,6 @@ run:
 
 test:
 	go test -v ./...
+
+mocks:
+	mockery --all

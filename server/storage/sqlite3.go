@@ -12,7 +12,7 @@ type Sqlite3ActivityStorage struct {
 	DB *sql.DB
 }
 
-func (stg Sqlite3ActivityStorage) Create(activity Activity) (*Activity, error) {
+func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 	newId := uuid.New()
 	insertSQL := `
 			INSERT INTO activities (
@@ -42,7 +42,7 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (*Activity, error) {
 	`
 	jsonStr, err := json.Marshal(activity.Attributes)
 	if err != nil {
-		return nil, err
+		return activity, err
 	}
 	_, insertErr := stg.DB.Exec(insertSQL,
 		newId,
@@ -57,10 +57,10 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (*Activity, error) {
 		activity.Completed,
 	)
 	if insertErr != nil {
-		return nil, insertErr
+		return activity, insertErr
 	}
 	activity.Id = newId
-	return &activity, nil
+	return activity, nil
 }
 
 func (stg Sqlite3ActivityStorage) Read(id uuid.UUID) (*Activity, error) {
