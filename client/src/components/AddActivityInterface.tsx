@@ -21,8 +21,6 @@ export const AddActivityInterface = ({
 
   const formik = useFormik({
     initialValues: {
-      id: "",
-      userId: "",
       name: "",
       type: "",
       attributes: {},

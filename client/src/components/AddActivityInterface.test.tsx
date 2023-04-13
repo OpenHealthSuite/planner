@@ -35,11 +35,9 @@ describe("Add Activity Interface", () => {
       attributes: {},
       completed: false,
       dateTime: "2023-04-03T00:00:00.000Z",
-      id: "",
       name: "Test name activity",
       timeRelevant: false,
-      type: activityTypes[0],
-      userId: ""
+      type: activityTypes[0]
     })
     expect(fakeCallback).toBeCalledWith("some-fake-id")
   })

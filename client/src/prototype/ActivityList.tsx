@@ -31,6 +31,6 @@ export const ActivityList = ({ updated }: { updated?: string }) => {
   }
 
   return <UnorderedList>
-      {activities.map(x => <ListItem>{x.name}</ListItem>)}
+      {activities.map(x => <ListItem key={x.id}>{x.name}</ListItem>)}
   </UnorderedList>
 }
