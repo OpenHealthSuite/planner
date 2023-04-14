@@ -22,3 +22,6 @@ go.work
 
 # Build output
 dist/
+
+# SQlite
+.sqlite

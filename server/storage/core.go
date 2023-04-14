@@ -46,7 +46,7 @@ func GetStorage() ActivityStorage {
 	// TODO: When there is more than SQLite3, configure here
 	// TODO: Also probably want to make this something that only
 	// gets generated once
-	strg, err := getSqliteStorageClient(":memory:")
+	strg, err := getSqliteStorageClient(".sqlite")
 	if err != nil {
 		os.Exit(500)
 	}
