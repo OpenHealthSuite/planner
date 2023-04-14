@@ -22,7 +22,7 @@ describe("Add Activity Interface", () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
     const fakeCallback = vi.fn();
-    render(<AddActivityInterface activityCreationFunction={fakeSaver} onCreated={fakeCallback}/>);
+    render(<AddActivityInterface activitySubmission={fakeSaver} onCreated={fakeCallback}/>);
     await user.click(screen.getByText("Add Activity"));
     await user.type(screen.getByLabelText("Name"), "Test name activity");
     await user.selectOptions(screen.getByLabelText("Type"), activityTypes[0]);
@@ -47,7 +47,7 @@ describe("Add Activity Interface", () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
     const fakeCallback = vi.fn();
-    render(<AddActivityInterface activityCreationFunction={fakeSaver} onCreated={fakeCallback}/>);
+    render(<AddActivityInterface activitySubmission={fakeSaver} onCreated={fakeCallback}/>);
     
     await user.click(screen.getByText("Add Activity"));
 
@@ -71,7 +71,7 @@ describe("Add Activity Interface", () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
     const fakeCallback = vi.fn();
-    render(<AddActivityInterface activityCreationFunction={fakeSaver} onCreated={fakeCallback}/>);
+    render(<AddActivityInterface activitySubmission={fakeSaver} onCreated={fakeCallback}/>);
     await user.click(screen.getByText("Add Activity"));
     expect(screen.getByText("Save")).toBeDisabled();
     await user.type(screen.getByLabelText("Name"), "Test name activity");
