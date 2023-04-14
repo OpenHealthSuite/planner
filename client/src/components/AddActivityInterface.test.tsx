@@ -41,4 +41,20 @@ describe("Add Activity Interface", () => {
     });
     expect(fakeCallback).toBeCalledWith("some-fake-id");
   });
+
+
+  test("Validation", async () => {
+    const user = userEvent.setup();
+    const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
+    const fakeCallback = vi.fn();
+    render(<AddActivityInterface activityCreationFunction={fakeSaver} onCreated={fakeCallback}/>);
+    await user.click(screen.getByText("Add Activity"));
+    expect(screen.getByText("Save")).toBeDisabled();
+    await user.type(screen.getByLabelText("Name"), "Test name activity");
+    expect(screen.getByText("Save")).toBeDisabled();
+    await user.selectOptions(screen.getByLabelText("Type"), activityTypes[0]);
+    expect(screen.getByText("Save")).toBeDisabled();
+    await user.type(screen.getByLabelText("Date"), "2023-04-03");
+    expect(screen.getByText("Save")).not.toBeDisabled();
+  });
 });
