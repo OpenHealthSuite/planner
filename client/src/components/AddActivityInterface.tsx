@@ -13,7 +13,7 @@ type AddActivityInterfaceProps = {
   onCreated?: (newId: string) => void
 }
 
-type InitialFormValues = Partial<Omit<Activity, "type" | "dateTime">> &
+export type InitialFormValues = Partial<Omit<Activity, "type" | "dateTime">> &
   Omit<Activity, "id" | "userId" | "type" | "dateTime"> &
   { dateTime: string; type: "" | ActivityType }
 
