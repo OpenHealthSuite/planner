@@ -1,7 +1,7 @@
 import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, Select, Checkbox } from "@chakra-ui/react";
 import { Activity, activityTypes } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
-import { Formik, useFormik } from "formik";
+import { Formik } from "formik";
 import * as Yup from "yup";
 
 const defaultActivityCreationFunction = (activity: Activity) => {

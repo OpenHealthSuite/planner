@@ -43,6 +43,30 @@ describe("Add Activity Interface", () => {
   });
 
 
+  test("Clears form on close and reopen", async () => {
+    const user = userEvent.setup();
+    const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
+    const fakeCallback = vi.fn();
+    render(<AddActivityInterface activityCreationFunction={fakeSaver} onCreated={fakeCallback}/>);
+    
+    await user.click(screen.getByText("Add Activity"));
+
+    await user.type(screen.getByLabelText("Name"), "Test name activity");
+    await user.selectOptions(screen.getByLabelText("Type"), activityTypes[0]);
+    await user.type(screen.getByLabelText("Date"), "2023-04-03");
+    await user.click(screen.getByText("Cancel"));
+
+    await waitForElementToBeRemoved(() => screen.queryByText("Adding Activity"));
+
+    expect(screen.queryByText("Adding Activity")).not.toBeInTheDocument();
+
+    await user.click(screen.getByText("Add Activity"));
+    expect(screen.getByLabelText("Name")).toHaveValue("");
+    expect(screen.getByLabelText("Type")).toHaveValue("");
+    expect(screen.getByLabelText("Date")).toHaveValue("");
+  });
+
+
   test("Validation", async () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
