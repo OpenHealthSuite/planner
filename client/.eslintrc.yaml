@@ -1,0 +1,33 @@
+env:
+  es2021: true
+  browser: true
+parser: "@typescript-eslint/parser"
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+  - plugin:react/recommended
+plugins:
+  - "@typescript-eslint"
+  - react
+parserOptions:
+  ecmaVersion: ESNext
+  sourceType: module
+  ecmaFeatures:
+    jsx: true
+settings:
+  react:
+    version: detect
+rules:
+  indent:
+    - error
+    - 2
+  linebreak-style:
+    - error
+    - unix
+  quotes:
+    - error
+    - double
+  semi:
+    - error
+    - always
+  react/react-in-jsx-scope: 'off'

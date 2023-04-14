@@ -1,4 +1,4 @@
-const API_ROOT = "/api"
+const API_ROOT = "/api";
 
 export async function plannerGetRequest<T>(
   path: string,
@@ -10,7 +10,7 @@ export async function plannerGetRequest<T>(
     return (await response.json()) as T;
   } else {
     if ([401, 403].includes(response.status)) {
-      window.location.reload()
+      window.location.reload();
     }
     throw new Error(`HTTP Status ${response.status}: Error retrieving data`);
   }
@@ -25,7 +25,7 @@ export async function plannerPostRequest<R, T>(
   const response = await fnFetch(apiRoot + path, {
     method: "POST",
     headers: {
-        "Content-Type": "application/json"
+      "Content-Type": "application/json"
     },
     body: JSON.stringify(body),
   });
@@ -33,7 +33,7 @@ export async function plannerPostRequest<R, T>(
     return (await response.json()) as T;
   } else {
     if ([401, 403].includes(response.status)) {
-      window.location.reload()
+      window.location.reload();
     }
     throw new Error(`HTTP Status ${response.status}: Error retrieving data`);
   }
@@ -48,7 +48,7 @@ export async function plannerPutRequest<R, T>(
   const response = await fnFetch(apiRoot + path, {
     method: "PUT",
     headers: {
-        "Content-Type": "application/json"
+      "Content-Type": "application/json"
     },
     body: JSON.stringify(body),
   });
@@ -56,7 +56,7 @@ export async function plannerPutRequest<R, T>(
     return (await response.json()) as T;
   } else {
     if ([401, 403].includes(response.status)) {
-      window.location.reload()
+      window.location.reload();
     }
     throw new Error(`HTTP Status ${response.status}: Error retrieving data`);
   }

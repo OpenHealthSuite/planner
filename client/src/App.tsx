@@ -1,7 +1,6 @@
-import { ChakraProvider, extendTheme } from '@chakra-ui/react'
-import Prototype from './Prototype';
-import { ActivityList } from './prototype/ActivityList';
-import { AddActivityInterface } from './components/AddActivityInterface';
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { ActivityList } from "./prototype/ActivityList";
+import { AddActivityInterface } from "./components/AddActivityInterface";
 
 const colors = {
   brand: {},
@@ -15,7 +14,7 @@ function App() {
       <ActivityList />
       <AddActivityInterface />
     </ChakraProvider>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -5,18 +5,20 @@ import {
 } from "./apiRequest";
 
 describe("plannerGetRequest", () => {
-   const { location } = window;
+  const { location } = window;
 
   beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     delete window.location;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     window.location = { reload: vi.fn() };
   });
 
   beforeEach(() => {
-    vi.resetAllMocks()
-  })
+    vi.resetAllMocks();
+  });
 
   afterAll(() => {
     window.location = location;
@@ -76,18 +78,20 @@ describe("plannerGetRequest", () => {
 });
 
 describe("plannerPostRequest", () => {
-     const { location } = window;
+  const { location } = window;
 
   beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     delete window.location;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     window.location = { reload: vi.fn() };
   });
 
   beforeEach(() => {
-    vi.resetAllMocks()
-  })
+    vi.resetAllMocks();
+  });
 
   afterAll(() => {
     window.location = location;
@@ -113,7 +117,7 @@ describe("plannerPostRequest", () => {
     expect(fakeFetch).toBeCalledWith(fakeApiRoot + fakeRequestRoute, {
       method: "POST",
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(fakeRequestBody),
     });
@@ -140,7 +144,7 @@ describe("plannerPostRequest", () => {
     expect(fakeFetch).toBeCalledWith(fakeApiRoot + fakeRequestRoute, {
       method: "POST",
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(fakeRequestBody),
     });
@@ -169,7 +173,7 @@ describe("plannerPostRequest", () => {
     expect(fakeFetch).toBeCalledWith(fakeApiRoot + fakeRequestRoute, {
       method: "POST",
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(fakeRequestBody),
     });
@@ -178,18 +182,20 @@ describe("plannerPostRequest", () => {
 });
 
 describe("plannerPutRequest", () => {
-     const { location } = window;
+  const { location } = window;
 
   beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     delete window.location;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     window.location = { reload: vi.fn() };
   });
 
   beforeEach(() => {
-    vi.resetAllMocks()
-  })
+    vi.resetAllMocks();
+  });
 
   afterAll(() => {
     window.location = location;
@@ -215,7 +221,7 @@ describe("plannerPutRequest", () => {
     expect(fakeFetch).toBeCalledWith(fakeApiRoot + fakeRequestRoute, {
       method: "PUT",
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(fakeRequestBody),
     });
@@ -242,7 +248,7 @@ describe("plannerPutRequest", () => {
     expect(fakeFetch).toBeCalledWith(fakeApiRoot + fakeRequestRoute, {
       method: "PUT",
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(fakeRequestBody),
     });
@@ -270,7 +276,7 @@ describe("plannerPutRequest", () => {
     expect(fakeFetch).toBeCalledWith(fakeApiRoot + fakeRequestRoute, {
       method: "PUT",
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(fakeRequestBody),
     });

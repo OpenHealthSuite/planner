@@ -1,7 +1,7 @@
 
 // TODO: This should be driven by the API at some point
 export type ActivityType = "running" | "cycling" | "other"
-export const activityTypes: ActivityType[] = ["running", "cycling", "other"]
+export const activityTypes: ActivityType[] = ["running", "cycling", "other"];
 
 export type Activity = {
 	id: string
