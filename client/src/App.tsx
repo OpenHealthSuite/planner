@@ -1,6 +1,6 @@
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { ActivityList } from "./prototype/ActivityList";
-import { AddActivityInterface } from "./components/AddActivityInterface";
+import { AddActivityInterface } from "./components/ActivityEditor";
 import { useState } from "react";
 
 const colors = {

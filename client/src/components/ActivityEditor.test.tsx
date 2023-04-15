@@ -1,7 +1,7 @@
 import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { AddActivityInterface } from "./AddActivityInterface";
+import { AddActivityInterface } from "./ActivityEditor";
 import { activityTypes } from "../types";
 
 describe("Add Activity Interface", () => {

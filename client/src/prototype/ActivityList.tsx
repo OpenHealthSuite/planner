@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { plannerGetRequest, plannerPutRequest } from "../utilities/apiRequest";
 import { Activity } from "../types";
 import { Button, ListItem, Modal, ModalContent, ModalOverlay, UnorderedList, useDisclosure } from "@chakra-ui/react";
-import { ActivityForm, InitialFormValues } from "../components/AddActivityInterface";
+import { ActivityForm, InitialFormValues } from "../components/ActivityEditor";
 
 
 const editActivitySubmission = (activity: Activity) => {

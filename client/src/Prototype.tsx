@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Grid, GridItem, Center, ButtonGroup, Spacer } from "@chakra-ui/react";
 import { useState } from "react";
-import { AddActivityInterface } from "./components/AddActivityInterface";
+import { AddActivityInterface } from "./components/ActivityEditor";
 
 type TimeSpan = "Week" | "Month"
 
