@@ -1,0 +1,39 @@
+name: Client Build and Test
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *" # run at 2 AM UTC
+  push:
+    branches: ["main"]
+    paths:
+      - "client/**"
+      - .github/workflows/build_and_test_client.yml
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "client/**"
+      - .github/workflows/build_and_test_client.yml
+
+jobs:
+  build-and-test-client:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "./client/.nvmrc"
+      - name: Restore dependencies
+        working-directory: ./client
+        run: npm ci
+      - name: Lint
+        working-directory: ./client
+        run: npm run lint
+      - name: Test
+        working-directory: ./client
+        run: npm test
+      - name: Build
+        working-directory: ./client
+        run: npm run build

@@ -1,0 +1,61 @@
+name: Build and Publish OpenFoodDiary Container
+
+on:
+  workflow_call:
+    inputs:
+      VERSION:
+        type: string
+        required: true
+      PUSH:
+        type: boolean
+        default: false
+        required: false
+      PUSH_LATEST:
+        type: boolean
+        default: false
+        required: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to GHCR
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "./test/server/system/.nvmrc"
+
+      - name: Build the Container image
+        working-directory: .
+        run: |
+          sudo apt install qemu-user-static
+          platarch=linux/arm/v7,linux/arm64/v8,linux/amd64
+          podman build --jobs=6 --platform=$platarch --manifest ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }} .
+
+      - name: Install Test Dependancies
+        working-directory: test/server/system
+        run: npm ci
+
+      - name: Test the Image
+        working-directory: test/server/system
+        run: |
+          podman run -d \
+            -p 3333:3333 \
+            ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }}
+          npm test
+
+      - name: Push Version
+        if: ${{ inputs.PUSH }}
+        run: podman manifest push ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }} ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }}
+
+      - name: Push Latest
+        if: ${{ inputs.PUSH && inputs.PUSH_LATEST }}
+        run: |
+          podman tag ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }} ghcr.io/openhealthsuite/planner:latest
+          podman manifest push ghcr.io/openhealthsuite/planner:latest ghcr.io/openhealthsuite/planner:latest
