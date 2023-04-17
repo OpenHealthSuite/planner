@@ -14,8 +14,23 @@ This will all be framed roughly through the lens of running, but is broadly appl
   - Multi stage: "I did *15 minutes easy, 15 minutes fast, 10 minutes easy*
   - Multi stage with repetitions: "I did *10 minutes easy* then I did *6 repetitions of 4 minutes fast, 2 minutes slow*, then finished with *10 minutes easy*"
     - Should be able to cover all bases with stages having a schema of:
-      - Metric (number)
-      - Unit (time, distance, reps)
+      - Description(?) (String: ie. "easy", "intervals", "hard" etc.) 
+      - (Metric, Unit)[] (number, (reps, time, distance, string?))
+        - NB: Making this an array of tuples, allows for reps of a pattern (ie. 6x4/2)
       - Repetitions (integer)
-- Was it completed? (yes/no/substitution)
-- how did you feel about it (completion notes) - also covers why and how there was a substitution
+- Has it been completed? (yes/no/substitution)
+- (optional) how did you feel about it (completion notes) - also covers why and how there was a substitution
+
+## TODO:
+
+- Refactor existing tracer code to match above schema for workouts
+- Add a concept/storage of distinct "plans" to the workouts - so workouts can be assigned to a plan (CRUD that casscades into workouts)
+  - Optional? The idea of people still being able to create workouts that aren't tied to a particular plan is useful
+- Build interface for creating and managing these plans (literally just a list with CRUD - we probably want an "archived" concept too)
+- Build an interface that makes it easy to create and edit the various kinds of workout singularly
+- Create a mobile-first weekly view of planned workouts
+- Create a bulk upload/download system for plans - probably CSV based
+- Create a data purge endpoint
+- Implement the Cassandra storage layer with same interface as SQLite
+
+That probably comprises the MVP of the system - we can then tie it into the dashboard, as well as 
