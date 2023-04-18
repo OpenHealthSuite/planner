@@ -25,7 +25,7 @@ func TestHappyPathCreateActivityHandler(t *testing.T) {
 	testUserId := "some-valid-expected-userid"
 
 	createBody := `{
-		"name": "some activity name"
+		"summary": "some activity name"
 	}`
 
 	req, err := http.NewRequest("POST", "/my-endpoint", strings.NewReader(createBody))
@@ -56,7 +56,7 @@ func TestHappyPathUpdateActivityHandler(t *testing.T) {
 	mockStorage.EXPECT().Update(mock.Anything).Return(nil).Once()
 
 	updateBody := `{
-		"name": "some activity name update"
+		"summary": "some activity name update"
 	}`
 	// We have to use "real" query params here
 	req, err := http.NewRequest("PUT", fmt.Sprintf("/api/activities/%s", returnedActivity.Id), strings.NewReader(updateBody))

@@ -24,20 +24,34 @@ func TestCreateReadUpdateDelete(t *testing.T) {
 		return
 	}
 	createActivity := Activity{
-		UserId:       "test-user-id",
-		Name:         "Test Item",
-		Type:         ActivityRunning,
-		Attributes:   map[string]string{"attr1": "attribute one"},
+		UserId:  "test-user-id",
+		Summary: "Test Item",
+		Stages: []ActivityStage{
+			{
+				Order:       0,
+				Description: "stg 1",
+				Metrics: []ActivityStageMetric{{
+					Amount: 5,
+					Unit:   "minutes",
+				}},
+				Repetitions: 6,
+			},
+		},
 		DateTime:     time.Now(),
 		TimeRelevant: false,
 		Completed:    false,
+		Notes:        "",
 	}
 	created, err := storage.Create(createActivity)
 	if err != nil {
 		t.Error("Error creating activity")
 		return
 	}
-	if created.Name != createActivity.Name {
+	if created.Id == uuid.MustParse("00000000-0000-0000-0000-000000000000") {
+		t.Error("Got 0 uuid")
+		return
+	}
+	if created.Summary != createActivity.Summary {
 		t.Error("Error with created activity")
 		return
 	}
@@ -47,14 +61,14 @@ func TestCreateReadUpdateDelete(t *testing.T) {
 		t.Errorf("Error reading activity %s", err)
 		return
 	}
-	if read.Attributes["attr1"] != createActivity.Attributes["attr1"] {
-		t.Error("Error with read activity")
+	if read.Stages[0].Description != createActivity.Stages[0].Description {
+		t.Error("Error with read stage")
 		return
 	}
 
 	updateActivity := read
 
-	updateActivity.Name = "Updated Activity Name"
+	updateActivity.Summary = "Updated Activity Name"
 
 	updateErr := storage.Update(*updateActivity)
 
@@ -68,7 +82,7 @@ func TestCreateReadUpdateDelete(t *testing.T) {
 		t.Errorf("Error reading activity %s", err)
 		return
 	}
-	if reread.Name != updateActivity.Name {
+	if reread.Summary != updateActivity.Summary {
 		t.Error("Error with reread updated activity")
 		return
 	}

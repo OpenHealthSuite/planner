@@ -18,7 +18,7 @@ This will all be framed roughly through the lens of running, but is broadly appl
       - (Metric, Unit)[] (number, (reps, time, distance, string?))
         - NB: Making this an array of tuples, allows for reps of a pattern (ie. 6x4/2)
       - Repetitions (integer)
-- Has it been completed? (yes/no/substitution)
+- Has it been completed? (yes/no)
 - (optional) how did you feel about it (completion notes) - also covers why and how there was a substitution
 
 ## TODO:

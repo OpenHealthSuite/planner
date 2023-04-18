@@ -18,18 +18,14 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 			INSERT INTO activities (
 				id,
 				userId,
-				name,
-				type,
-				attributes,
-				details,
+				summary,
+				stages,
 				dateTime,
 				timeRelevant,
-				durationMinutes,
-				completed
+				completed,
+				notes
 			)
 			VALUES (
-				?,
-				?,
 				?,
 				?,
 				?,
@@ -40,21 +36,19 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 				?
 			);
 	`
-	jsonStr, err := json.Marshal(activity.Attributes)
+	jsonStr, err := json.Marshal(activity.Stages)
 	if err != nil {
 		return activity, err
 	}
 	_, insertErr := stg.DB.Exec(insertSQL,
 		newId,
 		activity.UserId,
-		activity.Name,
-		activity.Type,
+		activity.Summary,
 		jsonStr,
-		activity.Details,
 		activity.DateTime,
 		activity.TimeRelevant,
-		activity.DurationMinutes,
 		activity.Completed,
+		activity.Notes,
 	)
 	if insertErr != nil {
 		return activity, insertErr
@@ -68,14 +62,12 @@ func (stg Sqlite3ActivityStorage) Read(id uuid.UUID) (*Activity, error) {
 			SELECT 
 				id,
 				userId,
-				name,
-				type,
-				attributes,
-				details,
+				summary,
+				stages,
 				dateTime,
 				timeRelevant,
-				durationMinutes,
-				completed
+				completed,
+				notes
 			FROM activities 
 			WHERE id = ?;
 	`
@@ -88,23 +80,21 @@ func (stg Sqlite3ActivityStorage) Read(id uuid.UUID) (*Activity, error) {
 	// Print the results of the query
 	if rows.Next() {
 		var activity Activity
-		rawAttributes := "{}"
+		rawStages := "[]"
 		err = rows.Scan(
 			&activity.Id,
 			&activity.UserId,
-			&activity.Name,
-			&activity.Type,
-			&rawAttributes,
-			&activity.Details,
+			&activity.Summary,
+			&rawStages,
 			&activity.DateTime,
 			&activity.TimeRelevant,
-			&activity.DurationMinutes,
 			&activity.Completed,
+			&activity.Notes,
 		)
 		if err != nil {
 			return nil, err
 		}
-		err := json.Unmarshal([]byte(rawAttributes), &activity.Attributes)
+		err := json.Unmarshal([]byte(rawStages), &activity.Stages)
 		if err != nil {
 			return nil, err
 		}
@@ -118,14 +108,12 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 	SELECT 
 		id,
 		userId,
-		name,
-		type,
-		attributes,
-		details,
+		summary,
+		stages,
 		dateTime,
 		timeRelevant,
-		durationMinutes,
-		completed
+		completed,
+		notes
 	FROM activities 
 	WHERE userId = ?;
 `
@@ -138,23 +126,21 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 	// Print the results of the query
 	if rows.Next() {
 		var activity Activity
-		rawAttributes := "{}"
+		rawStages := "[]"
 		err = rows.Scan(
 			&activity.Id,
 			&activity.UserId,
-			&activity.Name,
-			&activity.Type,
-			&rawAttributes,
-			&activity.Details,
+			&activity.Summary,
+			&rawStages,
 			&activity.DateTime,
 			&activity.TimeRelevant,
-			&activity.DurationMinutes,
 			&activity.Completed,
+			&activity.Notes,
 		)
 		if err != nil {
 			return nil, err
 		}
-		err := json.Unmarshal([]byte(rawAttributes), &activity.Attributes)
+		err := json.Unmarshal([]byte(rawStages), &activity.Stages)
 		if err != nil {
 			return nil, err
 		}
@@ -168,30 +154,26 @@ func (stg Sqlite3ActivityStorage) Update(activity Activity) error {
 			UPDATE activities
 			SET 
 				userId = ?,
-				name = ?,
-				type = ?,
-				attributes = ?,
-				details = ?,
+				summary = ?,
+				stages = ?,
 				dateTime = ?,
 				timeRelevant = ?,
-				durationMinutes = ?,
-				completed = ?
+				completed = ?,
+				notes = ?
 			WHERE id = ?;
 	`
-	jsonStr, err := json.Marshal(activity.Attributes)
+	jsonStr, err := json.Marshal(activity.Stages)
 	if err != nil {
 		return err
 	}
 	_, updateErr := stg.DB.Exec(insertSQL,
 		activity.UserId,
-		activity.Name,
-		activity.Type,
+		activity.Summary,
 		jsonStr,
-		activity.Details,
 		activity.DateTime,
 		activity.TimeRelevant,
-		activity.DurationMinutes,
 		activity.Completed,
+		activity.Notes,
 		activity.Id,
 	)
 	if updateErr != nil {
@@ -222,14 +204,12 @@ func getSqliteStorageClient(filepath string) (ActivityStorage, error) {
 	CREATE TABLE IF NOT EXISTS activities (
 			id TEXT PRIMARY KEY,
 			userId TEXT,
-			name TEXT,
-			type TEXT,
-			attributes TEXT,
-			details TEXT NULL,
+			summary TEXT,
+			stages TEXT,
 			dateTime DATETIME,
 			timeRelevant BOOLEAN,
-			durationMinutes INTEGER NULL,
-			completed BOOLEAN
+			completed BOOLEAN,
+			notes TEXT
 	);
 	`
 	_, err = db.Exec(createTableSQL)

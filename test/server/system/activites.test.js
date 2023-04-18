@@ -6,16 +6,14 @@ const TEST_USER_ID = randomUUID()
 describe('activities', () => {
   test("Create, Read, Update, Query, Delete", async () => {
     let createdActivity = {
-      name: "Some activity name",
-      type: "running",
-      attributes: {
-        "attr1": "attribute one"
-      },
+      summary: "Some activity name",
+      stages: [
+        { order: 0, description: "desc", metrics: [{amount: 1, unit: "unt"}], repetitions: 3}
+      ],
       dateTime: new Date().toISOString(),
-      details: null,
-      durationMinutes: null,
       timeRelevant: false,
-      completed: false
+      completed: false,
+      notes: ""
     }
     const createdRes = await fetch(`${HOST}/api/activities`, {
       method: "POST",
@@ -24,6 +22,7 @@ describe('activities', () => {
       },
       body: JSON.stringify(createdActivity)
     })
+
     const createdId = await createdRes.json();
     expect(createdId.length).toBe("db8a5a5a-38b5-482a-a3f1-eda999d35a13".length)
 
@@ -57,8 +56,8 @@ describe('activities', () => {
 
     let updatedActivity = structuredClone(expectedRead)
 
-    updatedActivity.name = "Updated Name"
-    updatedActivity.details = "Some details have been added"
+    updatedActivity.summary = "Updated Name"
+    updatedActivity.notes = "Some details have been added"
 
     const updateRes = await fetch(`${HOST}/api/activities/${createdId}`, {
       method: "PUT",

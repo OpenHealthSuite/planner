@@ -15,17 +15,27 @@ const (
 	ActivityOther   ActivityType = "other"
 )
 
+type ActivityStageMetric struct {
+	Amount int    `json:"amount"`
+	Unit   string `json:"unit"`
+}
+
+type ActivityStage struct {
+	Order       int                   `json:"order"`
+	Description string                `json:"description"`
+	Metrics     []ActivityStageMetric `json:"metrics"`
+	Repetitions int                   `json:"repetitions"`
+}
+
 type Activity struct {
-	Id              uuid.UUID         `json:"id"`
-	UserId          string            `json:"userId"`
-	Name            string            `json:"name"`
-	Type            ActivityType      `json:"type"`
-	Attributes      map[string]string `json:"attributes"`
-	Details         *string           `json:"details"`
-	DateTime        time.Time         `json:"dateTime"`
-	TimeRelevant    bool              `json:"timeRelevant"`
-	DurationMinutes *int32            `json:"durationMinutes"`
-	Completed       bool              `json:"completed"`
+	Id           uuid.UUID       `json:"id"`
+	UserId       string          `json:"userId"`
+	Summary      string          `json:"summary"`
+	Stages       []ActivityStage `json:"stages"`
+	DateTime     time.Time       `json:"dateTime"`
+	TimeRelevant bool            `json:"timeRelevant"`
+	Completed    bool            `json:"completed"`
+	Notes        string          `json:"notes"`
 }
 
 type ActivityStorageQuery struct {
