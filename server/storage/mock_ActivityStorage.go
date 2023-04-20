@@ -114,6 +114,48 @@ func (_c *MockActivityStorage_Delete_Call) RunAndReturn(run func(uuid.UUID) erro
 	return _c
 }
 
+// DeleteForPlan provides a mock function with given fields: planId
+func (_m *MockActivityStorage) DeleteForPlan(planId uuid.UUID) error {
+	ret := _m.Called(planId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID) error); ok {
+		r0 = rf(planId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockActivityStorage_DeleteForPlan_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteForPlan'
+type MockActivityStorage_DeleteForPlan_Call struct {
+	*mock.Call
+}
+
+// DeleteForPlan is a helper method to define mock.On call
+//   - planId uuid.UUID
+func (_e *MockActivityStorage_Expecter) DeleteForPlan(planId interface{}) *MockActivityStorage_DeleteForPlan_Call {
+	return &MockActivityStorage_DeleteForPlan_Call{Call: _e.mock.On("DeleteForPlan", planId)}
+}
+
+func (_c *MockActivityStorage_DeleteForPlan_Call) Run(run func(planId uuid.UUID)) *MockActivityStorage_DeleteForPlan_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(uuid.UUID))
+	})
+	return _c
+}
+
+func (_c *MockActivityStorage_DeleteForPlan_Call) Return(_a0 error) *MockActivityStorage_DeleteForPlan_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockActivityStorage_DeleteForPlan_Call) RunAndReturn(run func(uuid.UUID) error) *MockActivityStorage_DeleteForPlan_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Query provides a mock function with given fields: query
 func (_m *MockActivityStorage) Query(query ActivityStorageQuery) (*[]Activity, error) {
 	ret := _m.Called(query)

@@ -12,15 +12,15 @@ import (
 	"github.com/google/uuid"
 )
 
-func AddActivityHandlers(mux *http.ServeMux, strg storage.ActivityStorage, useridMiddleware middlewares.Middleware) {
-	mux.Handle("/api/activities", useridMiddleware(registerActivityRoot(strg)))
-	mux.Handle("/api/activities/", useridMiddleware(registerActivityId(strg)))
+func AddActivityHandlers(mux *http.ServeMux, strg storage.ActivityStorage, plnStrg storage.PlanStorage, useridMiddleware middlewares.Middleware) {
+	mux.Handle("/api/activities", useridMiddleware(registerActivityRoot(strg, plnStrg)))
+	mux.Handle("/api/activities/", useridMiddleware(registerActivityId(strg, plnStrg)))
 }
 
-func registerActivityRoot(strg storage.ActivityStorage) http.HandlerFunc {
+func registerActivityRoot(strg storage.ActivityStorage, plnStrg storage.PlanStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			handleCreateActivity(w, r, strg)
+			handleCreateActivity(w, r, strg, plnStrg)
 		} else if r.Method == http.MethodGet {
 			handleUserQueryActivity(w, r, strg)
 		} else {
@@ -30,7 +30,7 @@ func registerActivityRoot(strg storage.ActivityStorage) http.HandlerFunc {
 	}
 }
 
-func registerActivityId(strg storage.ActivityStorage) http.HandlerFunc {
+func registerActivityId(strg storage.ActivityStorage, plnStrg storage.PlanStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
 		id := parts[3]
@@ -43,7 +43,7 @@ func registerActivityId(strg storage.ActivityStorage) http.HandlerFunc {
 		}
 
 		if r.Method == http.MethodPut {
-			handleUpdateActivity(w, r, strg, uuid)
+			handleUpdateActivity(w, r, strg, plnStrg, uuid)
 		} else if r.Method == http.MethodGet {
 			handleReadActivity(w, r, strg, uuid)
 		} else if r.Method == http.MethodDelete {
@@ -64,7 +64,7 @@ func parseActivity(rdr io.Reader) (storage.Activity, error) {
 	return activity, err
 }
 
-func handleCreateActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage) {
+func handleCreateActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, plnStrg storage.PlanStorage) {
 	activity, err := parseActivity(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -72,6 +72,11 @@ func handleCreateActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 	}
 
 	activity.UserId = w.Header().Get(middlewares.VALIDATED_HEADER)
+
+	if activity.PlanId != nil && !validPlanId(plnStrg, activity) {
+		http.Error(w, "Plan not found", http.StatusBadRequest)
+		return
+	}
 
 	created, err := strg.Create(activity)
 	jsonData, err := json.Marshal(created.Id.String())
@@ -81,6 +86,14 @@ func handleCreateActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
+}
+
+func validPlanId(plnStrg storage.PlanStorage, activity storage.Activity) bool {
+	plan, err := plnStrg.Read(*activity.PlanId)
+	if plan == nil || plan.UserId != activity.UserId || err != nil {
+		return false
+	}
+	return true
 }
 
 func handleReadActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, uuid uuid.UUID) {
@@ -107,11 +120,21 @@ func handleReadActivity(w http.ResponseWriter, r *http.Request, strg storage.Act
 	w.Write(jsonData)
 }
 
-// TODO: Skipping tests until query gets more complex
 func handleUserQueryActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage) {
 	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
-	queried, err := strg.Query(storage.ActivityStorageQuery{UserId: &userId})
+	rawPlanId := r.URL.Query().Get("planId")
+	var planid *uuid.UUID
+	parsedPlanId, err := uuid.Parse(rawPlanId)
+	if rawPlanId != "" && err != nil {
+		http.Error(w, "Bad Plan Id", http.StatusBadRequest)
+		return
+	}
+	if rawPlanId != "" {
+		planid = &parsedPlanId
+	}
+
+	queried, err := strg.Query(storage.ActivityStorageQuery{UserId: &userId, PlanId: planid})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -129,7 +152,7 @@ func handleUserQueryActivity(w http.ResponseWriter, r *http.Request, strg storag
 
 }
 
-func handleUpdateActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, uuid uuid.UUID) {
+func handleUpdateActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, plnStrg storage.PlanStorage, uuid uuid.UUID) {
 	activity, err := parseActivity(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -152,6 +175,11 @@ func handleUpdateActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 
 	activity.Id = uuid
 	activity.UserId = userId
+
+	if activity.PlanId != nil && !validPlanId(plnStrg, activity) {
+		http.Error(w, "Plan not found", http.StatusBadRequest)
+		return
+	}
 
 	updateErr := strg.Update(activity)
 	if updateErr != nil {

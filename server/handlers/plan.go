@@ -12,9 +12,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func AddPlanHandlers(mux *http.ServeMux, strg storage.PlanStorage, useridMiddleware middlewares.Middleware) {
+func AddPlanHandlers(mux *http.ServeMux, strg storage.PlanStorage, actStrg storage.ActivityStorage, useridMiddleware middlewares.Middleware) {
 	mux.Handle("/api/plans", useridMiddleware(registerPlanRoot(strg)))
-	mux.Handle("/api/plans/", useridMiddleware(registerPlanId(strg)))
+	mux.Handle("/api/plans/", useridMiddleware(registerPlanId(strg, actStrg)))
 }
 
 func registerPlanRoot(strg storage.PlanStorage) http.HandlerFunc {
@@ -30,7 +30,7 @@ func registerPlanRoot(strg storage.PlanStorage) http.HandlerFunc {
 	}
 }
 
-func registerPlanId(strg storage.PlanStorage) http.HandlerFunc {
+func registerPlanId(strg storage.PlanStorage, actStrg storage.ActivityStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
 		id := parts[3]
@@ -47,7 +47,7 @@ func registerPlanId(strg storage.PlanStorage) http.HandlerFunc {
 		} else if r.Method == http.MethodGet {
 			handleReadPlan(w, r, strg, uuid)
 		} else if r.Method == http.MethodDelete {
-			handleDeletePlan(w, r, strg, uuid)
+			handleDeletePlan(w, r, strg, actStrg, uuid)
 		} else {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			fmt.Fprintf(w, "Invalid method: %s", r.Method)
@@ -107,7 +107,6 @@ func handleReadPlan(w http.ResponseWriter, r *http.Request, strg storage.PlanSto
 	w.Write(jsonData)
 }
 
-// TODO: Skipping tests until query gets more complex
 func handleUserQueryPlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage) {
 	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
@@ -163,7 +162,7 @@ func handleUpdatePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanS
 
 }
 
-func handleDeletePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage, uuid uuid.UUID) {
+func handleDeletePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage, actStrg storage.ActivityStorage, uuid uuid.UUID) {
 	storedPlan, err := strg.Read(uuid)
 
 	if err != nil {
@@ -180,6 +179,11 @@ func handleDeletePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanS
 
 	deleteErr := strg.Delete(uuid)
 	if deleteErr != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	activityDeleteErr := actStrg.DeleteForPlan(uuid)
+	if activityDeleteErr != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

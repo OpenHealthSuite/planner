@@ -46,6 +46,7 @@ func TestHappyPathCreatePlanHandler(t *testing.T) {
 
 func TestHappyPathUpdatePlanHandler(t *testing.T) {
 	mockStorage := storage.NewMockPlanStorage(t)
+	mockActStorage := storage.NewMockActivityStorage(t)
 	testUserId := "some-valid-expected-userid"
 
 	returnedPlan := storage.Plan{
@@ -67,7 +68,7 @@ func TestHappyPathUpdatePlanHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerPlanId(mockStorage))
+	handler := http.Handler(registerPlanId(mockStorage, mockActStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -76,6 +77,7 @@ func TestHappyPathUpdatePlanHandler(t *testing.T) {
 
 func TestHappyPathDeletePlanHandler(t *testing.T) {
 	mockStorage := storage.NewMockPlanStorage(t)
+	mockActStorage := storage.NewMockActivityStorage(t)
 	testUserId := "some-valid-expected-userid"
 
 	returnedPlan := storage.Plan{
@@ -85,6 +87,7 @@ func TestHappyPathDeletePlanHandler(t *testing.T) {
 	mockStorage.EXPECT().Read(returnedPlan.Id).Return(&returnedPlan, nil).Once()
 
 	mockStorage.EXPECT().Delete(returnedPlan.Id).Return(nil).Once()
+	mockActStorage.EXPECT().DeleteForPlan(returnedPlan.Id).Return(nil).Once()
 
 	// We have to use "real" query params here
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("/api/plans/%s", returnedPlan.Id), nil)
@@ -94,7 +97,7 @@ func TestHappyPathDeletePlanHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerPlanId(mockStorage))
+	handler := http.Handler(registerPlanId(mockStorage, mockActStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -126,6 +129,7 @@ func TestMalformedReturns400CreatePlanHandler(t *testing.T) {
 
 func TestHappyPathReadPlanHandler(t *testing.T) {
 	mockStorage := storage.NewMockPlanStorage(t)
+	mockActStorage := storage.NewMockActivityStorage(t)
 	testUserId := "some-valid-expected-userid"
 
 	returnedPlan := storage.Plan{
@@ -142,7 +146,7 @@ func TestHappyPathReadPlanHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerPlanId(mockStorage))
+	handler := http.Handler(registerPlanId(mockStorage, mockActStorage))
 	handler.ServeHTTP(rr, req)
 
 	expectedBody, err := json.Marshal(returnedPlan)

@@ -121,16 +121,17 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 		completed,
 		notes
 	FROM activities 
-	WHERE userId = ?;
+	WHERE userId = ?
+	AND (? IS NULL OR planId = ?);
 `
-	rows, err := stg.DB.Query(selectSQL, query.UserId)
+	rows, err := stg.DB.Query(selectSQL, query.UserId, query.PlanId, query.PlanId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	activities := make([]Activity, 0)
 	// Print the results of the query
-	if rows.Next() {
+	for rows.Next() {
 		var activity Activity
 		rawStages := "[]"
 		err = rows.Scan(
@@ -147,6 +148,7 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 		if err != nil {
 			return nil, err
 		}
+
 		err := json.Unmarshal([]byte(rawStages), &activity.Stages)
 		if err != nil {
 			return nil, err
@@ -197,6 +199,18 @@ func (stg Sqlite3ActivityStorage) Delete(id uuid.UUID) error {
 			WHERE id = ?;
 	`
 	_, deleteErr := stg.DB.Exec(deleteSQL, id)
+	if deleteErr != nil {
+		return deleteErr
+	}
+	return nil
+}
+
+func (stg Sqlite3ActivityStorage) DeleteForPlan(planId uuid.UUID) error {
+	deleteSQL := `
+			DELETE FROM activities
+			WHERE planId = ?;
+	`
+	_, deleteErr := stg.DB.Exec(deleteSQL, planId)
 	if deleteErr != nil {
 		return deleteErr
 	}
@@ -284,8 +298,7 @@ func (stg Sqlite3PlanStorage) Query(query PlanStorageQuery) (*[]Plan, error) {
 	}
 	defer rows.Close()
 	plans := make([]Plan, 0)
-	// Print the results of the query
-	if rows.Next() {
+	for rows.Next() {
 		var plan Plan
 		err = rows.Scan(
 			&plan.Id,

@@ -62,6 +62,7 @@ type ActivityStorage interface {
 	Query(query ActivityStorageQuery) (*[]Activity, error)
 	Update(activity Activity) error
 	Delete(id uuid.UUID) error
+	DeleteForPlan(planId uuid.UUID) error
 }
 
 //go:generate mockery --name PlanStorage

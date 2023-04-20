@@ -17,6 +17,7 @@ import (
 
 func TestHappyPathCreateActivityHandler(t *testing.T) {
 	mockStorage := storage.NewMockActivityStorage(t)
+	mockPlanStorage := storage.NewMockPlanStorage(t)
 	returnedActivity := storage.Activity{
 		Id: uuid.New(),
 	}
@@ -36,7 +37,7 @@ func TestHappyPathCreateActivityHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerActivityRoot(mockStorage))
+	handler := http.Handler(registerActivityRoot(mockStorage, mockPlanStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -45,6 +46,7 @@ func TestHappyPathCreateActivityHandler(t *testing.T) {
 
 func TestHappyPathUpdateActivityHandler(t *testing.T) {
 	mockStorage := storage.NewMockActivityStorage(t)
+	mockPlanStorage := storage.NewMockPlanStorage(t)
 	testUserId := "some-valid-expected-userid"
 
 	returnedActivity := storage.Activity{
@@ -66,7 +68,7 @@ func TestHappyPathUpdateActivityHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerActivityId(mockStorage))
+	handler := http.Handler(registerActivityId(mockStorage, mockPlanStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -75,6 +77,7 @@ func TestHappyPathUpdateActivityHandler(t *testing.T) {
 
 func TestHappyPathDeleteActivityHandler(t *testing.T) {
 	mockStorage := storage.NewMockActivityStorage(t)
+	mockPlanStorage := storage.NewMockPlanStorage(t)
 	testUserId := "some-valid-expected-userid"
 
 	returnedActivity := storage.Activity{
@@ -93,7 +96,7 @@ func TestHappyPathDeleteActivityHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerActivityId(mockStorage))
+	handler := http.Handler(registerActivityId(mockStorage, mockPlanStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -103,6 +106,7 @@ func TestHappyPathDeleteActivityHandler(t *testing.T) {
 func TestMalformedReturns400CreateActivityHandler(t *testing.T) {
 
 	mockStorage := storage.NewMockActivityStorage(t)
+	mockPlanStorage := storage.NewMockPlanStorage(t)
 
 	testUserId := "some-valid-expected-userid"
 
@@ -117,7 +121,34 @@ func TestMalformedReturns400CreateActivityHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerActivityRoot(mockStorage))
+	handler := http.Handler(registerActivityRoot(mockStorage, mockPlanStorage))
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestPlanDoesntExistReturns400CreateActivityHandler(t *testing.T) {
+	mockStorage := storage.NewMockActivityStorage(t)
+	mockPlanStorage := storage.NewMockPlanStorage(t)
+
+	testUserId := "some-valid-expected-userid"
+	planId := uuid.New()
+
+	mockPlanStorage.EXPECT().Read(planId).Return(nil, nil).Once()
+
+	createBody := fmt.Sprintf(`{
+		"summary": "some summary",
+		"planId": "%s"
+	}`, planId)
+
+	req, err := http.NewRequest("POST", "/my-endpoint", strings.NewReader(createBody))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
+
+	handler := http.Handler(registerActivityRoot(mockStorage, mockPlanStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
@@ -125,6 +156,7 @@ func TestMalformedReturns400CreateActivityHandler(t *testing.T) {
 
 func TestHappyPathReadActivityHandler(t *testing.T) {
 	mockStorage := storage.NewMockActivityStorage(t)
+	mockPlanStorage := storage.NewMockPlanStorage(t)
 	testUserId := "some-valid-expected-userid"
 
 	returnedActivity := storage.Activity{
@@ -141,7 +173,7 @@ func TestHappyPathReadActivityHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerActivityId(mockStorage))
+	handler := http.Handler(registerActivityId(mockStorage, mockPlanStorage))
 	handler.ServeHTTP(rr, req)
 
 	expectedBody, err := json.Marshal(returnedActivity)
