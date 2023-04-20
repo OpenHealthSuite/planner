@@ -7,6 +7,7 @@ describe('activities', () => {
   test("Create, Read, Update, Query, Delete", async () => {
     let createdActivity = {
       summary: "Some activity name",
+      planId: null,
       stages: [
         { order: 0, description: "desc", metrics: [{amount: 1, unit: "unt"}], repetitions: 3}
       ],

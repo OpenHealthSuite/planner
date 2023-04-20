@@ -7,8 +7,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func TestCreateReadUpdateDelete(t *testing.T) {
-	storage, err := getSqliteStorageClient(":memory:")
+func TestActivityCreateReadUpdateDelete(t *testing.T) {
+	allStorage, err := getSqliteStorageClient(":memory:")
+	storage := allStorage.Activity
 	if err != nil {
 		//t.Errorf("Add(2, 3) = %d; want 5", result)
 		t.Errorf("Error creating storage: %s", err.Error())
@@ -118,6 +119,105 @@ func TestCreateReadUpdateDelete(t *testing.T) {
 	}
 	if rereread != nil {
 		t.Error("Error got deleted activity")
+		return
+	}
+
+}
+
+func TestPlanCreateReadUpdateDelete(t *testing.T) {
+	allStorage, err := getSqliteStorageClient(":memory:")
+	storage := allStorage.Plan
+	if err != nil {
+		//t.Errorf("Add(2, 3) = %d; want 5", result)
+		t.Errorf("Error creating storage: %s", err.Error())
+		return
+	}
+	res, err := storage.Read(uuid.New())
+	if err != nil {
+		t.Error("Error reading with empty uuid")
+		return
+	}
+	if res != nil {
+		t.Error("somehow got result on random uuid?")
+		return
+	}
+	createPlan := Plan{
+		UserId: "test-user-id",
+		Name:   "Test Plan",
+		Active: true,
+	}
+	created, err := storage.Create(createPlan)
+	if err != nil {
+		t.Errorf("Error creating plan %s", err)
+		return
+	}
+	if created.Id == uuid.MustParse("00000000-0000-0000-0000-000000000000") {
+		t.Error("Got 0 uuid")
+		return
+	}
+	if created.Name != createPlan.Name {
+		t.Error("Error with created plan")
+		return
+	}
+
+	read, err := storage.Read(created.Id)
+	if err != nil {
+		t.Errorf("Error reading plan %s", err)
+		return
+	}
+
+	updatePlan := read
+
+	updatePlan.Name = "Updated plan Name"
+
+	updateErr := storage.Update(*updatePlan)
+
+	if updateErr != nil {
+		t.Errorf("Error updating plan %s", updateErr)
+		return
+	}
+
+	reread, err := storage.Read(created.Id)
+	if err != nil {
+		t.Errorf("Error reading plan %s", err)
+		return
+	}
+	if reread.Name != updatePlan.Name {
+		t.Error("Error with reread updated plan")
+		return
+	}
+
+	query, err := storage.Query(PlanStorageQuery{
+		UserId: &read.UserId,
+	})
+
+	if err != nil {
+		t.Errorf("Error querying plan %s", err)
+		return
+	}
+	if len(*query) != 1 {
+		t.Error("Error with count of stored items")
+		return
+	}
+	if (*query)[0].Id != read.Id {
+		t.Error("Error with queried plan")
+		return
+	}
+
+	deleteErr := storage.Delete(read.Id)
+
+	if deleteErr != nil {
+		t.Errorf("Error deleting plan %s", deleteErr)
+		return
+	}
+
+	rereread, err := storage.Read(read.Id)
+	if err != nil {
+		t.Errorf("Error rerereading plan %s", err)
+		return
+	}
+	if rereread != nil {
+		t.Error("Error got deleted plan")
 		return
 	}
 

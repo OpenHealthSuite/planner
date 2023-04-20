@@ -30,6 +30,7 @@ type ActivityStage struct {
 type Activity struct {
 	Id           uuid.UUID       `json:"id"`
 	UserId       string          `json:"userId"`
+	PlanId       *uuid.UUID      `json:"planId"`
 	Summary      string          `json:"summary"`
 	Stages       []ActivityStage `json:"stages"`
 	DateTime     time.Time       `json:"dateTime"`
@@ -38,7 +39,19 @@ type Activity struct {
 	Notes        string          `json:"notes"`
 }
 
+type Plan struct {
+	Id     uuid.UUID `json:"id"`
+	UserId string    `json:"userId"`
+	Name   string    `json:"name"`
+	Active bool      `json:"active"`
+}
+
 type ActivityStorageQuery struct {
+	UserId *string
+	PlanId *uuid.UUID
+}
+
+type PlanStorageQuery struct {
 	UserId *string
 }
 
@@ -51,7 +64,21 @@ type ActivityStorage interface {
 	Delete(id uuid.UUID) error
 }
 
-func GetStorage() ActivityStorage {
+//go:generate mockery --name PlanStorage
+type PlanStorage interface {
+	Create(plan Plan) (Plan, error)
+	Read(id uuid.UUID) (*Plan, error)
+	Query(query PlanStorageQuery) (*[]Plan, error)
+	Update(plan Plan) error
+	Delete(id uuid.UUID) error
+}
+
+type Storage struct {
+	Activity ActivityStorage
+	Plan     PlanStorage
+}
+
+func GetStorage() Storage {
 	// TODO: This is how we should get storage
 	// TODO: When there is more than SQLite3, configure here
 	// TODO: Also probably want to make this something that only

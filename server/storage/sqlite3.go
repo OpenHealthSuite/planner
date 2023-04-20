@@ -18,6 +18,7 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 			INSERT INTO activities (
 				id,
 				userId,
+				planId,
 				summary,
 				stages,
 				dateTime,
@@ -26,6 +27,7 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 				notes
 			)
 			VALUES (
+				?,
 				?,
 				?,
 				?,
@@ -43,6 +45,7 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 	_, insertErr := stg.DB.Exec(insertSQL,
 		newId,
 		activity.UserId,
+		activity.PlanId,
 		activity.Summary,
 		jsonStr,
 		activity.DateTime,
@@ -62,6 +65,7 @@ func (stg Sqlite3ActivityStorage) Read(id uuid.UUID) (*Activity, error) {
 			SELECT 
 				id,
 				userId,
+				planId,
 				summary,
 				stages,
 				dateTime,
@@ -84,6 +88,7 @@ func (stg Sqlite3ActivityStorage) Read(id uuid.UUID) (*Activity, error) {
 		err = rows.Scan(
 			&activity.Id,
 			&activity.UserId,
+			&activity.PlanId,
 			&activity.Summary,
 			&rawStages,
 			&activity.DateTime,
@@ -108,6 +113,7 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 	SELECT 
 		id,
 		userId,
+		planId,
 		summary,
 		stages,
 		dateTime,
@@ -130,6 +136,7 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 		err = rows.Scan(
 			&activity.Id,
 			&activity.UserId,
+			&activity.PlanId,
 			&activity.Summary,
 			&rawStages,
 			&activity.DateTime,
@@ -154,6 +161,7 @@ func (stg Sqlite3ActivityStorage) Update(activity Activity) error {
 			UPDATE activities
 			SET 
 				userId = ?,
+				planId = ?,
 				summary = ?,
 				stages = ?,
 				dateTime = ?,
@@ -168,6 +176,7 @@ func (stg Sqlite3ActivityStorage) Update(activity Activity) error {
 	}
 	_, updateErr := stg.DB.Exec(insertSQL,
 		activity.UserId,
+		activity.PlanId,
 		activity.Summary,
 		jsonStr,
 		activity.DateTime,
@@ -194,16 +203,148 @@ func (stg Sqlite3ActivityStorage) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func getSqliteStorageClient(filepath string) (ActivityStorage, error) {
-	db, err := sql.Open("sqlite3", filepath)
+type Sqlite3PlanStorage struct {
+	DB *sql.DB
+}
+
+func (stg Sqlite3PlanStorage) Create(plan Plan) (Plan, error) {
+	newId := uuid.New()
+	insertSQL := `
+			INSERT INTO plans (
+				id,
+				userId,
+				name,
+				active
+			)
+			VALUES (
+				?,
+				?,
+				?,
+				?
+			);
+	`
+	_, insertErr := stg.DB.Exec(insertSQL,
+		newId,
+		plan.UserId,
+		plan.Name,
+		plan.Active,
+	)
+	if insertErr != nil {
+		return plan, insertErr
+	}
+	plan.Id = newId
+	return plan, nil
+}
+
+func (stg Sqlite3PlanStorage) Read(id uuid.UUID) (*Plan, error) {
+	selectSQL := `
+			SELECT 
+				id,
+				userId,
+				name,
+				active
+			FROM plans 
+			WHERE id = ?;
+	`
+	rows, err := stg.DB.Query(selectSQL, id)
 	if err != nil {
 		return nil, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		var plan Plan
+		err = rows.Scan(
+			&plan.Id,
+			&plan.UserId,
+			&plan.Name,
+			&plan.Active,
+		)
+		if err != nil {
+			return nil, err
+		}
+		return &plan, nil
+	}
+	return nil, nil
+}
+
+func (stg Sqlite3PlanStorage) Query(query PlanStorageQuery) (*[]Plan, error) {
+	selectSQL := `
+	SELECT 
+		id,
+		userId,
+		name,
+		active
+	FROM plans 
+	WHERE userId = ?;
+`
+	rows, err := stg.DB.Query(selectSQL, query.UserId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	plans := make([]Plan, 0)
+	// Print the results of the query
+	if rows.Next() {
+		var plan Plan
+		err = rows.Scan(
+			&plan.Id,
+			&plan.UserId,
+			&plan.Name,
+			&plan.Active,
+		)
+		if err != nil {
+			return nil, err
+		}
+		plans = append(plans, plan)
+	}
+	return &plans, nil
+}
+
+func (stg Sqlite3PlanStorage) Update(plan Plan) error {
+	insertSQL := `
+			UPDATE plans
+			SET 
+				userId = ?,
+				name = ?,
+				active = ?
+			WHERE id = ?;
+	`
+	_, updateErr := stg.DB.Exec(insertSQL,
+		plan.UserId,
+		plan.Name,
+		plan.Active,
+		plan.Id,
+	)
+	if updateErr != nil {
+		return updateErr
+	}
+	return nil
+}
+
+func (stg Sqlite3PlanStorage) Delete(id uuid.UUID) error {
+	deleteSQL := `
+			DELETE FROM plans
+			WHERE id = ?;
+	`
+	_, deleteErr := stg.DB.Exec(deleteSQL, id)
+	if deleteErr != nil {
+		return deleteErr
+	}
+	return nil
+}
+
+func getSqliteStorageClient(filepath string) (Storage, error) {
+	db, err := sql.Open("sqlite3", filepath)
+	if err != nil {
+		return Storage{}, err
 	}
 	// Do migrations
 	createTableSQL := `
 	CREATE TABLE IF NOT EXISTS activities (
 			id TEXT PRIMARY KEY,
 			userId TEXT,
+			planId TEXT NULL,
 			summary TEXT,
 			stages TEXT,
 			dateTime DATETIME,
@@ -211,11 +352,19 @@ func getSqliteStorageClient(filepath string) (ActivityStorage, error) {
 			completed BOOLEAN,
 			notes TEXT
 	);
+	CREATE TABLE IF NOT EXISTS plans (
+			id TEXT PRIMARY KEY,
+			userId TEXT,
+			name TEXT,
+			active BOOLEAN
+	);
 	`
 	_, err = db.Exec(createTableSQL)
 	if err != nil {
-		return nil, err
+		return Storage{}, err
 	}
-	strg := Sqlite3ActivityStorage{DB: db}
-	return strg, nil
+	return Storage{
+		Activity: Sqlite3ActivityStorage{DB: db},
+		Plan:     Sqlite3PlanStorage{DB: db},
+	}, nil
 }

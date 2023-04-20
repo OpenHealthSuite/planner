@@ -13,3 +13,6 @@ test:
 
 mocks:
 	mockery --all
+
+mocks_podman:
+	podman run --rm -v "$(shell pwd)":/src -w /src docker.io/vektra/mockery --all
