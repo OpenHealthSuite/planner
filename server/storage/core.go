@@ -46,9 +46,15 @@ type Plan struct {
 	Active bool      `json:"active"`
 }
 
+type DateRange struct {
+	Start time.Time
+	End   time.Time
+}
+
 type ActivityStorageQuery struct {
-	UserId *string
-	PlanId *uuid.UUID
+	UserId    *string
+	PlanId    *uuid.UUID
+	DateRange *DateRange
 }
 
 type PlanStorageQuery struct {

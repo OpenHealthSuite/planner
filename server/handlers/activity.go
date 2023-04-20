@@ -8,6 +8,7 @@ import (
 	"planner/middlewares"
 	"planner/storage"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -134,7 +135,20 @@ func handleUserQueryActivity(w http.ResponseWriter, r *http.Request, strg storag
 		planid = &parsedPlanId
 	}
 
-	queried, err := strg.Query(storage.ActivityStorageQuery{UserId: &userId, PlanId: planid})
+	rawStartTime := r.URL.Query().Get("timeStart")
+	rawEndTime := r.URL.Query().Get("timeEnd")
+
+	var timeRange *storage.DateRange
+	startTime, startErr := time.Parse(time.RFC3339, rawStartTime)
+	endTime, endErr := time.Parse(time.RFC3339, rawEndTime)
+	if rawStartTime != "" && rawEndTime != "" && startErr == nil && endErr == nil {
+		timeRange = &storage.DateRange{
+			Start: startTime,
+			End:   endTime,
+		}
+	}
+
+	queried, err := strg.Query(storage.ActivityStorageQuery{UserId: &userId, PlanId: planid, DateRange: timeRange})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

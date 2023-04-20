@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"encoding/json"
+	"time"
 
 	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
@@ -109,6 +110,12 @@ func (stg Sqlite3ActivityStorage) Read(id uuid.UUID) (*Activity, error) {
 }
 
 func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity, error) {
+	var startTime *time.Time
+	var endTime *time.Time
+	if query.DateRange != nil {
+		startTime = &query.DateRange.Start
+		endTime = &query.DateRange.End
+	}
 	selectSQL := `
 	SELECT 
 		id,
@@ -122,9 +129,13 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 		notes
 	FROM activities 
 	WHERE userId = ?
-	AND (? IS NULL OR planId = ?);
+	AND (? IS NULL OR planId = ?)
+	AND (? IS NULL OR (dateTime > ? AND dateTime < ?));
 `
-	rows, err := stg.DB.Query(selectSQL, query.UserId, query.PlanId, query.PlanId)
+	rows, err := stg.DB.Query(selectSQL,
+		query.UserId,
+		query.PlanId, query.PlanId,
+		startTime, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}
