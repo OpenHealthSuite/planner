@@ -77,6 +77,7 @@ func main() {
 	mux.Handle("/api/whoami", useridMiddleware(http.HandlerFunc(getUserInfo)))
 
 	handlers.AddActivityHandlers(mux, storage.Activity, useridMiddleware)
+	handlers.AddPlanHandlers(mux, storage.Plan, useridMiddleware)
 
 	mux.HandleFunc("/", getPublicFile)
 	mux.HandleFunc("*", getPublicFile)
