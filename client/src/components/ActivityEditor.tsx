@@ -98,7 +98,7 @@ export const ActivityForm = ({
                 id="completed"
                 name="completed" onChange={handleChange} isChecked={values.completed}>Complete</Checkbox>
             </FormControl>
-            {values.stages.length > 0 && <Accordion>
+            {values.stages.length > 0 && <Accordion allowToggle>
               {values.stages.map((stage, i) => {
                 return <AccordionItem key={stage.order}>
                   
@@ -154,8 +154,8 @@ export const ActivityForm = ({
                     <Button width={"100%"} mt={"1em"}
                       onClick={() => {
                         values.stages[i].metrics.push({
-                          amount: 0,
-                          unit: ""
+                          amount: 1,
+                          unit: "min(s)"
                         });
                         validateForm();
                       }}
@@ -176,10 +176,10 @@ export const ActivityForm = ({
             </Accordion>}
             <Button onClick={() => {
               values.stages.push({
-                order: values.stages.length - 1,
+                order: values.stages.length,
                 repetitions: 1,
                 metrics: [],
-                description: ""
+                description: `Stage ${values.stages.length + 1}`
               });
               validateForm();
             }}>Add Stage</Button>

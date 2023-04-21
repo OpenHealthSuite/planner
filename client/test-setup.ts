@@ -13,6 +13,8 @@ global.CSS = {
   supports: (k, v) => false,
 };
 
+window.scrollTo = () => { return; };
+
 // runs a cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {
   cleanup();

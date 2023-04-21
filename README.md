@@ -27,7 +27,7 @@ This will all be framed roughly through the lens of running, but is broadly appl
 - ~~Add a concept/storage of distinct "plans" to the workouts - so workouts can be assigned to a plan (CRUD that casscades into workouts)~~
   - ~~Optional? The idea of people still being able to create workouts that aren't tied to a particular plan is useful~~
 - ~~Build interface for creating and managing these plans (literally just a list with CRUD - we probably want an "archived" concept too)~~
-- Build an interface that makes it easy to create and edit the various kinds of workout singularly
+- ~~Build an interface that makes it easy to create and edit the various kinds of workout singularly~~
 - ~~Create a mobile-first weekly view of planned workouts~~
 - Create a bulk upload/download system for plans - probably CSV based
 - Create a data purge endpoint

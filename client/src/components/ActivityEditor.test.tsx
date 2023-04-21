@@ -41,7 +41,7 @@ describe("Add Activity Interface", () => {
   });
 
 
-  test("Full Journey :: Clicks Button, Fills in Form with Stages, Saves, Closes", async () => {
+  test("Full Journey :: Clicks Button, Fills in Form with Stage and Metric, Saves, Closes", async () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
     const fakeCallback = vi.fn();
@@ -50,7 +50,24 @@ describe("Add Activity Interface", () => {
     await user.type(screen.getByLabelText("Summary"), "Test name activity");
     await user.type(screen.getByLabelText("Date"), "2023-04-03");
 
-    
+    await user.click(screen.getByText("Add Stage"));
+
+    await user.click(screen.getByText("Stage 1"));
+
+    await user.clear(screen.getByLabelText("Description"));
+    await user.type(screen.getByLabelText("Description"), "My Custom Stage");
+
+    await user.clear(screen.getByLabelText("Repetitions"));
+    await user.type(screen.getByLabelText("Repetitions"), "4");
+
+    await user.click(screen.getByText("Add Metric"));
+
+    await user.clear(screen.getByLabelText("Amount"));
+    await user.type(screen.getByLabelText("Amount"), "11");
+
+    await user.clear(screen.getByLabelText("Unit"));
+    await user.type(screen.getByLabelText("Unit"), "meters");
+
     await user.click(screen.getByText("Save"));
 
     await waitForElementToBeRemoved(() => screen.queryByText("Adding Activity"));
@@ -59,7 +76,14 @@ describe("Add Activity Interface", () => {
       completed: false,
       dateTime: "2023-04-03T00:00:00.000Z",
       notes: "",
-      stages: [],
+      stages: [
+        {description: "My Custom Stage",
+          metrics: [
+            {amount: 11, unit: "meters"}
+          ],
+          order: 0,
+          repetitions:4}
+      ],
       summary: "Test name activity",
       timeRelevant: false,
     });
