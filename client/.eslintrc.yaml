@@ -30,4 +30,6 @@ rules:
   semi:
     - error
     - always
+  prefer-spread:
+    - "off"
   react/react-in-jsx-scope: 'off'
