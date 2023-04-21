@@ -17,7 +17,7 @@ describe("Add Activity Interface", () => {
     expect(screen.queryByText("Adding Activity")).toBeInTheDocument();
   });
 
-  test("Full Journey :: Clicks Button, Fills in Form, Saves, Closes", async () => {
+  test("Full Journey :: Clicks Button, Fills in Minimal Form, Saves, Closes", async () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
     const fakeCallback = vi.fn();
@@ -25,6 +25,32 @@ describe("Add Activity Interface", () => {
     await user.click(screen.getByText("Add Activity"));
     await user.type(screen.getByLabelText("Summary"), "Test name activity");
     await user.type(screen.getByLabelText("Date"), "2023-04-03");
+    await user.click(screen.getByText("Save"));
+
+    await waitForElementToBeRemoved(() => screen.queryByText("Adding Activity"));
+
+    expect(fakeSaver).toBeCalledWith({
+      completed: false,
+      dateTime: "2023-04-03T00:00:00.000Z",
+      notes: "",
+      stages: [],
+      summary: "Test name activity",
+      timeRelevant: false,
+    });
+    expect(fakeCallback).toBeCalledWith("some-fake-id");
+  });
+
+
+  test("Full Journey :: Clicks Button, Fills in Form with Stages, Saves, Closes", async () => {
+    const user = userEvent.setup();
+    const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
+    const fakeCallback = vi.fn();
+    render(<AddActivityInterface activitySubmission={fakeSaver} onCreated={fakeCallback}/>);
+    await user.click(screen.getByText("Add Activity"));
+    await user.type(screen.getByLabelText("Summary"), "Test name activity");
+    await user.type(screen.getByLabelText("Date"), "2023-04-03");
+
+    
     await user.click(screen.getByText("Save"));
 
     await waitForElementToBeRemoved(() => screen.queryByText("Adding Activity"));
