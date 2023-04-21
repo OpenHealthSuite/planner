@@ -21,3 +21,5 @@ export type Activity = {
 	completed: boolean
 	notes: string
 }
+
+export type ActivityApiSubmission = Omit<Activity, "dateTime"> & { dateTime: string }

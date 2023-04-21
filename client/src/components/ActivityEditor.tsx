@@ -1,11 +1,11 @@
 import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, Select, Checkbox } from "@chakra-ui/react";
-import { Activity } from "../types";
+import { Activity, ActivityApiSubmission } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
 import { Formik } from "formik";
 import * as Yup from "yup";
 
-const defaultActivitySubmission = (activity: Activity) => {
-  return plannerPostRequest<Activity, string>("/activities", activity);
+const defaultActivitySubmission = (activity: ActivityApiSubmission) => {
+  return plannerPostRequest<ActivityApiSubmission, string>("/activities", activity);
 };
 
 type AddActivityInterfaceProps = { 
@@ -13,9 +13,9 @@ type AddActivityInterfaceProps = {
   onCreated?: (newId: string) => void
 }
 
-export type InitialFormValues = Partial<Omit<Activity, "dateTime">> &
-  Omit<Activity, "id" | "userId"  | "dateTime"> &
-  { dateTime: string;}
+export type InitialFormValues = Partial<Activity> &
+  Omit<Activity, "id" | "userId" | "dateTime"> &
+  { date: string; }
 
 type ActivityFormProps = { 
   activitySubmission: typeof defaultActivitySubmission
@@ -28,7 +28,7 @@ const ActivitySchema =  Yup.object().shape({
   summary: Yup.string()
     .min(1, "Needs at least one character")
     .required("Required"),
-  dateTime: Yup.date().required("Required")
+  date: Yup.date().required("Required")
 });
 
 export const ActivityForm = ({
@@ -41,9 +41,10 @@ export const ActivityForm = ({
     initialValues={initialActivity}
     validationSchema={ActivitySchema}
     onSubmit={async (values) => {
-      values.dateTime = new Date(Date.parse(values.dateTime)).toISOString();
+      const { date, ...submission } = values;
+      (submission as unknown as ActivityApiSubmission).dateTime = new Date(Date.parse(values.date)).toISOString()
       try {
-        const id = await activitySubmission(values as unknown as Activity);
+        const id = await activitySubmission(submission as unknown as ActivityApiSubmission);
         onClose();
         onCreated(id);
       } catch {
@@ -71,10 +72,10 @@ export const ActivityForm = ({
                 type='text' onChange={handleChange} value={values.summary}/>
             </FormControl>
             <FormControl>
-              <FormLabel htmlFor="dateTime">Date</FormLabel>
+              <FormLabel htmlFor="date">Date</FormLabel>
               <Input 
-                id="dateTime"
-                name="dateTime" type='date' onChange={handleChange} value={values.dateTime} />
+                id="date"
+                name="date" type='date' onChange={handleChange} value={values.date} />
             </FormControl>
             <FormControl>
               <Checkbox 
@@ -118,7 +119,7 @@ export const AddActivityInterface = ({
           initialActivity={{
             summary: "",
             stages: [],
-            dateTime: "",
+            date: "",
             timeRelevant: false,
             completed: false,
             notes: ""
