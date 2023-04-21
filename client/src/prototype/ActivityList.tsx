@@ -23,7 +23,7 @@ export const ActivityList = ({ updated }: { updated?: string }) => {
     setLoading(true);
     plannerGetRequest<Activity[]>("/activities")
       .then(acts => acts.map(a => {
-        a.dateTime = new Date(a.dateTime)
+        a.dateTime = new Date(a.dateTime);
         return a;
       }))
       .then(acts => {

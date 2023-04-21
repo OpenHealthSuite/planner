@@ -1,4 +1,4 @@
-import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, Select, Checkbox } from "@chakra-ui/react";
+import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, Checkbox } from "@chakra-ui/react";
 import { Activity, ActivityApiSubmission } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
 import { Formik } from "formik";
@@ -42,7 +42,7 @@ export const ActivityForm = ({
     validationSchema={ActivitySchema}
     onSubmit={async (values) => {
       const { date, ...submission } = values;
-      (submission as unknown as ActivityApiSubmission).dateTime = new Date(Date.parse(values.date)).toISOString()
+      (submission as unknown as ActivityApiSubmission).dateTime = new Date(Date.parse(date)).toISOString();
       try {
         const id = await activitySubmission(submission as unknown as ActivityApiSubmission);
         onClose();
