@@ -22,4 +22,11 @@ export type Activity = {
 	notes: string
 }
 
+export type Plan = {
+	id: string,
+	name: string,
+	userId: string,
+	active: boolean
+}
+
 export type ActivityApiSubmission = Omit<Activity, "dateTime"> & { dateTime: string }

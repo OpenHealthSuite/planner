@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import App from "./App";
 import WeeklySchedule from "./routes/WeeklySchedule";
+import PlanManagement from "./routes/PlanManagement";
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <WeeklySchedule />
+      },
+      {
+        path: "plans",
+        element: <PlanManagement />
       }
     ],
     errorElement: <div>Nothing here...</div>,
