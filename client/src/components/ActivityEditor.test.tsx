@@ -2,7 +2,6 @@ import { render, screen, waitForElementToBeRemoved } from "@testing-library/reac
 import userEvent from "@testing-library/user-event";
 
 import { AddActivityInterface } from "./ActivityEditor";
-import { activityTypes } from "../types";
 
 describe("Add Activity Interface", () => {
   test("Initial Load :: Has Button, No Modal Visible", () => {
@@ -24,20 +23,19 @@ describe("Add Activity Interface", () => {
     const fakeCallback = vi.fn();
     render(<AddActivityInterface activitySubmission={fakeSaver} onCreated={fakeCallback}/>);
     await user.click(screen.getByText("Add Activity"));
-    await user.type(screen.getByLabelText("Name"), "Test name activity");
-    await user.selectOptions(screen.getByLabelText("Type"), activityTypes[0]);
+    await user.type(screen.getByLabelText("Summary"), "Test name activity");
     await user.type(screen.getByLabelText("Date"), "2023-04-03");
     await user.click(screen.getByText("Save"));
 
     await waitForElementToBeRemoved(() => screen.queryByText("Adding Activity"));
 
     expect(fakeSaver).toBeCalledWith({
-      attributes: {},
       completed: false,
       dateTime: "2023-04-03T00:00:00.000Z",
-      name: "Test name activity",
+      notes: "",
+      stages: [],
+      summary: "Test name activity",
       timeRelevant: false,
-      type: activityTypes[0]
     });
     expect(fakeCallback).toBeCalledWith("some-fake-id");
   });
@@ -51,8 +49,7 @@ describe("Add Activity Interface", () => {
     
     await user.click(screen.getByText("Add Activity"));
 
-    await user.type(screen.getByLabelText("Name"), "Test name activity");
-    await user.selectOptions(screen.getByLabelText("Type"), activityTypes[0]);
+    await user.type(screen.getByLabelText("Summary"), "Test name activity");
     await user.type(screen.getByLabelText("Date"), "2023-04-03");
     await user.click(screen.getByText("Cancel"));
 
@@ -61,8 +58,7 @@ describe("Add Activity Interface", () => {
     expect(screen.queryByText("Adding Activity")).not.toBeInTheDocument();
 
     await user.click(screen.getByText("Add Activity"));
-    expect(screen.getByLabelText("Name")).toHaveValue("");
-    expect(screen.getByLabelText("Type")).toHaveValue("");
+    expect(screen.getByLabelText("Summary")).toHaveValue("");
     expect(screen.getByLabelText("Date")).toHaveValue("");
   });
 
@@ -74,9 +70,7 @@ describe("Add Activity Interface", () => {
     render(<AddActivityInterface activitySubmission={fakeSaver} onCreated={fakeCallback}/>);
     await user.click(screen.getByText("Add Activity"));
     expect(screen.getByText("Save")).toBeDisabled();
-    await user.type(screen.getByLabelText("Name"), "Test name activity");
-    expect(screen.getByText("Save")).toBeDisabled();
-    await user.selectOptions(screen.getByLabelText("Type"), activityTypes[0]);
+    await user.type(screen.getByLabelText("Summary"), "Test name activity");
     expect(screen.getByText("Save")).toBeDisabled();
     await user.type(screen.getByLabelText("Date"), "2023-04-03");
     expect(screen.getByText("Save")).not.toBeDisabled();

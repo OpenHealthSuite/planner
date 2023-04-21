@@ -1,17 +1,23 @@
+export type ActivityStageMetric = {
+	amount: number,
+	unit: string
+}
 
-// TODO: This should be driven by the API at some point
-export type ActivityType = "running" | "cycling" | "other"
-export const activityTypes: ActivityType[] = ["running", "cycling", "other"];
+export type ActivityStage = {
+	order: number,
+	description: string,
+	metrics: ActivityStageMetric[]
+	repetitions: number
+}
 
 export type Activity = {
 	id: string
 	userId: string
-	name: string
-	type: ActivityType
-	attributes: { [key: string]: string }
-	details?: string
+	planId?: string
+	summary: string
+	stages: ActivityStage[]
 	dateTime: Date
 	timeRelevant: boolean
-	durationMinutes?: number
 	completed: boolean
+	notes: string
 }

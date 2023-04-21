@@ -1,5 +1,5 @@
 import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, Select, Checkbox } from "@chakra-ui/react";
-import { Activity, ActivityType, activityTypes } from "../types";
+import { Activity } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -13,9 +13,9 @@ type AddActivityInterfaceProps = {
   onCreated?: (newId: string) => void
 }
 
-export type InitialFormValues = Partial<Omit<Activity, "type" | "dateTime">> &
-  Omit<Activity, "id" | "userId" | "type" | "dateTime"> &
-  { dateTime: string; type: "" | ActivityType }
+export type InitialFormValues = Partial<Omit<Activity, "dateTime">> &
+  Omit<Activity, "id" | "userId"  | "dateTime"> &
+  { dateTime: string;}
 
 type ActivityFormProps = { 
   activitySubmission: typeof defaultActivitySubmission
@@ -25,10 +25,9 @@ type ActivityFormProps = {
 } 
 
 const ActivitySchema =  Yup.object().shape({
-  name: Yup.string()
+  summary: Yup.string()
     .min(1, "Needs at least one character")
     .required("Required"),
-  type: Yup.string().required("Required"),
   dateTime: Yup.date().required("Required")
 });
 
@@ -65,19 +64,11 @@ export const ActivityForm = ({
         <ModalBody>
           <Flex flexDirection={"column"} gap={"1em"}>
             <FormControl>
-              <FormLabel htmlFor="name">Name</FormLabel>
+              <FormLabel htmlFor="summary">Summary</FormLabel>
               <Input 
-                id="name"
-                name="name"
-                type='text' onChange={handleChange} value={values.name}/>
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="type">Type</FormLabel>
-              <Select 
-                id="type"
-                name="type" placeholder='Select Type' onChange={handleChange} value={values.type}>
-                {activityTypes.map(a => <option key={a}>{a}</option>)}
-              </Select>
+                id="summary"
+                name="summary"
+                type='text' onChange={handleChange} value={values.summary}/>
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="dateTime">Date</FormLabel>
@@ -125,12 +116,12 @@ export const AddActivityInterface = ({
           onCreated={onCreated}
           onClose={onClose}
           initialActivity={{
-            name: "",
-            type: "",
-            attributes: {},
+            summary: "",
+            stages: [],
             dateTime: "",
             timeRelevant: false,
-            completed: false
+            completed: false,
+            notes: ""
           }}/>
       </ModalContent>
     </Modal>

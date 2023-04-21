@@ -43,7 +43,7 @@ export const ActivityList = ({ updated }: { updated?: string }) => {
   }
 
   return <UnorderedList>
-    {activities.map(x => <ListItem key={x.id}>{x.name} <Button onClick={() => {
+    {activities.map(x => <ListItem key={x.id}>{x.summary} <Button onClick={() => {
       setEditActivity({...x, dateTime: new Date(x.dateTime).toISOString().split("T")[0]});
       onOpen();
     }}>Edit</Button></ListItem>)}
