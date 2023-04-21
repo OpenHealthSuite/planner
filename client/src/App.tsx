@@ -1,7 +1,5 @@
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
-import { ActivityList } from "./prototype/ActivityList";
-import { AddActivityInterface } from "./components/ActivityEditor";
-import { useState } from "react";
+import { Outlet } from "react-router-dom";
 
 const colors = {
   brand: {},
@@ -11,11 +9,9 @@ const theme = extendTheme({ colors });
 
 
 function App() {
-  const [newActivityId, setNewActivityId] = useState("");
   return (
     <ChakraProvider theme={theme}>
-      <ActivityList updated={newActivityId}/>
-      <AddActivityInterface onCreated={setNewActivityId}/>
+      <Outlet />
     </ChakraProvider>
   );
 }
