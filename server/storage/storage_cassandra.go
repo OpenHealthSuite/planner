@@ -50,7 +50,7 @@ func (stg CassandraActivityStorage) Create(activity Activity) (Activity, error) 
 	}
 	var planIdString *string
 	if activity.PlanId != nil {
-		dirString := ""
+		dirString := activity.PlanId.String()
 		planIdString = &dirString
 	}
 	insertErr := session.Query(insertCQL,
@@ -97,10 +97,11 @@ func (stg CassandraActivityStorage) Read(userId string, id uuid.UUID) (*Activity
 		var activity Activity
 		rawStages := "[]"
 		rawId := ""
+		rawPlanId := ""
 		err = scanner.Scan(
 			&rawId,
 			&activity.UserId,
-			&activity.PlanId,
+			&rawPlanId,
 			&activity.Summary,
 			&rawStages,
 			&activity.DateTime,
@@ -116,6 +117,10 @@ func (stg CassandraActivityStorage) Read(userId string, id uuid.UUID) (*Activity
 			return nil, err
 		}
 		activity.Id = uuid.MustParse(rawId)
+		if rawPlanId != "" {
+			dirRef := uuid.MustParse(rawPlanId)
+			activity.PlanId = &dirRef
+		}
 		return &activity, nil
 	}
 	return nil, nil
@@ -160,10 +165,11 @@ func (stg CassandraActivityStorage) Query(query ActivityStorageQuery) (*[]Activi
 		var activity Activity
 		rawStages := "[]"
 		rawId := ""
+		rawPlanId := ""
 		err = rows.Scan(
 			&rawId,
 			&activity.UserId,
-			&activity.PlanId,
+			&rawPlanId,
 			&activity.Summary,
 			&rawStages,
 			&activity.DateTime,
@@ -180,6 +186,10 @@ func (stg CassandraActivityStorage) Query(query ActivityStorageQuery) (*[]Activi
 			return nil, err
 		}
 		activity.Id = uuid.MustParse(rawId)
+		if rawPlanId != "" {
+			dirRef := uuid.MustParse(rawPlanId)
+			activity.PlanId = &dirRef
+		}
 		activities = append(activities, activity)
 	}
 	return &activities, nil
@@ -209,7 +219,7 @@ func (stg CassandraActivityStorage) Update(activity Activity) error {
 	}
 	var planIdString *string
 	if activity.PlanId != nil {
-		dirString := ""
+		dirString := activity.PlanId.String()
 		planIdString = &dirString
 	}
 	updateErr := session.Query(updateCQL,

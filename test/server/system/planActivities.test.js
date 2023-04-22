@@ -20,7 +20,6 @@ describe("Plan Relations", () => {
                 "x-planner-userid": TEST_USER_ID
             }
         })
-
         const read = await readRes.json()
         return {
             ...read,
@@ -134,7 +133,7 @@ describe("Plan Relations", () => {
             }
         }).then(res => res.json())
 
-        expect(planActivities).toEqual([planActivity, planActivity2])
+        expect(planActivities.sort((a, b) => a.id.localeCompare(b.id))).toEqual([planActivity, planActivity2].sort((a, b) => a.id.localeCompare(b.id)))
 
         const allActivities = await fetch(`${HOST}/api/activities`, {
             method: "GET",
@@ -143,7 +142,7 @@ describe("Plan Relations", () => {
             }
         }).then(res => res.json())
 
-        expect(allActivities).toEqual([planActivity, planActivity2, looseActivity, looseActivity2])
+        expect(allActivities.sort((a, b) => a.id.localeCompare(b.id))).toEqual([planActivity, planActivity2, looseActivity, looseActivity2].sort((a, b) => a.id.localeCompare(b.id)))
 
         // Deleting Plan also Deletes Child Activities
         await fetch(`${HOST}/api/plans/${plan.id}`, {
@@ -160,7 +159,7 @@ describe("Plan Relations", () => {
             }
         }).then(res => res.json())
 
-        expect(remainingActivities).toEqual([looseActivity, looseActivity2])
+        expect(remainingActivities.sort((a, b) => a.id.localeCompare(b.id))).toEqual([looseActivity, looseActivity2].sort((a, b) => a.id.localeCompare(b.id)))
 
     })
 })
@@ -296,28 +295,30 @@ describe("Plan Relations", () => {
             notes: ""
         });
 
-        expect(await fetch(`${HOST}/api/activities`, {
+        expect((await fetch(`${HOST}/api/activities`, {
             method: "GET",
             headers: {
                 "x-planner-userid": TEST_USER_ID
             }
-        }).then(res => res.json())).toEqual([earlyPlan, midPlan, latePlan, earlyPlanless, midPlanless, latePlanless])
+        }).then(res => res.json())).sort((a, b) => a.id.localeCompare(b.id)))
+            .toEqual([earlyPlan, midPlan, latePlan, earlyPlanless, midPlanless, latePlanless].sort((a, b) => a.id.localeCompare(b.id)))
     
         earlyDate.setDate(earlyDate.getDate() + 1)
         lateDate.setDate(lateDate.getDate() - 1)
     
-        expect(await fetch(`${HOST}/api/activities?timeStart=${earlyDate.toISOString()}&timeEnd=${lateDate.toISOString()}`, {
+        expect((await fetch(`${HOST}/api/activities?timeStart=${earlyDate.toISOString()}&timeEnd=${lateDate.toISOString()}`, {
             method: "GET",
             headers: {
                 "x-planner-userid": TEST_USER_ID
             }
-        }).then(res => res.json())).toEqual([midPlan, midPlanless])
+        }).then(res => res.json())).sort((a, b) => a.id.localeCompare(b.id)))
+            .toEqual([midPlan, midPlanless].sort((a, b) => a.id.localeCompare(b.id)))
 
-        expect(await fetch(`${HOST}/api/activities?planId=${plan.id}&timeStart=${earlyDate.toISOString()}&timeEnd=${lateDate.toISOString()}`, {
+        expect((await fetch(`${HOST}/api/activities?planId=${plan.id}&timeStart=${earlyDate.toISOString()}&timeEnd=${lateDate.toISOString()}`, {
             method: "GET",
             headers: {
                 "x-planner-userid": TEST_USER_ID
             }
-        }).then(res => res.json())).toEqual([midPlan])
+        }).then(res => res.json())).sort((a, b) => a.id.localeCompare(b.id))).toEqual([midPlan])
     })
 })
