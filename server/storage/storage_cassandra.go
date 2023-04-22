@@ -247,16 +247,27 @@ func (stg CassandraActivityStorage) Delete(userId string, id uuid.UUID) error {
 }
 
 func (stg CassandraActivityStorage) DeleteForPlan(userId string, planId uuid.UUID) error {
+	planActivities, err := stg.Query(ActivityStorageQuery{UserId: userId, PlanId: &planId})
+	if err != nil {
+		return err
+	}
+	if len(*planActivities) == 0 {
+		return nil
+	}
 	session, err := stg.Cluster.CreateSession()
 	if err != nil {
 		return errors.New("Cassandra Connection Error")
 	}
 	defer session.Close()
+	planActivityIds := []string{}
+	for _, value := range *planActivities {
+		planActivityIds = append(planActivityIds, value.Id.String())
+	}
 	deleteCQL := `
 			DELETE FROM ohs_planner.activities
-			WHERE userId = ? AND planId = ?;
+			WHERE userId = ? AND id IN (?);
 	`
-	deleteErr := session.Query(deleteCQL, userId, planId.String()).Exec()
+	deleteErr := session.Query(deleteCQL, userId, planActivityIds).Exec()
 	if deleteErr != nil {
 		return deleteErr
 	}

@@ -1,18 +1,10 @@
 package storage
 
 import (
-	"os"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
-)
-
-type ActivityType string
-
-const (
-	ActivityRunning ActivityType = "running"
-	ActivityCycling ActivityType = "cycling"
-	ActivityOther   ActivityType = "other"
 )
 
 type ActivityStageMetric struct {
@@ -85,14 +77,21 @@ type Storage struct {
 	Plan     PlanStorage
 }
 
-func GetStorage() Storage {
-	// TODO: This is how we should get storage
-	// TODO: When there is more than SQLite3, configure here
-	// TODO: Also probably want to make this something that only
-	// gets generated once
-	strg, err := getSqliteStorageClient(".sqlite")
-	if err != nil {
-		os.Exit(500)
+type StorageType string
+
+const (
+	Sqlite    StorageType = "sqlite"
+	Cassandra StorageType = "cassandra"
+)
+
+func GetStorage(storage_type StorageType) (Storage, error) {
+	if storage_type == Sqlite {
+		strg, err := getSqliteStorageClient(".sqlite")
+		return strg, err
 	}
-	return strg
+	if storage_type == Cassandra {
+		strg, err := getCassandratorageClient()
+		return strg, err
+	}
+	return Storage{}, errors.New("Not Implemented")
 }

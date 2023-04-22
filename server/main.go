@@ -68,9 +68,25 @@ func getUserInfo(w http.ResponseWriter, r *http.Request) {
 func main() {
 	mux := http.NewServeMux()
 
-	// TODO: Drive header value from env
-	useridMiddleware := middlewares.RequiresUserIdHeader("x-planner-userid")
-	storage := storage.GetStorage()
+	useridHeader := os.Getenv("PLANNER_USERID_HEADER")
+
+	if useridHeader == "" {
+		useridHeader = "x-planner-userid"
+	}
+
+	storageType := storage.Sqlite
+	storageTypeSetting := os.Getenv("PLANNER_STORAGE_TYPE")
+	if storageTypeSetting == string(storage.Cassandra) {
+		storageType = storage.Cassandra
+	}
+
+	useridMiddleware := middlewares.RequiresUserIdHeader(useridHeader)
+	storage, err := storage.GetStorage(storageType)
+
+	if err != nil {
+		fmt.Printf("error starting server: %s\n", err)
+		os.Exit(1)
+	}
 
 	mux.HandleFunc("/api/hello", getHello)
 
@@ -82,7 +98,7 @@ func main() {
 	mux.HandleFunc("/", getPublicFile)
 	mux.HandleFunc("*", getPublicFile)
 
-	err := http.ListenAndServe(":3333", mux)
+	err = http.ListenAndServe(":3333", mux)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {
