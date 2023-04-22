@@ -52,7 +52,7 @@ type DateRange struct {
 }
 
 type ActivityStorageQuery struct {
-	UserId    *string
+	UserId    string
 	PlanId    *uuid.UUID
 	DateRange *DateRange
 }

@@ -148,7 +148,7 @@ func handleUserQueryActivity(w http.ResponseWriter, r *http.Request, strg storag
 		}
 	}
 
-	queried, err := strg.Query(storage.ActivityStorageQuery{UserId: &userId, PlanId: planid, DateRange: timeRange})
+	queried, err := strg.Query(storage.ActivityStorageQuery{UserId: userId, PlanId: planid, DateRange: timeRange})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

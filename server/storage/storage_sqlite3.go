@@ -170,7 +170,7 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 }
 
 func (stg Sqlite3ActivityStorage) Update(activity Activity) error {
-	insertSQL := `
+	updateSQL := `
 			UPDATE activities
 			SET 
 				userId = ?,
@@ -187,7 +187,7 @@ func (stg Sqlite3ActivityStorage) Update(activity Activity) error {
 	if err != nil {
 		return err
 	}
-	_, updateErr := stg.DB.Exec(insertSQL,
+	_, updateErr := stg.DB.Exec(updateSQL,
 		activity.UserId,
 		activity.PlanId,
 		activity.Summary,

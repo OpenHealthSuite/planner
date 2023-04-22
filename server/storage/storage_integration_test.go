@@ -26,11 +26,11 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 		userId := fmt.Sprintf("test-user-id-%s", uuid.New())
 		res, err := storage.Read(userId, uuid.New())
 		if err != nil {
-			t.Error("Error reading with empty uuid")
+			t.Errorf("Error reading with empty uuid: %s", err.Error())
 			return
 		}
 		if res != nil {
-			t.Error("somehow got result on random uuid?")
+			t.Errorf("somehow got result on random uuid?")
 			return
 		}
 		createActivity := Activity{
@@ -54,15 +54,15 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 		}
 		created, err := storage.Create(createActivity)
 		if err != nil {
-			t.Error("Error creating activity")
+			t.Errorf("Error creating activity: %s", err.Error())
 			return
 		}
 		if created.Id == uuid.MustParse("00000000-0000-0000-0000-000000000000") {
-			t.Error("Got 0 uuid")
+			t.Errorf("Got 0 uuid")
 			return
 		}
 		if created.Summary != createActivity.Summary {
-			t.Error("Error with created activity")
+			t.Errorf("Error with created activity")
 			return
 		}
 
@@ -72,7 +72,7 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		if read.Stages[0].Description != createActivity.Stages[0].Description {
-			t.Error("Error with read stage")
+			t.Errorf("Error with read stage")
 			return
 		}
 
@@ -93,12 +93,12 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		if reread.Summary != updateActivity.Summary {
-			t.Error("Error with reread updated activity")
+			t.Errorf("Error with reread updated activity")
 			return
 		}
 
 		query, err := storage.Query(ActivityStorageQuery{
-			UserId: &read.UserId,
+			UserId: read.UserId,
 		})
 
 		if err != nil {
@@ -106,11 +106,11 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		if len(*query) != 1 {
-			t.Error("Error with count of stored items")
+			t.Errorf("Error with count of stored items: %d instead of 1", len(*query))
 			return
 		}
 		if (*query)[0].Id != read.Id {
-			t.Error("Error with queried activity")
+			t.Errorf("Error with queried activity")
 			return
 		}
 
@@ -127,7 +127,7 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		if rereread != nil {
-			t.Error("Error got deleted activity")
+			t.Errorf("Error got deleted activity")
 			return
 		}
 	}
@@ -151,11 +151,11 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 		userId := fmt.Sprintf("test-user-id-%s", uuid.New())
 		res, err := storage.Read(userId, uuid.New())
 		if err != nil {
-			t.Error("Error reading with empty uuid")
+			t.Errorf("Error reading with empty uuid: %s", err.Error())
 			return
 		}
 		if res != nil {
-			t.Error("somehow got result on random uuid?")
+			t.Errorf("somehow got result on random uuid?")
 			return
 		}
 		createPlan := Plan{
@@ -169,11 +169,11 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		if created.Id == uuid.MustParse("00000000-0000-0000-0000-000000000000") {
-			t.Error("Got 0 uuid")
+			t.Errorf("Got 0 uuid")
 			return
 		}
 		if created.Name != createPlan.Name {
-			t.Error("Error with created plan")
+			t.Errorf("Error with created plan")
 			return
 		}
 
@@ -200,7 +200,7 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		if reread.Name != updatePlan.Name {
-			t.Error("Error with reread updated plan")
+			t.Errorf("Error with reread updated plan")
 			return
 		}
 
@@ -213,11 +213,11 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		if len(*query) != 1 {
-			t.Error("Error with count of stored items")
+			t.Errorf("Error with count of stored items")
 			return
 		}
 		if (*query)[0].Id != read.Id {
-			t.Error("Error with queried plan")
+			t.Errorf("Error with queried plan")
 			return
 		}
 
@@ -234,7 +234,7 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		if rereread != nil {
-			t.Error("Error got deleted plan")
+			t.Errorf("Error got deleted plan")
 			return
 		}
 	}
