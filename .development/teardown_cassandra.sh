@@ -1,0 +1,1 @@
+podman stop local-cassandra || true && podman rm local-cassandra || true
