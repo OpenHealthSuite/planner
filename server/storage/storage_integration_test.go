@@ -8,13 +8,19 @@ import (
 )
 
 func TestActivityCreateReadUpdateDelete(t *testing.T) {
+	var allStorages []ActivityStorage
 	sqliteStorage, sqliteErr := getSqliteStorageClient(":memory:")
 	if sqliteErr != nil {
-		//t.Errorf("Add(2, 3) = %d; want 5", result)
 		t.Errorf("Error creating storage: %s", sqliteErr.Error())
 		return
 	}
-	allStorages := [1]ActivityStorage{sqliteStorage.Activity}
+	allStorages = append(allStorages, sqliteStorage.Activity)
+	cassandraStorage, cassandraErr := getCassandratorageClient()
+	if cassandraErr != nil {
+		t.Errorf("Error creating cassandra storage: %s", cassandraErr.Error())
+	} else {
+		allStorages = append(allStorages, cassandraStorage.Activity)
+	}
 	for _, storage := range allStorages {
 		res, err := storage.Read(uuid.New())
 		if err != nil {
@@ -126,13 +132,19 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 }
 
 func TestPlanCreateReadUpdateDelete(t *testing.T) {
+	var allStorages []PlanStorage
 	sqliteStorage, sqliteErr := getSqliteStorageClient(":memory:")
 	if sqliteErr != nil {
-		//t.Errorf("Add(2, 3) = %d; want 5", result)
 		t.Errorf("Error creating storage: %s", sqliteErr.Error())
 		return
 	}
-	allStorages := [1]PlanStorage{sqliteStorage.Plan}
+	allStorages = append(allStorages, sqliteStorage.Plan)
+	cassandraStorage, cassandraErr := getCassandratorageClient()
+	if cassandraErr != nil {
+		t.Errorf("Error creating cassandra storage: %s", cassandraErr.Error())
+	} else {
+		allStorages = append(allStorages, cassandraStorage.Plan)
+	}
 	for _, storage := range allStorages {
 		res, err := storage.Read(uuid.New())
 		if err != nil {
