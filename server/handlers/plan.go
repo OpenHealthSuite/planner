@@ -110,7 +110,7 @@ func handleReadPlan(w http.ResponseWriter, r *http.Request, strg storage.PlanSto
 func handleUserQueryPlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage) {
 	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
-	queried, err := strg.Query(storage.PlanStorageQuery{UserId: &userId})
+	queried, err := strg.Query(storage.PlanStorageQuery{UserId: userId})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

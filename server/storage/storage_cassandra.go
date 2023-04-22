@@ -50,7 +50,7 @@ func (stg CassandraActivityStorage) Create(activity Activity) (Activity, error) 
 	}
 	var planIdString *string
 	if activity.PlanId != nil {
-		dirString := "Hello, world!"
+		dirString := ""
 		planIdString = &dirString
 	}
 	insertErr := session.Query(insertCQL,
@@ -209,7 +209,7 @@ func (stg CassandraActivityStorage) Update(activity Activity) error {
 	}
 	var planIdString *string
 	if activity.PlanId != nil {
-		dirString := "Hello, world!"
+		dirString := ""
 		planIdString = &dirString
 	}
 	updateErr := session.Query(updateCQL,
@@ -268,23 +268,149 @@ type CassandraPlanStorage struct {
 }
 
 func (stg CassandraPlanStorage) Create(plan Plan) (Plan, error) {
-	return Plan{}, errors.New("Not Implemented")
+	session, err := stg.Cluster.CreateSession()
+	if err != nil {
+		return Plan{}, errors.New("Cassandra Connection Error")
+	}
+	defer session.Close()
+	newId := uuid.New()
+	insertCQL := `
+			INSERT INTO ohs_planner.plans (
+				userId,
+				id,
+				name,
+				active
+			)
+			VALUES (
+				?,
+				?,
+				?,
+				?
+			);
+	`
+	insertErr := session.Query(insertCQL,
+		plan.UserId,
+		newId.String(),
+		plan.Name,
+		plan.Active,
+	).Exec()
+	if insertErr != nil {
+		return plan, insertErr
+	}
+	plan.Id = newId
+	return plan, nil
 }
 
 func (stg CassandraPlanStorage) Read(userId string, id uuid.UUID) (*Plan, error) {
-	return nil, errors.New("Not Implemented")
+	session, err := stg.Cluster.CreateSession()
+	if err != nil {
+		return nil, errors.New("Cassandra Connection Error")
+	}
+	defer session.Close()
+	selectCQL := `
+			SELECT 
+			id,
+			userId,
+			name,
+			active
+			FROM ohs_planner.plans 
+			WHERE userId = ? AND id = ?
+			LIMIT 1;
+	`
+	scanner := session.Query(selectCQL, userId, id.String()).Iter().Scanner()
+	if scanner.Next() {
+		var plan Plan
+		rawId := ""
+		err = scanner.Scan(
+			&rawId,
+			&plan.UserId,
+			&plan.Name,
+			&plan.Active,
+		)
+		if err != nil {
+			return nil, err
+		}
+		plan.Id = uuid.MustParse(rawId)
+		return &plan, nil
+	}
+	return nil, nil
 }
 
 func (stg CassandraPlanStorage) Query(query PlanStorageQuery) (*[]Plan, error) {
-	return nil, errors.New("Not Implemented")
+	session, err := stg.Cluster.CreateSession()
+	if err != nil {
+		return nil, errors.New("Cassandra Connection Error")
+	}
+	defer session.Close()
+	selectCQL := `
+			SELECT 
+			id,
+			userId,
+			name,
+			active
+			FROM ohs_planner.plans 
+			WHERE userId = ?;
+	`
+	scanner := session.Query(selectCQL, query.UserId).Iter().Scanner()
+	plans := make([]Plan, 0)
+	for scanner.Next() {
+		var plan Plan
+		rawId := ""
+		err = scanner.Scan(
+			&rawId,
+			&plan.UserId,
+			&plan.Name,
+			&plan.Active,
+		)
+		if err != nil {
+			return nil, err
+		}
+		plan.Id = uuid.MustParse(rawId)
+		plans = append(plans, plan)
+	}
+	return &plans, nil
 }
 
 func (stg CassandraPlanStorage) Update(plan Plan) error {
-	return errors.New("Not Implemented")
+	session, err := stg.Cluster.CreateSession()
+	if err != nil {
+		return errors.New("Cassandra Connection Error")
+	}
+	defer session.Close()
+	updateCQL := `
+			UPDATE ohs_planner.plans
+			SET 
+				name = ?,
+				active = ?
+			WHERE userId = ? AND id = ?;
+	`
+	updateErr := session.Query(updateCQL,
+		plan.Name,
+		plan.Active,
+		plan.UserId,
+		plan.Id.String(),
+	).Exec()
+	if updateErr != nil {
+		return updateErr
+	}
+	return nil
 }
 
 func (stg CassandraPlanStorage) Delete(userId string, id uuid.UUID) error {
-	return errors.New("Not Implemented")
+	session, err := stg.Cluster.CreateSession()
+	if err != nil {
+		return errors.New("Cassandra Connection Error")
+	}
+	defer session.Close()
+	deleteCQL := `
+			DELETE FROM ohs_planner.plans
+			WHERE userId = ? AND id = ?;
+	`
+	deleteErr := session.Query(deleteCQL, userId, id.String()).Exec()
+	if deleteErr != nil {
+		return deleteErr
+	}
+	return nil
 }
 
 func getCassandratorageClient() (Storage, error) {

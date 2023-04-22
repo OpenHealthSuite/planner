@@ -58,7 +58,7 @@ type ActivityStorageQuery struct {
 }
 
 type PlanStorageQuery struct {
-	UserId *string
+	UserId string
 }
 
 //go:generate mockery --name ActivityStorage

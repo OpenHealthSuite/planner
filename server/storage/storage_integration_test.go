@@ -205,7 +205,7 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 		}
 
 		query, err := storage.Query(PlanStorageQuery{
-			UserId: &read.UserId,
+			UserId: read.UserId,
 		})
 
 		if err != nil {

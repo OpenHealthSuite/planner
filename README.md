@@ -31,6 +31,6 @@ This will all be framed roughly through the lens of running, but is broadly appl
 - ~~Create a mobile-first weekly view of planned workouts~~
 - Create a bulk upload/download system for plans - probably CSV based
 - Create a data purge endpoint
-- Implement the Cassandra storage layer with same interface as SQLite
+- ~~Implement the Cassandra storage layer with same interface as SQLite~~
 
 That probably comprises the MVP of the system - we can then tie it into the dashboard
