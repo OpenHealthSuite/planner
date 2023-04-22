@@ -90,7 +90,7 @@ func handleCreateActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 }
 
 func validPlanId(plnStrg storage.PlanStorage, activity storage.Activity) bool {
-	plan, err := plnStrg.Read(*activity.PlanId)
+	plan, err := plnStrg.Read(activity.UserId, *activity.PlanId)
 	if plan == nil || plan.UserId != activity.UserId || err != nil {
 		return false
 	}
@@ -98,14 +98,14 @@ func validPlanId(plnStrg storage.PlanStorage, activity storage.Activity) bool {
 }
 
 func handleReadActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, uuid uuid.UUID) {
-	storedActivity, err := strg.Read(uuid)
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
+
+	storedActivity, err := strg.Read(userId, uuid)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
 	if storedActivity == nil || storedActivity.UserId != userId {
 		http.Error(w, "Not Found", http.StatusNotFound)
@@ -167,20 +167,21 @@ func handleUserQueryActivity(w http.ResponseWriter, r *http.Request, strg storag
 }
 
 func handleUpdateActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, plnStrg storage.PlanStorage, uuid uuid.UUID) {
+
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
+
 	activity, err := parseActivity(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	storedActivity, err := strg.Read(uuid)
+	storedActivity, err := strg.Read(userId, uuid)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
 	if storedActivity == nil || storedActivity.UserId != userId {
 		http.Error(w, "Not Found", http.StatusNotFound)
@@ -206,21 +207,22 @@ func handleUpdateActivity(w http.ResponseWriter, r *http.Request, strg storage.A
 }
 
 func handleDeleteActivity(w http.ResponseWriter, r *http.Request, strg storage.ActivityStorage, uuid uuid.UUID) {
-	storedActivity, err := strg.Read(uuid)
+
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
+
+	storedActivity, err := strg.Read(userId, uuid)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
-
 	if storedActivity == nil || storedActivity.UserId != userId {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 
-	deleteErr := strg.Delete(uuid)
+	deleteErr := strg.Delete(userId, uuid)
 	if deleteErr != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

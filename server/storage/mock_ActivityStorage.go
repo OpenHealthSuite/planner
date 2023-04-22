@@ -72,13 +72,13 @@ func (_c *MockActivityStorage_Create_Call) RunAndReturn(run func(Activity) (Acti
 	return _c
 }
 
-// Delete provides a mock function with given fields: id
-func (_m *MockActivityStorage) Delete(id uuid.UUID) error {
-	ret := _m.Called(id)
+// Delete provides a mock function with given fields: userId, id
+func (_m *MockActivityStorage) Delete(userId string, id uuid.UUID) error {
+	ret := _m.Called(userId, id)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(string, uuid.UUID) error); ok {
+		r0 = rf(userId, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -92,14 +92,15 @@ type MockActivityStorage_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
+//   - userId string
 //   - id uuid.UUID
-func (_e *MockActivityStorage_Expecter) Delete(id interface{}) *MockActivityStorage_Delete_Call {
-	return &MockActivityStorage_Delete_Call{Call: _e.mock.On("Delete", id)}
+func (_e *MockActivityStorage_Expecter) Delete(userId interface{}, id interface{}) *MockActivityStorage_Delete_Call {
+	return &MockActivityStorage_Delete_Call{Call: _e.mock.On("Delete", userId, id)}
 }
 
-func (_c *MockActivityStorage_Delete_Call) Run(run func(id uuid.UUID)) *MockActivityStorage_Delete_Call {
+func (_c *MockActivityStorage_Delete_Call) Run(run func(userId string, id uuid.UUID)) *MockActivityStorage_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID))
+		run(args[0].(string), args[1].(uuid.UUID))
 	})
 	return _c
 }
@@ -109,18 +110,18 @@ func (_c *MockActivityStorage_Delete_Call) Return(_a0 error) *MockActivityStorag
 	return _c
 }
 
-func (_c *MockActivityStorage_Delete_Call) RunAndReturn(run func(uuid.UUID) error) *MockActivityStorage_Delete_Call {
+func (_c *MockActivityStorage_Delete_Call) RunAndReturn(run func(string, uuid.UUID) error) *MockActivityStorage_Delete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// DeleteForPlan provides a mock function with given fields: planId
-func (_m *MockActivityStorage) DeleteForPlan(planId uuid.UUID) error {
-	ret := _m.Called(planId)
+// DeleteForPlan provides a mock function with given fields: userId, planId
+func (_m *MockActivityStorage) DeleteForPlan(userId string, planId uuid.UUID) error {
+	ret := _m.Called(userId, planId)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID) error); ok {
-		r0 = rf(planId)
+	if rf, ok := ret.Get(0).(func(string, uuid.UUID) error); ok {
+		r0 = rf(userId, planId)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -134,14 +135,15 @@ type MockActivityStorage_DeleteForPlan_Call struct {
 }
 
 // DeleteForPlan is a helper method to define mock.On call
+//   - userId string
 //   - planId uuid.UUID
-func (_e *MockActivityStorage_Expecter) DeleteForPlan(planId interface{}) *MockActivityStorage_DeleteForPlan_Call {
-	return &MockActivityStorage_DeleteForPlan_Call{Call: _e.mock.On("DeleteForPlan", planId)}
+func (_e *MockActivityStorage_Expecter) DeleteForPlan(userId interface{}, planId interface{}) *MockActivityStorage_DeleteForPlan_Call {
+	return &MockActivityStorage_DeleteForPlan_Call{Call: _e.mock.On("DeleteForPlan", userId, planId)}
 }
 
-func (_c *MockActivityStorage_DeleteForPlan_Call) Run(run func(planId uuid.UUID)) *MockActivityStorage_DeleteForPlan_Call {
+func (_c *MockActivityStorage_DeleteForPlan_Call) Run(run func(userId string, planId uuid.UUID)) *MockActivityStorage_DeleteForPlan_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID))
+		run(args[0].(string), args[1].(uuid.UUID))
 	})
 	return _c
 }
@@ -151,7 +153,7 @@ func (_c *MockActivityStorage_DeleteForPlan_Call) Return(_a0 error) *MockActivit
 	return _c
 }
 
-func (_c *MockActivityStorage_DeleteForPlan_Call) RunAndReturn(run func(uuid.UUID) error) *MockActivityStorage_DeleteForPlan_Call {
+func (_c *MockActivityStorage_DeleteForPlan_Call) RunAndReturn(run func(string, uuid.UUID) error) *MockActivityStorage_DeleteForPlan_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -210,25 +212,25 @@ func (_c *MockActivityStorage_Query_Call) RunAndReturn(run func(ActivityStorageQ
 	return _c
 }
 
-// Read provides a mock function with given fields: id
-func (_m *MockActivityStorage) Read(id uuid.UUID) (*Activity, error) {
-	ret := _m.Called(id)
+// Read provides a mock function with given fields: userId, id
+func (_m *MockActivityStorage) Read(userId string, id uuid.UUID) (*Activity, error) {
+	ret := _m.Called(userId, id)
 
 	var r0 *Activity
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID) (*Activity, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(string, uuid.UUID) (*Activity, error)); ok {
+		return rf(userId, id)
 	}
-	if rf, ok := ret.Get(0).(func(uuid.UUID) *Activity); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(string, uuid.UUID) *Activity); ok {
+		r0 = rf(userId, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*Activity)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(string, uuid.UUID) error); ok {
+		r1 = rf(userId, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -242,14 +244,15 @@ type MockActivityStorage_Read_Call struct {
 }
 
 // Read is a helper method to define mock.On call
+//   - userId string
 //   - id uuid.UUID
-func (_e *MockActivityStorage_Expecter) Read(id interface{}) *MockActivityStorage_Read_Call {
-	return &MockActivityStorage_Read_Call{Call: _e.mock.On("Read", id)}
+func (_e *MockActivityStorage_Expecter) Read(userId interface{}, id interface{}) *MockActivityStorage_Read_Call {
+	return &MockActivityStorage_Read_Call{Call: _e.mock.On("Read", userId, id)}
 }
 
-func (_c *MockActivityStorage_Read_Call) Run(run func(id uuid.UUID)) *MockActivityStorage_Read_Call {
+func (_c *MockActivityStorage_Read_Call) Run(run func(userId string, id uuid.UUID)) *MockActivityStorage_Read_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID))
+		run(args[0].(string), args[1].(uuid.UUID))
 	})
 	return _c
 }
@@ -259,7 +262,7 @@ func (_c *MockActivityStorage_Read_Call) Return(_a0 *Activity, _a1 error) *MockA
 	return _c
 }
 
-func (_c *MockActivityStorage_Read_Call) RunAndReturn(run func(uuid.UUID) (*Activity, error)) *MockActivityStorage_Read_Call {
+func (_c *MockActivityStorage_Read_Call) RunAndReturn(run func(string, uuid.UUID) (*Activity, error)) *MockActivityStorage_Read_Call {
 	_c.Call.Return(run)
 	return _c
 }

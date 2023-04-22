@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -22,7 +23,8 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 		allStorages = append(allStorages, cassandraStorage.Activity)
 	}
 	for _, storage := range allStorages {
-		res, err := storage.Read(uuid.New())
+		userId := fmt.Sprintf("test-user-id-%s", uuid.New())
+		res, err := storage.Read(userId, uuid.New())
 		if err != nil {
 			t.Error("Error reading with empty uuid")
 			return
@@ -32,7 +34,7 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		createActivity := Activity{
-			UserId:  "test-user-id",
+			UserId:  userId,
 			Summary: "Test Item",
 			Stages: []ActivityStage{
 				{
@@ -64,7 +66,7 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 
-		read, err := storage.Read(created.Id)
+		read, err := storage.Read(userId, created.Id)
 		if err != nil {
 			t.Errorf("Error reading activity %s", err)
 			return
@@ -85,7 +87,7 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 
-		reread, err := storage.Read(created.Id)
+		reread, err := storage.Read(userId, created.Id)
 		if err != nil {
 			t.Errorf("Error reading activity %s", err)
 			return
@@ -112,14 +114,14 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 
-		deleteErr := storage.Delete(read.Id)
+		deleteErr := storage.Delete(userId, read.Id)
 
 		if deleteErr != nil {
 			t.Errorf("Error deleting activity %s", deleteErr)
 			return
 		}
 
-		rereread, err := storage.Read(read.Id)
+		rereread, err := storage.Read(userId, read.Id)
 		if err != nil {
 			t.Errorf("Error rerereading activity %s", err)
 			return
@@ -146,7 +148,8 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 		allStorages = append(allStorages, cassandraStorage.Plan)
 	}
 	for _, storage := range allStorages {
-		res, err := storage.Read(uuid.New())
+		userId := fmt.Sprintf("test-user-id-%s", uuid.New())
+		res, err := storage.Read(userId, uuid.New())
 		if err != nil {
 			t.Error("Error reading with empty uuid")
 			return
@@ -156,7 +159,7 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		createPlan := Plan{
-			UserId: "test-user-id",
+			UserId: userId,
 			Name:   "Test Plan",
 			Active: true,
 		}
@@ -174,7 +177,7 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 
-		read, err := storage.Read(created.Id)
+		read, err := storage.Read(userId, created.Id)
 		if err != nil {
 			t.Errorf("Error reading plan %s", err)
 			return
@@ -191,7 +194,7 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 
-		reread, err := storage.Read(created.Id)
+		reread, err := storage.Read(userId, created.Id)
 		if err != nil {
 			t.Errorf("Error reading plan %s", err)
 			return
@@ -218,14 +221,14 @@ func TestPlanCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 
-		deleteErr := storage.Delete(read.Id)
+		deleteErr := storage.Delete(userId, read.Id)
 
 		if deleteErr != nil {
 			t.Errorf("Error deleting plan %s", deleteErr)
 			return
 		}
 
-		rereread, err := storage.Read(read.Id)
+		rereread, err := storage.Read(userId, read.Id)
 		if err != nil {
 			t.Errorf("Error rerereading plan %s", err)
 			return

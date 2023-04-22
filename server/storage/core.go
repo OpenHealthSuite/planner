@@ -64,20 +64,20 @@ type PlanStorageQuery struct {
 //go:generate mockery --name ActivityStorage
 type ActivityStorage interface {
 	Create(activity Activity) (Activity, error)
-	Read(id uuid.UUID) (*Activity, error)
+	Read(userId string, id uuid.UUID) (*Activity, error)
 	Query(query ActivityStorageQuery) (*[]Activity, error)
 	Update(activity Activity) error
-	Delete(id uuid.UUID) error
-	DeleteForPlan(planId uuid.UUID) error
+	Delete(userId string, id uuid.UUID) error
+	DeleteForPlan(userId string, planId uuid.UUID) error
 }
 
 //go:generate mockery --name PlanStorage
 type PlanStorage interface {
 	Create(plan Plan) (Plan, error)
-	Read(id uuid.UUID) (*Plan, error)
+	Read(userId string, id uuid.UUID) (*Plan, error)
 	Query(query PlanStorageQuery) (*[]Plan, error)
 	Update(plan Plan) error
-	Delete(id uuid.UUID) error
+	Delete(userId string, id uuid.UUID) error
 }
 
 type Storage struct {

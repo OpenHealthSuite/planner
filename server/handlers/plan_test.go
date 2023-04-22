@@ -53,7 +53,7 @@ func TestHappyPathUpdatePlanHandler(t *testing.T) {
 		Id:     uuid.New(),
 		UserId: testUserId,
 	}
-	mockStorage.EXPECT().Read(returnedPlan.Id).Return(&returnedPlan, nil).Once()
+	mockStorage.EXPECT().Read(testUserId, returnedPlan.Id).Return(&returnedPlan, nil).Once()
 
 	mockStorage.EXPECT().Update(mock.Anything).Return(nil).Once()
 
@@ -84,10 +84,10 @@ func TestHappyPathDeletePlanHandler(t *testing.T) {
 		Id:     uuid.New(),
 		UserId: testUserId,
 	}
-	mockStorage.EXPECT().Read(returnedPlan.Id).Return(&returnedPlan, nil).Once()
+	mockStorage.EXPECT().Read(testUserId, returnedPlan.Id).Return(&returnedPlan, nil).Once()
 
-	mockStorage.EXPECT().Delete(returnedPlan.Id).Return(nil).Once()
-	mockActStorage.EXPECT().DeleteForPlan(returnedPlan.Id).Return(nil).Once()
+	mockStorage.EXPECT().Delete(testUserId, returnedPlan.Id).Return(nil).Once()
+	mockActStorage.EXPECT().DeleteForPlan(testUserId, returnedPlan.Id).Return(nil).Once()
 
 	// We have to use "real" query params here
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("/api/plans/%s", returnedPlan.Id), nil)
@@ -136,7 +136,7 @@ func TestHappyPathReadPlanHandler(t *testing.T) {
 		Id:     uuid.New(),
 		UserId: testUserId,
 	}
-	mockStorage.EXPECT().Read(returnedPlan.Id).Return(&returnedPlan, nil).Once()
+	mockStorage.EXPECT().Read(testUserId, returnedPlan.Id).Return(&returnedPlan, nil).Once()
 
 	// We have to use "real" query params here
 	req, err := http.NewRequest("GET", fmt.Sprintf("/api/plans/%s", returnedPlan.Id), nil)

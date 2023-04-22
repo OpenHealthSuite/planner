@@ -72,13 +72,13 @@ func (_c *MockPlanStorage_Create_Call) RunAndReturn(run func(Plan) (Plan, error)
 	return _c
 }
 
-// Delete provides a mock function with given fields: id
-func (_m *MockPlanStorage) Delete(id uuid.UUID) error {
-	ret := _m.Called(id)
+// Delete provides a mock function with given fields: userId, id
+func (_m *MockPlanStorage) Delete(userId string, id uuid.UUID) error {
+	ret := _m.Called(userId, id)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(string, uuid.UUID) error); ok {
+		r0 = rf(userId, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -92,14 +92,15 @@ type MockPlanStorage_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
+//   - userId string
 //   - id uuid.UUID
-func (_e *MockPlanStorage_Expecter) Delete(id interface{}) *MockPlanStorage_Delete_Call {
-	return &MockPlanStorage_Delete_Call{Call: _e.mock.On("Delete", id)}
+func (_e *MockPlanStorage_Expecter) Delete(userId interface{}, id interface{}) *MockPlanStorage_Delete_Call {
+	return &MockPlanStorage_Delete_Call{Call: _e.mock.On("Delete", userId, id)}
 }
 
-func (_c *MockPlanStorage_Delete_Call) Run(run func(id uuid.UUID)) *MockPlanStorage_Delete_Call {
+func (_c *MockPlanStorage_Delete_Call) Run(run func(userId string, id uuid.UUID)) *MockPlanStorage_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID))
+		run(args[0].(string), args[1].(uuid.UUID))
 	})
 	return _c
 }
@@ -109,7 +110,7 @@ func (_c *MockPlanStorage_Delete_Call) Return(_a0 error) *MockPlanStorage_Delete
 	return _c
 }
 
-func (_c *MockPlanStorage_Delete_Call) RunAndReturn(run func(uuid.UUID) error) *MockPlanStorage_Delete_Call {
+func (_c *MockPlanStorage_Delete_Call) RunAndReturn(run func(string, uuid.UUID) error) *MockPlanStorage_Delete_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -168,25 +169,25 @@ func (_c *MockPlanStorage_Query_Call) RunAndReturn(run func(PlanStorageQuery) (*
 	return _c
 }
 
-// Read provides a mock function with given fields: id
-func (_m *MockPlanStorage) Read(id uuid.UUID) (*Plan, error) {
-	ret := _m.Called(id)
+// Read provides a mock function with given fields: userId, id
+func (_m *MockPlanStorage) Read(userId string, id uuid.UUID) (*Plan, error) {
+	ret := _m.Called(userId, id)
 
 	var r0 *Plan
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID) (*Plan, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(string, uuid.UUID) (*Plan, error)); ok {
+		return rf(userId, id)
 	}
-	if rf, ok := ret.Get(0).(func(uuid.UUID) *Plan); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(string, uuid.UUID) *Plan); ok {
+		r0 = rf(userId, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*Plan)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(string, uuid.UUID) error); ok {
+		r1 = rf(userId, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -200,14 +201,15 @@ type MockPlanStorage_Read_Call struct {
 }
 
 // Read is a helper method to define mock.On call
+//   - userId string
 //   - id uuid.UUID
-func (_e *MockPlanStorage_Expecter) Read(id interface{}) *MockPlanStorage_Read_Call {
-	return &MockPlanStorage_Read_Call{Call: _e.mock.On("Read", id)}
+func (_e *MockPlanStorage_Expecter) Read(userId interface{}, id interface{}) *MockPlanStorage_Read_Call {
+	return &MockPlanStorage_Read_Call{Call: _e.mock.On("Read", userId, id)}
 }
 
-func (_c *MockPlanStorage_Read_Call) Run(run func(id uuid.UUID)) *MockPlanStorage_Read_Call {
+func (_c *MockPlanStorage_Read_Call) Run(run func(userId string, id uuid.UUID)) *MockPlanStorage_Read_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID))
+		run(args[0].(string), args[1].(uuid.UUID))
 	})
 	return _c
 }
@@ -217,7 +219,7 @@ func (_c *MockPlanStorage_Read_Call) Return(_a0 *Plan, _a1 error) *MockPlanStora
 	return _c
 }
 
-func (_c *MockPlanStorage_Read_Call) RunAndReturn(run func(uuid.UUID) (*Plan, error)) *MockPlanStorage_Read_Call {
+func (_c *MockPlanStorage_Read_Call) RunAndReturn(run func(string, uuid.UUID) (*Plan, error)) *MockPlanStorage_Read_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -61,7 +61,7 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 	return activity, nil
 }
 
-func (stg Sqlite3ActivityStorage) Read(id uuid.UUID) (*Activity, error) {
+func (stg Sqlite3ActivityStorage) Read(userId string, id uuid.UUID) (*Activity, error) {
 	selectSQL := `
 			SELECT 
 				id,
@@ -204,7 +204,7 @@ func (stg Sqlite3ActivityStorage) Update(activity Activity) error {
 	return nil
 }
 
-func (stg Sqlite3ActivityStorage) Delete(id uuid.UUID) error {
+func (stg Sqlite3ActivityStorage) Delete(userId string, id uuid.UUID) error {
 	deleteSQL := `
 			DELETE FROM activities
 			WHERE id = ?;
@@ -216,7 +216,7 @@ func (stg Sqlite3ActivityStorage) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func (stg Sqlite3ActivityStorage) DeleteForPlan(planId uuid.UUID) error {
+func (stg Sqlite3ActivityStorage) DeleteForPlan(userId string, planId uuid.UUID) error {
 	deleteSQL := `
 			DELETE FROM activities
 			WHERE planId = ?;
@@ -261,7 +261,7 @@ func (stg Sqlite3PlanStorage) Create(plan Plan) (Plan, error) {
 	return plan, nil
 }
 
-func (stg Sqlite3PlanStorage) Read(id uuid.UUID) (*Plan, error) {
+func (stg Sqlite3PlanStorage) Read(userId string, id uuid.UUID) (*Plan, error) {
 	selectSQL := `
 			SELECT 
 				id,
@@ -346,7 +346,7 @@ func (stg Sqlite3PlanStorage) Update(plan Plan) error {
 	return nil
 }
 
-func (stg Sqlite3PlanStorage) Delete(id uuid.UUID) error {
+func (stg Sqlite3PlanStorage) Delete(userId string, id uuid.UUID) error {
 	deleteSQL := `
 			DELETE FROM plans
 			WHERE id = ?;

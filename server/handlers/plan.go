@@ -84,15 +84,15 @@ func handleCreatePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanS
 }
 
 func handleReadPlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage, uuid uuid.UUID) {
-	storedPlan, err := strg.Read(uuid)
+
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
+
+	storedPlan, err := strg.Read(userId, uuid)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
-
 	if storedPlan == nil || storedPlan.UserId != userId {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
@@ -129,20 +129,21 @@ func handleUserQueryPlan(w http.ResponseWriter, r *http.Request, strg storage.Pl
 }
 
 func handleUpdatePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage, uuid uuid.UUID) {
+
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
+
 	plan, err := parsePlan(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	storedPlan, err := strg.Read(uuid)
+	storedPlan, err := strg.Read(userId, uuid)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
 	if storedPlan == nil || storedPlan.UserId != userId {
 		http.Error(w, "Not Found", http.StatusNotFound)
@@ -163,26 +164,27 @@ func handleUpdatePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanS
 }
 
 func handleDeletePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage, actStrg storage.ActivityStorage, uuid uuid.UUID) {
-	storedPlan, err := strg.Read(uuid)
+
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
+
+	storedPlan, err := strg.Read(userId, uuid)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
-
 	if storedPlan == nil || storedPlan.UserId != userId {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 
-	deleteErr := strg.Delete(uuid)
+	deleteErr := strg.Delete(userId, uuid)
 	if deleteErr != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	activityDeleteErr := actStrg.DeleteForPlan(uuid)
+	activityDeleteErr := actStrg.DeleteForPlan(userId, uuid)
 	if activityDeleteErr != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

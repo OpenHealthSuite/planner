@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -13,26 +14,97 @@ type CassandraActivityStorage struct {
 }
 
 func (stg CassandraActivityStorage) Create(activity Activity) (Activity, error) {
-	return Activity{}, errors.New("Not Implemented")
+	session, err := stg.Cluster.CreateSession()
+	if err != nil {
+		return Activity{}, errors.New("Cassandra Connection Error")
+	}
+	defer session.Close()
+	newId := uuid.New()
+	insertCQL := `
+			INSERT INTO activities (
+				id,
+				userId,
+				planId,
+				summary,
+				stages,
+				dateTime,
+				timeRelevant,
+				completed,
+				notes
+			)
+			VALUES (
+				?,
+				?,
+				?,
+				?,
+				?,
+				?,
+				?,
+				?,
+				?
+			);
+	`
+	jsonStr, err := json.Marshal(activity.Stages)
+	if err != nil {
+		return activity, err
+	}
+	insertErr := session.Query(insertCQL,
+		newId,
+		activity.UserId,
+		activity.PlanId,
+		activity.Summary,
+		jsonStr,
+		activity.DateTime,
+		activity.TimeRelevant,
+		activity.Completed,
+		activity.Notes,
+	).Exec()
+	if insertErr != nil {
+		return activity, insertErr
+	}
+	activity.Id = newId
+	return activity, errors.New("Not Implemented")
 }
 
-func (stg CassandraActivityStorage) Read(id uuid.UUID) (*Activity, error) {
+func (stg CassandraActivityStorage) Read(userId string, id uuid.UUID) (*Activity, error) {
 	return nil, errors.New("Not Implemented")
+	// var id gocql.UUID
+	// var text string
+
+	// /* Search for a specific set of records whose 'timeline' column matches
+	//  * the value 'me'. The secondary index that we created earlier will be
+	//  * used for optimizing the search */
+	// if err := session.Query(`SELECT id, text FROM tweet WHERE timeline = ? LIMIT 1`,
+	// 	"me").WithContext(ctx).Consistency(gocql.One).Scan(&id, &text); err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("Tweet:", id, text)
+	// fmt.Println()
 }
 
 func (stg CassandraActivityStorage) Query(query ActivityStorageQuery) (*[]Activity, error) {
 	return nil, errors.New("Not Implemented")
+	//	scanner := session.Query(`SELECT id, text FROM tweet WHERE timeline = ?`,
+	//	"me").WithContext(ctx).Iter().Scanner()
+	//
+	//	for scanner.Next() {
+	//		err = scanner.Scan(&id, &text)
+	//		if err != nil {
+	//			log.Fatal(err)
+	//		}
+	//		fmt.Println("Tweet:", id, text)
+	//	}
 }
 
 func (stg CassandraActivityStorage) Update(activity Activity) error {
 	return errors.New("Not Implemented")
 }
 
-func (stg CassandraActivityStorage) Delete(id uuid.UUID) error {
+func (stg CassandraActivityStorage) Delete(userId string, id uuid.UUID) error {
 	return errors.New("Not Implemented")
 }
 
-func (stg CassandraActivityStorage) DeleteForPlan(id uuid.UUID) error {
+func (stg CassandraActivityStorage) DeleteForPlan(userId string, id uuid.UUID) error {
 	return errors.New("Not Implemented")
 }
 
@@ -44,7 +116,7 @@ func (stg CassandraPlanStorage) Create(plan Plan) (Plan, error) {
 	return Plan{}, errors.New("Not Implemented")
 }
 
-func (stg CassandraPlanStorage) Read(id uuid.UUID) (*Plan, error) {
+func (stg CassandraPlanStorage) Read(userId string, id uuid.UUID) (*Plan, error) {
 	return nil, errors.New("Not Implemented")
 }
 
@@ -56,7 +128,7 @@ func (stg CassandraPlanStorage) Update(plan Plan) error {
 	return errors.New("Not Implemented")
 }
 
-func (stg CassandraPlanStorage) Delete(id uuid.UUID) error {
+func (stg CassandraPlanStorage) Delete(userId string, id uuid.UUID) error {
 	return errors.New("Not Implemented")
 }
 
