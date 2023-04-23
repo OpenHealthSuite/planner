@@ -1,4 +1,5 @@
 const { randomUUID } = require("node:crypto")
+const { dateTimeFieldNormaliser } = require("./utilities")
 
 const HOST = "http://localhost:3333"
 const TEST_USER_ID = randomUUID()
@@ -42,7 +43,7 @@ describe('activities', () => {
       userId: TEST_USER_ID,
       id: createdId
     }
-    expect(read).toEqual(expectedRead)
+    expect(dateTimeFieldNormaliser(read)).toEqual(expectedRead)
 
     const queryRes = await fetch(`${HOST}/api/activities`, {
       method: "GET",
@@ -53,7 +54,7 @@ describe('activities', () => {
 
     const query = await queryRes.json()
 
-    expect(query).toEqual([expectedRead])
+    expect(query.map(dateTimeFieldNormaliser)).toEqual([expectedRead])
 
     let updatedActivity = structuredClone(expectedRead)
 
@@ -81,7 +82,7 @@ describe('activities', () => {
 
     const reread = await rereadRes.json()
 
-    expect(reread).toEqual(updatedActivity)
+    expect(dateTimeFieldNormaliser(reread)).toEqual(updatedActivity)
 
     const deleteRes = await fetch(`${HOST}/api/activities/${createdId}`, {
       method: "DELETE",

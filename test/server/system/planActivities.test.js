@@ -1,4 +1,6 @@
 const { randomUUID } = require("node:crypto")
+const { dateTimeFieldNormaliser } = require("./utilities")
+
 const HOST = "http://localhost:3333"
 describe("Plan Relations", () => {
     const TEST_USER_ID = randomUUID()
@@ -21,11 +23,11 @@ describe("Plan Relations", () => {
             }
         })
         const read = await readRes.json()
-        return {
+        return dateTimeFieldNormaliser({
             ...read,
             userId: TEST_USER_ID,
             id: createdId
-        }
+        })
     }
 
     const createPlan = async (createdPlan) => {
@@ -133,7 +135,7 @@ describe("Plan Relations", () => {
             }
         }).then(res => res.json())
 
-        expect(planActivities.sort((a, b) => a.id.localeCompare(b.id))).toEqual([planActivity, planActivity2].sort((a, b) => a.id.localeCompare(b.id)))
+        expect(planActivities.sort((a, b) => a.id.localeCompare(b.id)).map(dateTimeFieldNormaliser)).toEqual([planActivity, planActivity2].sort((a, b) => a.id.localeCompare(b.id)))
 
         const allActivities = await fetch(`${HOST}/api/activities`, {
             method: "GET",
@@ -142,7 +144,7 @@ describe("Plan Relations", () => {
             }
         }).then(res => res.json())
 
-        expect(allActivities.sort((a, b) => a.id.localeCompare(b.id))).toEqual([planActivity, planActivity2, looseActivity, looseActivity2].sort((a, b) => a.id.localeCompare(b.id)))
+        expect(allActivities.sort((a, b) => a.id.localeCompare(b.id)).map(dateTimeFieldNormaliser)).toEqual([planActivity, planActivity2, looseActivity, looseActivity2].sort((a, b) => a.id.localeCompare(b.id)))
 
         // Deleting Plan also Deletes Child Activities
         await fetch(`${HOST}/api/plans/${plan.id}`, {
@@ -159,7 +161,7 @@ describe("Plan Relations", () => {
             }
         }).then(res => res.json())
 
-        expect(remainingActivities.sort((a, b) => a.id.localeCompare(b.id))).toEqual([looseActivity, looseActivity2].sort((a, b) => a.id.localeCompare(b.id)))
+        expect(remainingActivities.sort((a, b) => a.id.localeCompare(b.id)).map(dateTimeFieldNormaliser)).toEqual([looseActivity, looseActivity2].sort((a, b) => a.id.localeCompare(b.id)))
 
     })
 })
@@ -186,11 +188,11 @@ describe("Plan Relations", () => {
         })
 
         const read = await readRes.json()
-        return {
+        return dateTimeFieldNormaliser({
             ...read,
             userId: TEST_USER_ID,
             id: createdId
-        }
+        })
     }
 
     const createPlan = async (createdPlan) => {
@@ -212,11 +214,11 @@ describe("Plan Relations", () => {
         })
 
         const read = await readRes.json()
-        return {
+        return dateTimeFieldNormaliser({
             ...read,
             userId: TEST_USER_ID,
             id: createdId
-        }
+        })
     }
     test("Plan Activities with Dates", async () => {
         // Create Plan
@@ -300,7 +302,7 @@ describe("Plan Relations", () => {
             headers: {
                 "x-planner-userid": TEST_USER_ID
             }
-        }).then(res => res.json())).sort((a, b) => a.id.localeCompare(b.id)))
+        }).then(res => res.json())).sort((a, b) => a.id.localeCompare(b.id)).map(dateTimeFieldNormaliser))
             .toEqual([earlyPlan, midPlan, latePlan, earlyPlanless, midPlanless, latePlanless].sort((a, b) => a.id.localeCompare(b.id)))
     
         earlyDate.setDate(earlyDate.getDate() + 1)
@@ -311,7 +313,7 @@ describe("Plan Relations", () => {
             headers: {
                 "x-planner-userid": TEST_USER_ID
             }
-        }).then(res => res.json())).sort((a, b) => a.id.localeCompare(b.id)))
+        }).then(res => res.json())).sort((a, b) => a.id.localeCompare(b.id)).map(dateTimeFieldNormaliser))
             .toEqual([midPlan, midPlanless].sort((a, b) => a.id.localeCompare(b.id)))
 
         expect((await fetch(`${HOST}/api/activities?planId=${plan.id}&timeStart=${earlyDate.toISOString()}&timeEnd=${lateDate.toISOString()}`, {
@@ -319,6 +321,6 @@ describe("Plan Relations", () => {
             headers: {
                 "x-planner-userid": TEST_USER_ID
             }
-        }).then(res => res.json())).sort((a, b) => a.id.localeCompare(b.id))).toEqual([midPlan])
+        }).then(res => res.json())).sort((a, b) => a.id.localeCompare(b.id)).map(dateTimeFieldNormaliser)).toEqual([midPlan])
     })
 })
