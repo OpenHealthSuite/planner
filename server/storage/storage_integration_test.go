@@ -218,6 +218,82 @@ func TestDeleteActivitiesForPlan(t *testing.T) {
 	}
 }
 
+func TestActivityQuery(t *testing.T) {
+	var allStorages []ActivityStorage
+	sqliteStorage, sqliteErr := getSqliteStorageClient(":memory:")
+	if sqliteErr != nil {
+		t.Errorf("Error creating storage: %s", sqliteErr.Error())
+		return
+	}
+	allStorages = append(allStorages, sqliteStorage.Activity)
+	cassandraStorage, cassandraErr := getCassandratorageClient()
+	if cassandraErr != nil {
+		t.Errorf("Error creating cassandra storage: %s", cassandraErr.Error())
+	} else {
+		allStorages = append(allStorages, cassandraStorage.Activity)
+	}
+	for _, storage := range allStorages {
+		userId := fmt.Sprintf("test-user-id-%s", uuid.New())
+		res, err := storage.Read(userId, uuid.New())
+		if err != nil {
+			t.Errorf("Error reading with empty uuid: %s", err.Error())
+			return
+		}
+		if res != nil {
+			t.Errorf("somehow got result on random uuid?")
+			return
+		}
+
+		createStartPlan := Activity{
+			UserId:       userId,
+			Summary:      "Start Plan",
+			Stages:       []ActivityStage{},
+			DateTime:     time.Date(2011, 12, 12, 12, 12, 12, 12, time.UTC),
+			TimeRelevant: false,
+			Completed:    false,
+			Notes:        "",
+		}
+		createMidPlan := Activity{
+			UserId:       userId,
+			Summary:      "Mid Plan",
+			Stages:       []ActivityStage{},
+			DateTime:     time.Date(2012, 12, 12, 12, 12, 12, 12, time.UTC),
+			TimeRelevant: false,
+			Completed:    false,
+			Notes:        "",
+		}
+
+		createLatePlan := Activity{
+			UserId:       userId,
+			Summary:      "Late Plan",
+			Stages:       []ActivityStage{},
+			DateTime:     time.Date(2013, 12, 12, 12, 12, 12, 12, time.UTC),
+			TimeRelevant: false,
+			Completed:    false,
+			Notes:        "",
+		}
+		storage.Create(createStartPlan)
+		storage.Create(createMidPlan)
+		storage.Create(createLatePlan)
+
+		midActivity, _ := storage.Query(ActivityStorageQuery{
+			UserId: userId,
+			DateRange: &DateRange{
+				Start: time.Date(2011, 12, 13, 12, 12, 12, 12, time.UTC),
+				End:   time.Date(2013, 12, 11, 12, 12, 12, 12, time.UTC),
+			},
+		})
+		if len(*midActivity) != 1 {
+			t.Errorf("Error expected 1 activities got: %d", len(*midActivity))
+			return
+		}
+		if (*midActivity)[0].Summary != "Mid Plan" {
+			t.Errorf("Error expected Mid Plan got: %s", (*midActivity)[0].Summary)
+			return
+		}
+	}
+}
+
 func TestPlanCreateReadUpdateDelete(t *testing.T) {
 	var allStorages []PlanStorage
 	sqliteStorage, sqliteErr := getSqliteStorageClient(":memory:")

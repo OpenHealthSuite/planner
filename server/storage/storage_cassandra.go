@@ -151,9 +151,9 @@ func (stg CassandraActivityStorage) Query(query ActivityStorageQuery) (*[]Activi
 		params = append(params, query.PlanId.String())
 	}
 	if query.DateRange != nil {
-		selectCQL = selectCQL + ` AND dateTime > ? AND dateTime < ?`
-		params = append(params, query.DateRange.Start.String())
-		params = append(params, query.DateRange.End.String())
+		selectCQL = selectCQL + ` AND dateTime >= ? AND dateTime <= ?`
+		params = append(params, query.DateRange.Start)
+		params = append(params, query.DateRange.End)
 	}
 	if query.PlanId != nil || query.DateRange != nil {
 		selectCQL = selectCQL + ` ALLOW FILTERING`
