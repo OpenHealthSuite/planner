@@ -145,18 +145,18 @@ func (stg CassandraActivityStorage) Query(query ActivityStorageQuery) (*[]Activi
 		completed,
 		notes
 	FROM ohs_planner.activities 
-	WHERE userId = ?
-`
+	WHERE userId = ?`
 	if query.PlanId != nil {
-		selectCQL += `AND planId = ?
-		`
+		selectCQL = selectCQL + ` AND planId = ?`
 		params = append(params, query.PlanId.String())
 	}
 	if query.DateRange != nil {
-		selectCQL += `AND dateTime > ? AND dateTime < ?
-		`
+		selectCQL = selectCQL + ` AND dateTime > ? AND dateTime < ?`
 		params = append(params, query.DateRange.Start.String())
 		params = append(params, query.DateRange.End.String())
+	}
+	if query.PlanId != nil || query.DateRange != nil {
+		selectCQL = selectCQL + ` ALLOW FILTERING`
 	}
 	rows := session.Query(selectCQL, params...).Iter().Scanner()
 	activities := make([]Activity, 0)
@@ -269,15 +269,22 @@ func (stg CassandraActivityStorage) DeleteForPlan(userId string, planId uuid.UUI
 		return errors.New("Cassandra Connection Error")
 	}
 	defer session.Close()
-	planActivityIds := []string{}
+	params := make([]interface{}, 0)
+	params = append(params, userId)
 	for _, value := range *planActivities {
-		planActivityIds = append(planActivityIds, value.Id.String())
+		activityId := value.Id.String()
+		params = append(params, activityId)
 	}
 	deleteCQL := `
 			DELETE FROM ohs_planner.activities
-			WHERE userId = ? AND id IN (?);
-	`
-	deleteErr := session.Query(deleteCQL, userId, planActivityIds).Exec()
+			WHERE userId = ? AND id IN (`
+	for i := 1; i < len(params); i++ {
+		deleteCQL = deleteCQL + "?,"
+	}
+	deleteCQL = deleteCQL[:len(deleteCQL)-1]
+	deleteCQL = deleteCQL + ")"
+
+	deleteErr := session.Query(deleteCQL, params...).Exec()
 	if deleteErr != nil {
 		return deleteErr
 	}

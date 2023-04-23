@@ -133,6 +133,91 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 	}
 }
 
+func TestDeleteActivitiesForPlan(t *testing.T) {
+	var allStorages []ActivityStorage
+	sqliteStorage, sqliteErr := getSqliteStorageClient(":memory:")
+	if sqliteErr != nil {
+		t.Errorf("Error creating storage: %s", sqliteErr.Error())
+		return
+	}
+	allStorages = append(allStorages, sqliteStorage.Activity)
+	cassandraStorage, cassandraErr := getCassandratorageClient()
+	if cassandraErr != nil {
+		t.Errorf("Error creating cassandra storage: %s", cassandraErr.Error())
+	} else {
+		allStorages = append(allStorages, cassandraStorage.Activity)
+	}
+	for _, storage := range allStorages {
+
+		userId := fmt.Sprintf("test-user-id-%s", uuid.New())
+		planId := uuid.New()
+		res, err := storage.Read(userId, uuid.New())
+		if err != nil {
+			t.Errorf("Error reading with empty uuid: %s", err.Error())
+			return
+		}
+		if res != nil {
+			t.Errorf("somehow got result on random uuid?")
+			return
+		}
+		createActivityPlanless := Activity{
+			UserId:  userId,
+			Summary: "Test Item No Plan",
+			Stages: []ActivityStage{
+				{
+					Order:       0,
+					Description: "stg 1",
+					Metrics: []ActivityStageMetric{{
+						Amount: 5,
+						Unit:   "minutes",
+					}},
+					Repetitions: 6,
+				},
+			},
+			DateTime:     time.Now(),
+			TimeRelevant: false,
+			Completed:    false,
+			Notes:        "",
+		}
+		createActivityPlanned := Activity{
+			UserId:  userId,
+			PlanId:  &planId,
+			Summary: "Test Item Plan",
+			Stages: []ActivityStage{
+				{
+					Order:       0,
+					Description: "stg 1",
+					Metrics: []ActivityStageMetric{{
+						Amount: 5,
+						Unit:   "minutes",
+					}},
+					Repetitions: 6,
+				},
+			},
+			DateTime:     time.Now(),
+			TimeRelevant: false,
+			Completed:    false,
+			Notes:        "",
+		}
+		storage.Create(createActivityPlanless)
+		storage.Create(createActivityPlanned)
+
+		delErr := storage.DeleteForPlan(userId, planId)
+
+		if delErr != nil {
+			t.Errorf("Error deleting planned: %s", delErr.Error())
+			return
+		}
+
+		allActivities, _ := storage.Query(ActivityStorageQuery{UserId: userId})
+		if len(*allActivities) != 1 {
+
+			t.Errorf("Error expected 1 activities got: %d", len(*allActivities))
+			return
+		}
+	}
+}
+
 func TestPlanCreateReadUpdateDelete(t *testing.T) {
 	var allStorages []PlanStorage
 	sqliteStorage, sqliteErr := getSqliteStorageClient(":memory:")
