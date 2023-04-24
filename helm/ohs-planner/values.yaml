@@ -1,0 +1,8 @@
+replicas: 3
+image: ghcr.io/openhealthsuite/planner
+tag: v0.0.2
+
+cassandra:
+  # expects a "cassandrauser" and "cassandrapassword" data key
+  credentialssecret: cassandra-creds
+  contactpoints: cassandra.service.svc:9042

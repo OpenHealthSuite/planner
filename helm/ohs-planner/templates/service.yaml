@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ohs-planner
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: ohs-planner
+spec:
+  ports:
+    - name: http
+      port: 3024
+      protocol: TCP
+      targetPort: web
+  selector:
+    app: ohs-planner
+  type: ClusterIP

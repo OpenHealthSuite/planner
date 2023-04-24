@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ohs-planner
+  namespace: {{ .Release.Namespace }}
+  name: ohs-planner
+spec:
+  replicas: {{ required "replicas is required" .Values.replicas }}
+  selector:
+    matchLabels:
+      app: ohs-planner
+  template:
+    metadata:
+      labels:
+        app: ohs-planner
+      namespace: {{ .Release.Namespace }}
+      name: ohs-planner
+      # annotations:
+      #   prometheus.io/scrape: 'true'
+      #   prometheus.io/path: '/metrics'
+      #   prometheus.io/port: '3024'
+    spec:
+      containers:
+        - name: ohs-planner
+          image: {{ required "image is required" .Values.image }}:{{  required "tag is required" .Values.tag }}
+          ports:
+            - name: web
+              containerPort: 3024
+          env:
+            - name: PLANNER_USERID_HEADER
+              value: x-auth-request-user
+            - name: PLANNER_PORT
+              value: "3024"
+            - name: PLANNER_STORAGE_TYPE
+              value: cassandra
+            - name: PLANNER_CASSANDRA_CONTACT_POINTS
+              value: {{ required "cassandra.contactpoints is required" .Values.cassandra.contactpoints }}
+            - name: PLANNER_CASSANDRA_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "cassandra.credentialssecret is required" .Values.cassandra.credentialssecret }}
+                  key: cassandrauser
+            - name: PLANNER_CASSANDRA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "cassandra.credentialssecret is required" .Values.cassandra.credentialssecret }}
+                  key: cassandrapassword
