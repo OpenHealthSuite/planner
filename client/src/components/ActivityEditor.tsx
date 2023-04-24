@@ -207,9 +207,7 @@ export const AddActivityInterface = ({
 
   return <Flex flexDirection={"column"} 
     padding={"1em"}
-    position={"fixed"}
-    width={"100%"}
-    bottom={0}>
+    width={"100%"}>
     <Button onClick={onOpen}>Add Activity</Button>
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />

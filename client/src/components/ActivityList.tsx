@@ -7,7 +7,7 @@ import { plannerGetRequest, plannerPutRequest } from "../utilities/apiRequest";
 import { ActivityForm, InitialFormValues } from "./ActivityEditor";
 
 export type ActivityListProps = {
-    updated: string,
+    updated?: string,
     targetDate?: Date
 }
 
@@ -111,8 +111,8 @@ export const ActivityList = ({
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [internalUpdate, setInternalUpdate] = useState(updated);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [, setLoading] = useState(true);
+  const [, setError] = useState(false);
   
   const totalDaysToLoad = 21;
   const preceedingDays = 7;

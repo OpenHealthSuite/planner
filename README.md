@@ -32,6 +32,7 @@ This will all be framed roughly through the lens of running, but is broadly appl
 - Create a bulk upload/download system for plans - probably CSV based
 - Create a data purge endpoint
 - ~~Implement the Cassandra storage layer with same interface as SQLite~~
+- Implement a way of creating and parsing recurring workouts
 
 That probably comprises the MVP of the system - we can then tie it into the dashboard
 
