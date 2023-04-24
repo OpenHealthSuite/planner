@@ -98,7 +98,12 @@ func main() {
 	mux.HandleFunc("/", getPublicFile)
 	mux.HandleFunc("*", getPublicFile)
 
-	err = http.ListenAndServe(":3333", mux)
+	port := "3333"
+	portSetting := os.Getenv("PLANNER_PORT")
+	if portSetting != "" {
+		port = portSetting
+	}
+	err = http.ListenAndServe(":"+port, mux)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {

@@ -3,6 +3,8 @@ package storage
 import (
 	"encoding/json"
 	"errors"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gocql/gocql"
@@ -442,8 +444,29 @@ func (stg CassandraPlanStorage) Delete(userId string, id uuid.UUID) error {
 }
 
 func getCassandratorageClient() (Storage, error) {
-	cluster := gocql.NewCluster("localhost:9042")
-	cluster.Authenticator = gocql.PasswordAuthenticator{Username: "cassandra", Password: "cassandra"}
+	hosts := []string{"localhost:9042"}
+
+	hostSetting := os.Getenv("PLANNER_CASSANDRA_CONTACT_POINTS")
+	if hostSetting != "" {
+		hosts = strings.Split(hostSetting, ";")
+	}
+
+	username := "cassandra"
+
+	usernameSetting := os.Getenv("PLANNER_CASSANDRA_USER")
+	if usernameSetting != "" {
+		username = usernameSetting
+	}
+
+	password := "cassandra"
+
+	passwordSetting := os.Getenv("PLANNER_CASSANDRA_PASSWORD")
+	if passwordSetting != "" {
+		password = passwordSetting
+	}
+
+	cluster := gocql.NewCluster(hosts...)
+	cluster.Authenticator = gocql.PasswordAuthenticator{Username: username, Password: password}
 	cluster.Consistency = gocql.Quorum
 	cluster.ProtoVersion = 4
 	cluster.ConnectTimeout = time.Second * 10

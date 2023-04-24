@@ -34,3 +34,14 @@ This will all be framed roughly through the lens of running, but is broadly appl
 - ~~Implement the Cassandra storage layer with same interface as SQLite~~
 
 That probably comprises the MVP of the system - we can then tie it into the dashboard
+
+# Configuration
+
+- `PLANNER_USERID_HEADER`: Sets the userid header, defaults to `x-planner-userid`
+- `PLANNER_PORT`: Sets port serving app, defaults to `3333`
+- `PLANNER_STORAGE_TYPE`: pick from `sqlite` or `cassandra`. Defaults to `sqlite`.
+- `PLANNER_CASSANDRA_`...
+  - All have default values to work with development script setup
+  - `CONTACT_POINTS`: ; separated list of contact points.
+  - `USER`: username for logging into cassandra
+  - `PASSWORD`: password for logging into cassandra
