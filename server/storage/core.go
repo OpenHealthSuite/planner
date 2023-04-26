@@ -61,6 +61,11 @@ type ActivityStorageQuery struct {
 	DateRange *DateRange
 }
 
+type RecurringActivityStorageQuery struct {
+	UserId string
+	PlanId *uuid.UUID
+}
+
 type PlanStorageQuery struct {
 	UserId string
 }
@@ -75,11 +80,11 @@ type ActivityStorage interface {
 	DeleteForPlan(userId string, planId uuid.UUID) error
 }
 
-//go:generate mockery --name ActivityStorage
+//go:generate mockery --name RecurringActivityStorage
 type RecurringActivityStorage interface {
-	Create(activity Activity) (RecurringActivity, error)
+	Create(activity RecurringActivity) (RecurringActivity, error)
 	Read(userId string, id uuid.UUID) (*RecurringActivity, error)
-	Query(query ActivityStorageQuery) (*[]RecurringActivity, error)
+	Query(query RecurringActivityStorageQuery) (*[]RecurringActivity, error)
 	Update(activity RecurringActivity) error
 	Delete(userId string, id uuid.UUID) error
 	DeleteForPlan(userId string, planId uuid.UUID) error
@@ -95,8 +100,9 @@ type PlanStorage interface {
 }
 
 type Storage struct {
-	Activity ActivityStorage
-	Plan     PlanStorage
+	Activity          ActivityStorage
+	RecurringActivity RecurringActivityStorage
+	Plan              PlanStorage
 }
 
 type StorageType string

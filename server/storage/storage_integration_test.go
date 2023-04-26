@@ -134,6 +134,130 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 	}
 }
 
+func TestRecurringActivityCreateReadUpdateDelete(t *testing.T) {
+	var allStorages []RecurringActivityStorage
+	sqliteStorage, sqliteErr := getSqliteStorageClient(":memory:")
+	if sqliteErr != nil {
+		t.Errorf("Error creating storage: %s", sqliteErr.Error())
+		return
+	}
+	allStorages = append(allStorages, sqliteStorage.RecurringActivity)
+	cassandraStorage, cassandraErr := getCassandratorageClient()
+	if cassandraErr != nil {
+		t.Errorf("Error creating cassandra storage: %s", cassandraErr.Error())
+	} else {
+		allStorages = append(allStorages, cassandraStorage.RecurringActivity)
+	}
+	for _, storage := range allStorages {
+		userId := fmt.Sprintf("test-user-id-%s", uuid.New())
+		res, err := storage.Read(userId, uuid.New())
+		if err != nil {
+			t.Errorf("Error reading with empty uuid: %s", err.Error())
+			return
+		}
+		if res != nil {
+			t.Errorf("somehow got result on random uuid?")
+			return
+		}
+		createActivity := RecurringActivity{
+			UserId:  userId,
+			Summary: "Test Item",
+			Stages: []ActivityStage{
+				{
+					Order:       0,
+					Description: "stg 1",
+					Metrics: []ActivityStageMetric{{
+						Amount: 5,
+						Unit:   "minutes",
+					}},
+					Repetitions: 6,
+				},
+			},
+			RecurrEachDays: 7,
+			DateTimeStart:  time.Now(),
+			TimeRelevant:   false,
+		}
+		created, err := storage.Create(createActivity)
+		if err != nil {
+			t.Errorf("Error creating recurring activity: %s", err.Error())
+			return
+		}
+		if created.Id == uuid.MustParse("00000000-0000-0000-0000-000000000000") {
+			t.Errorf("Got 0 uuid")
+			return
+		}
+		if created.Summary != createActivity.Summary {
+			t.Errorf("Error with created recurring activity")
+			return
+		}
+
+		read, err := storage.Read(userId, created.Id)
+		if err != nil {
+			t.Errorf("Error reading recurring activity %s", err)
+			return
+		}
+		if read.Stages[0].Description != createActivity.Stages[0].Description {
+			t.Errorf("Error with read stage")
+			return
+		}
+
+		updateActivity := read
+
+		updateActivity.Summary = "Updated recurring Activity Name"
+
+		updateErr := storage.Update(*updateActivity)
+
+		if updateErr != nil {
+			t.Errorf("Error updating recurring activity %s", updateErr)
+			return
+		}
+
+		reread, err := storage.Read(userId, created.Id)
+		if err != nil {
+			t.Errorf("Error reading recurring activity %s", err)
+			return
+		}
+		if reread.Summary != updateActivity.Summary {
+			t.Errorf("Error with reread recurring updated activity")
+			return
+		}
+
+		query, err := storage.Query(RecurringActivityStorageQuery{
+			UserId: read.UserId,
+		})
+
+		if err != nil {
+			t.Errorf("Error querying recurring activity %s", err)
+			return
+		}
+		if len(*query) != 1 {
+			t.Errorf("Error with count of stored items: %d instead of 1", len(*query))
+			return
+		}
+		if (*query)[0].Id != read.Id {
+			t.Errorf("Error with queried recurring activity")
+			return
+		}
+
+		deleteErr := storage.Delete(userId, read.Id)
+
+		if deleteErr != nil {
+			t.Errorf("Error deleting recurring activity %s", deleteErr)
+			return
+		}
+
+		rereread, err := storage.Read(userId, read.Id)
+		if err != nil {
+			t.Errorf("Error rerereading recurring activity %s", err)
+			return
+		}
+		if rereread != nil {
+			t.Errorf("Error got deleted recurring activity")
+			return
+		}
+	}
+}
+
 func TestDeleteActivitiesForPlan(t *testing.T) {
 	var allStorages []ActivityStorage
 	sqliteStorage, sqliteErr := getSqliteStorageClient(":memory:")

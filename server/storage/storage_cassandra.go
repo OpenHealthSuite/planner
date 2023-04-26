@@ -549,7 +549,8 @@ func getCassandratorageClient() (Storage, error) {
 		}
 	}
 	return Storage{
-		Activity: CassandraActivityStorage{Cluster: cluster},
-		Plan:     CassandraPlanStorage{Cluster: cluster},
+		Activity:          CassandraActivityStorage{Cluster: cluster},
+		RecurringActivity: CassandraRecurringActivityStorage{Cluster: cluster},
+		Plan:              CassandraPlanStorage{Cluster: cluster},
 	}, nil
 }

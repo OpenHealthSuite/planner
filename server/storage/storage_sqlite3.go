@@ -409,7 +409,8 @@ func getSqliteStorageClient(filepath string) (Storage, error) {
 		}
 	}
 	return Storage{
-		Activity: Sqlite3ActivityStorage{DB: db},
-		Plan:     Sqlite3PlanStorage{DB: db},
+		Activity:          Sqlite3ActivityStorage{DB: db},
+		RecurringActivity: Sqlite3RecurringActivityStorage{DB: db},
+		Plan:              Sqlite3PlanStorage{DB: db},
 	}, nil
 }
