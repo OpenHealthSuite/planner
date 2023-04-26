@@ -94,6 +94,7 @@ func main() {
 
 	handlers.AddActivityHandlers(mux, storage.Activity, storage.Plan, useridMiddleware)
 	handlers.AddPlanHandlers(mux, storage.Plan, storage.Activity, useridMiddleware)
+	handlers.AddRecurringActivityHandlers(mux, storage.RecurringActivity, storage.Plan, useridMiddleware)
 
 	mux.HandleFunc("/", getPublicFile)
 	mux.HandleFunc("*", getPublicFile)

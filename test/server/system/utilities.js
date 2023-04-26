@@ -1,6 +1,6 @@
 
 
-const dateFields = ["dateTime"]
+const dateFields = ["dateTime", "dateTimeStart"]
 const dateTimeFieldNormaliser = (object) => {
   // We do this because Go's ISO string for dates
   // Drops the trailing zero if there is one

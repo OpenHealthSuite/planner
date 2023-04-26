@@ -4,21 +4,19 @@ const { dateTimeFieldNormaliser } = require("./utilities")
 const HOST = "http://localhost:3333"
 const TEST_USER_ID = randomUUID()
 
-describe('activities', () => {
+describe('recurring activities', () => {
   test("Create, Read, Update, Query, Delete", async () => {
     let createdActivity = {
       summary: "Some activity name",
       planId: null,
-      recurringActivityId: null,
       stages: [
         { order: 0, description: "desc", metrics: [{amount: 1, unit: "unt"}], repetitions: 3}
       ],
-      dateTime: new Date().toISOString(),
+      recurrEachDays: 7,
+      dateTimeStart: new Date().toISOString(),
       timeRelevant: false,
-      completed: false,
-      notes: ""
     }
-    const createdRes = await fetch(`${HOST}/api/activities`, {
+    const createdRes = await fetch(`${HOST}/api/recurring_activities`, {
       method: "POST",
       headers: {
         "x-planner-userid": TEST_USER_ID
@@ -29,7 +27,7 @@ describe('activities', () => {
     const createdId = await createdRes.json();
     expect(createdId.length).toBe("db8a5a5a-38b5-482a-a3f1-eda999d35a13".length)
 
-    const readRes = await fetch(`${HOST}/api/activities/${createdId}`, {
+    const readRes = await fetch(`${HOST}/api/recurring_activities/${createdId}`, {
       method: "GET",
       headers: {
         "x-planner-userid": TEST_USER_ID
@@ -46,7 +44,7 @@ describe('activities', () => {
     }
     expect(dateTimeFieldNormaliser(read)).toEqual(expectedRead)
 
-    const queryRes = await fetch(`${HOST}/api/activities`, {
+    const queryRes = await fetch(`${HOST}/api/recurring_activities`, {
       method: "GET",
       headers: {
         "x-planner-userid": TEST_USER_ID
@@ -60,9 +58,8 @@ describe('activities', () => {
     let updatedActivity = structuredClone(expectedRead)
 
     updatedActivity.summary = "Updated Name"
-    updatedActivity.notes = "Some details have been added"
 
-    const updateRes = await fetch(`${HOST}/api/activities/${createdId}`, {
+    const updateRes = await fetch(`${HOST}/api/recurring_activities/${createdId}`, {
       method: "PUT",
       headers: {
         "x-planner-userid": TEST_USER_ID
@@ -72,7 +69,7 @@ describe('activities', () => {
 
     expect(updateRes.status).toBe(200)
 
-    const rereadRes = await fetch(`${HOST}/api/activities/${createdId}`, {
+    const rereadRes = await fetch(`${HOST}/api/recurring_activities/${createdId}`, {
       method: "GET",
       headers: {
         "x-planner-userid": TEST_USER_ID
@@ -85,7 +82,7 @@ describe('activities', () => {
 
     expect(dateTimeFieldNormaliser(reread)).toEqual(updatedActivity)
 
-    const deleteRes = await fetch(`${HOST}/api/activities/${createdId}`, {
+    const deleteRes = await fetch(`${HOST}/api/recurring_activities/${createdId}`, {
       method: "DELETE",
       headers: {
         "x-planner-userid": TEST_USER_ID
@@ -94,7 +91,7 @@ describe('activities', () => {
 
     expect(deleteRes.status).toBe(200)
 
-    const reGetAfterDeleteRes = await fetch(`${HOST}/api/activities/${createdId}`, {
+    const reGetAfterDeleteRes = await fetch(`${HOST}/api/recurring_activities/${createdId}`, {
       method: "GET",
       headers: {
         "x-planner-userid": TEST_USER_ID
