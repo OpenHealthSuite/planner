@@ -13,37 +13,41 @@ const colors = {
 const theme = extendTheme({ colors });
 
 export type ApplicationContextType = {
-  userPlans: Plan[],
+  userPlans: Plan[]
+  setUserPlans: (plans: Plan[]) => void
   latestCreatedActivityId: string
+  setLatestCreatedActivityId: (activityId: string) => void
 }
 
 export const ApplicationContext = createContext<ApplicationContextType>({
   userPlans: [],
-  latestCreatedActivityId: ""
+  setUserPlans: () => { return; },
+  latestCreatedActivityId: "",
+  setLatestCreatedActivityId: () => { return; }
 });
 
 function App() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(true);
-  const [applicationContext, setApplicationContext] = useState<ApplicationContextType>({
-    userPlans: [],
-    latestCreatedActivityId: ""
-  });
+  const [userPlans, setUserPlans] = useState<Plan[]>([]);
+  const [latestCreatedActivityId, setLatestCreatedActivityId] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
     plannerGetRequest<Plan[]>("/plans")
-      .then(plans => setApplicationContext({
-        userPlans: plans,
-        latestCreatedActivityId: ""
-      }))
+      .then(setUserPlans)
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <ChakraProvider theme={theme}>
       {loading && <Spinner size='xl' />}
-      {!loading && <ApplicationContext.Provider value={applicationContext}>
+      {!loading && <ApplicationContext.Provider value={{
+        userPlans,
+        setUserPlans,
+        latestCreatedActivityId,
+        setLatestCreatedActivityId
+      }}>
         <Button position={"fixed"}
           bottom={0}
           right={0}
@@ -69,8 +73,8 @@ function App() {
             </DrawerBody>
 
             <DrawerFooter display={"flex"} flexDirection={"column"}>
-              <AddActivityInterface />
-              <AddRecurringActivityInterface />
+              <AddActivityInterface onCreated={setLatestCreatedActivityId} />
+              <AddRecurringActivityInterface onCreated={setLatestCreatedActivityId}/>
             </DrawerFooter>
           </DrawerContent>
         </Drawer>

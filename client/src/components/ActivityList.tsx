@@ -2,13 +2,13 @@ import { Box, Flex, IconButton, Modal, ModalCloseButton, ModalContent, ModalOver
 import { addDays, format, subDays, isAfter, addMinutes, differenceInDays } from "date-fns";
 import { ViewIcon, CheckIcon, RepeatIcon } from "@chakra-ui/icons";
 import { Activity, ActivityApiSubmission, RecurringActivity } from "../types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { plannerGetRequest, plannerPostRequest, plannerPutRequest } from "../utilities/apiRequest";
 import { ActivityForm, InitialFormValues } from "./ActivityEditor";
 import { ActivityDetails } from "./ActivityDetails";
+import { ApplicationContext } from "../App";
 
 export type ActivityListProps = {
-    updated?: string,
     targetDate?: Date
 }
 
@@ -182,13 +182,12 @@ const DaysActivities = ({ date, activities, recurringActivities, onUpdate }: {
 };
 
 export const ActivityList = ({
-  updated,
   targetDate = new Date() 
 } : ActivityListProps) => {
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [recurringActivities, setRecurringActivities] = useState<RecurringActivity[]>([]);
-  const [internalUpdate, setInternalUpdate] = useState(updated);
+  const {latestCreatedActivityId: updated, setLatestCreatedActivityId} = useContext(ApplicationContext);
   const [, setLoading] = useState(true);
   const [, setError] = useState(false);
   
@@ -223,7 +222,7 @@ export const ActivityList = ({
         setError(true);
       })
       .finally(() => setLoading(false));
-  }, [updated, internalUpdate, setActivities, setLoading, setError]);
+  }, [updated, setActivities, setLoading, setError]);
 
   const activityDayMap = activities.reduce<{[key: string]: Activity[]}>((acc, curr)=>{
     const date = curr.dateTime.toISOString().split("T")[0];
@@ -242,7 +241,7 @@ export const ActivityList = ({
         date={x} 
         activities={activityDayMap[date]}
         recurringActivities={recurringActivities}
-        onUpdate={setInternalUpdate}/>;
+        onUpdate={setLatestCreatedActivityId}/>;
     })}
   </div>;
 };
