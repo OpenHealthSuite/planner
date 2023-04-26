@@ -68,7 +68,7 @@ func TestHappyPathUpdatePlanHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerPlanId(mockStorage, mockActStorage))
+	handler := http.Handler(registerPlanId(mockStorage, mockActStorage, storage.NewMockRecurringActivityStorage(t)))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -78,6 +78,7 @@ func TestHappyPathUpdatePlanHandler(t *testing.T) {
 func TestHappyPathDeletePlanHandler(t *testing.T) {
 	mockStorage := storage.NewMockPlanStorage(t)
 	mockActStorage := storage.NewMockActivityStorage(t)
+	mockRecActStorage := storage.NewMockRecurringActivityStorage(t)
 	testUserId := "some-valid-expected-userid"
 
 	returnedPlan := storage.Plan{
@@ -88,6 +89,7 @@ func TestHappyPathDeletePlanHandler(t *testing.T) {
 
 	mockStorage.EXPECT().Delete(testUserId, returnedPlan.Id).Return(nil).Once()
 	mockActStorage.EXPECT().DeleteForPlan(testUserId, returnedPlan.Id).Return(nil).Once()
+	mockRecActStorage.EXPECT().DeleteForPlan(testUserId, returnedPlan.Id).Return(nil).Once()
 
 	// We have to use "real" query params here
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("/api/plans/%s", returnedPlan.Id), nil)
@@ -97,7 +99,7 @@ func TestHappyPathDeletePlanHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerPlanId(mockStorage, mockActStorage))
+	handler := http.Handler(registerPlanId(mockStorage, mockActStorage, mockRecActStorage))
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
@@ -146,7 +148,7 @@ func TestHappyPathReadPlanHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
 
-	handler := http.Handler(registerPlanId(mockStorage, mockActStorage))
+	handler := http.Handler(registerPlanId(mockStorage, mockActStorage, storage.NewMockRecurringActivityStorage(t)))
 	handler.ServeHTTP(rr, req)
 
 	expectedBody, err := json.Marshal(returnedPlan)

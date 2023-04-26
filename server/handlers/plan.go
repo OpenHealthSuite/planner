@@ -12,9 +12,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func AddPlanHandlers(mux *http.ServeMux, strg storage.PlanStorage, actStrg storage.ActivityStorage, useridMiddleware middlewares.Middleware) {
+func AddPlanHandlers(mux *http.ServeMux, strg storage.PlanStorage, actStrg storage.ActivityStorage, recActStrg storage.RecurringActivityStorage, useridMiddleware middlewares.Middleware) {
 	mux.Handle("/api/plans", useridMiddleware(registerPlanRoot(strg)))
-	mux.Handle("/api/plans/", useridMiddleware(registerPlanId(strg, actStrg)))
+	mux.Handle("/api/plans/", useridMiddleware(registerPlanId(strg, actStrg, recActStrg)))
 }
 
 func registerPlanRoot(strg storage.PlanStorage) http.HandlerFunc {
@@ -30,7 +30,7 @@ func registerPlanRoot(strg storage.PlanStorage) http.HandlerFunc {
 	}
 }
 
-func registerPlanId(strg storage.PlanStorage, actStrg storage.ActivityStorage) http.HandlerFunc {
+func registerPlanId(strg storage.PlanStorage, actStrg storage.ActivityStorage, recActStrg storage.RecurringActivityStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
 		id := parts[3]
@@ -47,7 +47,7 @@ func registerPlanId(strg storage.PlanStorage, actStrg storage.ActivityStorage) h
 		} else if r.Method == http.MethodGet {
 			handleReadPlan(w, r, strg, uuid)
 		} else if r.Method == http.MethodDelete {
-			handleDeletePlan(w, r, strg, actStrg, uuid)
+			handleDeletePlan(w, r, strg, actStrg, recActStrg, uuid)
 		} else {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			fmt.Fprintf(w, "Invalid method: %s", r.Method)
@@ -163,7 +163,7 @@ func handleUpdatePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanS
 
 }
 
-func handleDeletePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage, actStrg storage.ActivityStorage, uuid uuid.UUID) {
+func handleDeletePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage, actStrg storage.ActivityStorage, recActStrg storage.RecurringActivityStorage, uuid uuid.UUID) {
 
 	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
 
@@ -186,6 +186,11 @@ func handleDeletePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanS
 	}
 	activityDeleteErr := actStrg.DeleteForPlan(userId, uuid)
 	if activityDeleteErr != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	recActDeleteErr := recActStrg.DeleteForPlan(userId, uuid)
+	if recActDeleteErr != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -93,7 +93,7 @@ func main() {
 	mux.Handle("/api/whoami", useridMiddleware(http.HandlerFunc(getUserInfo)))
 
 	handlers.AddActivityHandlers(mux, storage.Activity, storage.Plan, useridMiddleware)
-	handlers.AddPlanHandlers(mux, storage.Plan, storage.Activity, useridMiddleware)
+	handlers.AddPlanHandlers(mux, storage.Plan, storage.Activity, storage.RecurringActivity, useridMiddleware)
 	handlers.AddRecurringActivityHandlers(mux, storage.RecurringActivity, storage.Plan, useridMiddleware)
 
 	mux.HandleFunc("/", getPublicFile)
