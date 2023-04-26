@@ -482,6 +482,7 @@ func getCassandratorageClient() (Storage, error) {
 		`CREATE TABLE IF NOT EXISTS ohs_planner.activities (
 			userId text,
 			id UUID,
+			recurringActivityId UUID,
 			planId UUID,
 			summary text,
 			stages text,
@@ -498,6 +499,17 @@ func getCassandratorageClient() (Storage, error) {
 			id UUID,
 			name text,
 			active boolean,
+			PRIMARY KEY ((userId), id)
+		);`,
+		`CREATE TABLE IF NOT EXISTS ohs_planner.recurring_activities (
+			userId text,
+			id UUID,
+			planId UUID,
+			summary text,
+			stages text,
+			recurrEachDays int,
+			dateTimeStart timestamp,
+			timeRelevant boolean,
 			PRIMARY KEY ((userId), id)
 		);`,
 	}

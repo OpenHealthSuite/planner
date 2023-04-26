@@ -367,6 +367,7 @@ func getSqliteStorageClient(filepath string) (Storage, error) {
 	migrations := []string{`
 	CREATE TABLE IF NOT EXISTS activities (
 			id TEXT PRIMARY KEY,
+			recurringActivityId TEXT NULL,
 			userId TEXT,
 			planId TEXT NULL,
 			summary TEXT,
@@ -381,8 +382,18 @@ func getSqliteStorageClient(filepath string) (Storage, error) {
 			userId TEXT,
 			name TEXT,
 			active BOOLEAN
-	);
-	`}
+	);`,
+		`CREATE TABLE IF NOT EXISTS recurring_activities (
+			id TEXT PRIMARY KEY,
+			userId TEXT,
+			planId TEXT NULL,
+			summary TEXT,
+			stages TEXT,
+			recurrEachDays INT,
+			dateTimeStart DATETIME,
+			timeRelevant BOOLEAN
+	);`,
+	}
 	for _, migration := range migrations {
 		_, err = db.Exec(migration)
 		if err != nil {

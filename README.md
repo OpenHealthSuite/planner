@@ -20,6 +20,18 @@ This will all be framed roughly through the lens of running, but is broadly appl
       - Repetitions (integer)
 - Has it been completed? (yes/no)
 - (optional) how did you feel about it (completion notes) - also covers why and how there was a substitution
+- (optional) recurring workout id: if this workout served as a recurring workout.
+
+### Recurring workouts
+
+Recurring workouts would be the same as the above, except the following changes:
+
+- No completed status - they're infinitely recurring until you turn them/the plan off
+- No Notes - they aren't an "instance" they're a template
+- Date is instead "first date" - it's where the recursion will be offset from
+- Recurs every N days - allows most flexibility in how it recurrs
+
+You mark them as "complete" within a particular day, by creating an activity on the given day with the id of the recurring workout associated
 
 ## TODO:
 
