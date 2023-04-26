@@ -1,10 +1,11 @@
-import { Box, Flex, IconButton, Modal, ModalContent, ModalOverlay, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Flex, IconButton, Modal, ModalCloseButton, ModalContent, ModalOverlay, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure } from "@chakra-ui/react";
 import { addDays, format, subDays, isAfter, addMinutes, differenceInDays } from "date-fns";
 import { ViewIcon, CheckIcon, RepeatIcon } from "@chakra-ui/icons";
 import { Activity, ActivityApiSubmission, RecurringActivity } from "../types";
 import { useCallback, useEffect, useState } from "react";
 import { plannerGetRequest, plannerPutRequest } from "../utilities/apiRequest";
 import { ActivityForm, InitialFormValues } from "./ActivityEditor";
+import { ActivityDetails } from "./ActivityDetails";
 
 export type ActivityListProps = {
     updated?: string,
@@ -64,10 +65,23 @@ const ActivitySummary = ({ activity, onUpdate } : { activity: Activity,
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ActivityForm activitySubmission={defaultActivitySubmission}
-          onCreated={onUpdate}
-          onClose={onClose}
-          initialActivity={editActivity}/>
+        <ModalCloseButton />
+        <Tabs>
+          <TabList>
+            <Tab>View</Tab>
+            <Tab>Edit</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <ActivityDetails activity={activity}/>
+            </TabPanel>
+            <TabPanel>
+              <ActivityForm activitySubmission={defaultActivitySubmission}
+                onCreated={onUpdate}
+                initialActivity={editActivity}/>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </ModalContent>
     </Modal>
   </Flex>;

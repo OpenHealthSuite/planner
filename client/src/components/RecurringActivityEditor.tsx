@@ -1,4 +1,4 @@
-import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input } from "@chakra-ui/react";
+import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, FormControl, FormLabel, Input, Divider } from "@chakra-ui/react";
 import { RecurringActivity, RecurringActivityApiSubmission } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
 import { Formik } from "formik";
@@ -78,41 +78,36 @@ export const RecurringActivityForm = ({
       validateForm
     }) => (
       <form onSubmit={handleSubmit}>
-        <ModalHeader>Adding Recurring Activity</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <Flex flexDirection={"column"} gap={"1em"}>
-            <FormControl>
-              <FormLabel htmlFor="summary">Summary</FormLabel>
-              <Input 
-                id="summary"
-                name="summary"
-                type='text' onChange={handleChange} value={values.summary}/>
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="date">Date</FormLabel>
-              <Input 
-                id="date"
-                name="date" type='date' onChange={handleChange} value={values.date} />
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor={"recurrEachDays"}>Recurr Every n Days</FormLabel>
-              <Input 
-                id={"recurrEachDays"}
-                name={"recurrEachDays"}
-                type='number' onChange={handleChange} value={values.recurrEachDays}/>
-            </FormControl>
-            <ActivityStageEditor values={values} handleChange={handleChange} validateForm={validateForm}/>
-          </Flex>
-        </ModalBody>
-        <ModalFooter>
-          <Flex w={"100%"} justifyContent={"space-between"}>
-            <Button onClick={onClose} variant='ghost' type="button">Cancel</Button>
-            <Button type="submit" isDisabled={!dirty || !isValid}>
+        <Flex flexDirection={"column"} gap={"1em"}>
+          <FormControl>
+            <FormLabel htmlFor="summary">Summary</FormLabel>
+            <Input 
+              id="summary"
+              name="summary"
+              type='text' onChange={handleChange} value={values.summary}/>
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="date">Date</FormLabel>
+            <Input 
+              id="date"
+              name="date" type='date' onChange={handleChange} value={values.date} />
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor={"recurrEachDays"}>Recurr Every n Days</FormLabel>
+            <Input 
+              id={"recurrEachDays"}
+              name={"recurrEachDays"}
+              type='number' onChange={handleChange} value={values.recurrEachDays}/>
+          </FormControl>
+          <ActivityStageEditor values={values} handleChange={handleChange} validateForm={validateForm}/>
+        </Flex>
+        <Divider margin={"1em 0"} />
+        <Flex w={"100%"} justifyContent={"space-between"}>
+          <Button onClick={onClose} variant='ghost' type="button">Cancel</Button>
+          <Button type="submit" isDisabled={!dirty || !isValid}>
              Save
-            </Button>
-          </Flex>
-        </ModalFooter>
+          </Button>
+        </Flex>
       </form>
     )}
   </Formik>;
@@ -132,16 +127,20 @@ export const AddRecurringActivityInterface = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <RecurringActivityForm activitySubmission={activitySubmission}
-          onCreated={onCreated}
-          onClose={onClose}
-          initialRecurringActivity={{
-            summary: "",
-            stages: [],
-            date: "",
-            timeRelevant: false,
-            recurrEachDays: 1
-          }}/>
+        <ModalHeader>Adding Recurring Activity</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <RecurringActivityForm activitySubmission={activitySubmission}
+            onCreated={onCreated}
+            onClose={onClose}
+            initialRecurringActivity={{
+              summary: "",
+              stages: [],
+              date: "",
+              timeRelevant: false,
+              recurrEachDays: 1
+            }}/>
+        </ModalBody>
       </ModalContent>
     </Modal>
   </Flex>;

@@ -1,4 +1,4 @@
-import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, Checkbox } from "@chakra-ui/react";
+import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, FormControl, FormLabel, Input, Checkbox, Divider } from "@chakra-ui/react";
 import { Activity, ActivityApiSubmission } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
 import { Formik } from "formik";
@@ -21,7 +21,7 @@ export type InitialFormValues = Partial<Activity> &
 type ActivityFormProps = { 
   activitySubmission: typeof defaultActivitySubmission
   onCreated: (newId: string) => void
-  onClose: () => void
+  onClose?: () => void
   initialActivity: InitialFormValues
 } 
 
@@ -61,7 +61,7 @@ export const ActivityForm = ({
       (submission as unknown as ActivityApiSubmission).dateTime = new Date(Date.parse(date)).toISOString();
       try {
         const id = await activitySubmission(submission as unknown as ActivityApiSubmission);
-        onClose();
+        onClose ? onClose() : () => { return; };
         onCreated(id);
       } catch {
         console.error("Bad Request");
@@ -77,39 +77,34 @@ export const ActivityForm = ({
       validateForm
     }) => (
       <form onSubmit={handleSubmit}>
-        <ModalHeader>Adding Activity</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <Flex flexDirection={"column"} gap={"1em"}>
-            <FormControl>
-              <FormLabel htmlFor="summary">Summary</FormLabel>
-              <Input 
-                id="summary"
-                name="summary"
-                type='text' onChange={handleChange} value={values.summary}/>
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="date">Date</FormLabel>
-              <Input 
-                id="date"
-                name="date" type='date' onChange={handleChange} value={values.date} />
-            </FormControl>
-            <FormControl>
-              <Checkbox 
-                id="completed"
-                name="completed" onChange={handleChange} isChecked={values.completed}>Complete</Checkbox>
-            </FormControl>
-            <ActivityStageEditor values={values} handleChange={handleChange} validateForm={validateForm}/>
-          </Flex>
-        </ModalBody>
-        <ModalFooter>
-          <Flex w={"100%"} justifyContent={"space-between"}>
-            <Button onClick={onClose} variant='ghost' type="button">Cancel</Button>
-            <Button type="submit" isDisabled={!dirty || !isValid}>
+        <Flex flexDirection={"column"} gap={"1em"}>
+          <FormControl>
+            <FormLabel htmlFor="summary">Summary</FormLabel>
+            <Input 
+              id="summary"
+              name="summary"
+              type='text' onChange={handleChange} value={values.summary}/>
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="date">Date</FormLabel>
+            <Input 
+              id="date"
+              name="date" type='date' onChange={handleChange} value={values.date} />
+          </FormControl>
+          <FormControl>
+            <Checkbox 
+              id="completed"
+              name="completed" onChange={handleChange} isChecked={values.completed}>Complete</Checkbox>
+          </FormControl>
+          <ActivityStageEditor values={values} handleChange={handleChange} validateForm={validateForm}/>
+        </Flex>
+        <Divider margin={"1em 0"} />
+        <Flex w={"100%"} justifyContent={"space-between"}>
+          {onClose && <Button onClick={onClose} variant='ghost' type="button">Cancel</Button>}
+          <Button type="submit" isDisabled={!dirty || !isValid}>
              Save
-            </Button>
-          </Flex>
-        </ModalFooter>
+          </Button>
+        </Flex>
       </form>
     )}
   </Formik>;
@@ -129,17 +124,21 @@ export const AddActivityInterface = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ActivityForm activitySubmission={activitySubmission}
-          onCreated={onCreated}
-          onClose={onClose}
-          initialActivity={{
-            summary: "",
-            stages: [],
-            date: "",
-            timeRelevant: false,
-            completed: false,
-            notes: ""
-          }}/>
+        <ModalHeader>Adding Activity</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <ActivityForm activitySubmission={activitySubmission}
+            onCreated={onCreated}
+            onClose={onClose}
+            initialActivity={{
+              summary: "",
+              stages: [],
+              date: "",
+              timeRelevant: false,
+              completed: false,
+              notes: ""
+            }}/>
+        </ModalBody>
       </ModalContent>
     </Modal>
   </Flex>;
