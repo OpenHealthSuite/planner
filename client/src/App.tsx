@@ -1,9 +1,10 @@
-import { Button, ChakraProvider, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, MenuItem, MenuList, Spinner, extendTheme, useDisclosure } from "@chakra-ui/react";
+import { Button, ChakraProvider, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Spinner, extendTheme, useDisclosure } from "@chakra-ui/react";
 import { createContext, useEffect, useState } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { AddActivityInterface } from "./components/ActivityEditor";
 import { Plan } from "./types";
 import { plannerGetRequest } from "./utilities/apiRequest";
+import { AddRecurringActivityInterface } from "./components/RecurringActivityEditor";
 
 const colors = {
   brand: {},
@@ -67,8 +68,9 @@ function App() {
               <Button variant="ghost" onClick={() => {navigate("/plans"); onClose();}}>Plans</Button>
             </DrawerBody>
 
-            <DrawerFooter>
+            <DrawerFooter display={"flex"} flexDirection={"column"}>
               <AddActivityInterface />
+              <AddRecurringActivityInterface />
             </DrawerFooter>
           </DrawerContent>
         </Drawer>

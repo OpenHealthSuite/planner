@@ -1,7 +1,7 @@
 import { Box, Flex, IconButton, Modal, ModalContent, ModalOverlay, Text, useDisclosure } from "@chakra-ui/react";
-import { addDays, format, subDays, isAfter, addMinutes } from "date-fns";
-import { ViewIcon, CheckIcon } from "@chakra-ui/icons";
-import { Activity, ActivityApiSubmission } from "../types";
+import { addDays, format, subDays, isAfter, addMinutes, differenceInDays } from "date-fns";
+import { ViewIcon, CheckIcon, RepeatIcon } from "@chakra-ui/icons";
+import { Activity, ActivityApiSubmission, RecurringActivity } from "../types";
 import { useCallback, useEffect, useState } from "react";
 import { plannerGetRequest, plannerPutRequest } from "../utilities/apiRequest";
 import { ActivityForm, InitialFormValues } from "./ActivityEditor";
@@ -73,6 +73,20 @@ const ActivitySummary = ({ activity, onUpdate } : { activity: Activity,
   </Flex>;
 };
 
+
+const RecurringActivitySummary = ({ activity } : { activity: RecurringActivity }) => {
+  return <Flex margin="0.25em 0"
+    padding="0.25em 0.25em 0.25em 0.5em"
+    marginRight="1em"
+    border={"1px dashed black"}
+    backgroundColor="white"
+    borderRadius="0.25em"
+    alignItems={"center"}>
+    <RepeatIcon />
+    <Text>{activity.summary}</Text>
+  </Flex>;
+};
+
 const TODAY_BACKGROUND = `repeating-linear-gradient(
     135deg,
     #EDEDED,
@@ -81,11 +95,18 @@ const TODAY_BACKGROUND = `repeating-linear-gradient(
     #FFFFFF 14px
   );`;
 
-const DaysActivities = ({ date, activities, onUpdate }: { 
+const DaysActivities = ({ date, activities, recurringActivities, onUpdate }: { 
     date: Date,
     activities?: Activity[],
+    recurringActivities: RecurringActivity[],
     onUpdate: (str: string) => void
 }) => {
+  // TODO: This *will* give us perf grief in the future - we should
+  // instead calculate all relevant dates in view
+  const relevantRecurringActivities = recurringActivities.filter(ra => {
+    const dayDiff = differenceInDays(new Date(date.toISOString().split("T")[0]), new Date(ra.dateTimeStart.toISOString().split("T")[0]));
+    return dayDiff === 0 || (dayDiff > 0 && dayDiff % ra.recurrEachDays === 0);
+  });
   return <Flex margin={"0.5em 0"} 
     borderBottom={date.getDay() === 6 ? "1px dashed black" : undefined}
     background={date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0] ? TODAY_BACKGROUND : undefined}>
@@ -96,11 +117,15 @@ const DaysActivities = ({ date, activities, onUpdate }: {
       borderRight={"1px solid black"}>
       <Text>{format(date, "eee")}</Text>
     </Box>
-    <Box flex='1'>{!activities ? <Box margin="0.25em 0" padding="0.25em">
-      <Text>Rest</Text>
-    </Box> : activities.map(x => <ActivitySummary key={x.id} 
-      activity={x}
-      onUpdate={onUpdate}/>)}</Box>
+    <Box flex='1'>
+      {!activities && !relevantRecurringActivities && <Box margin="0.25em 0" padding="0.25em">
+        <Text>Rest</Text>
+      </Box>}
+      {activities && activities.map(x => <ActivitySummary key={x.id} 
+        activity={x}
+        onUpdate={onUpdate}/>)}
+      {relevantRecurringActivities.map(x => <RecurringActivitySummary key={x.id} 
+        activity={x}/>)}</Box>
   </Flex>;
 };
 
@@ -110,6 +135,7 @@ export const ActivityList = ({
 } : ActivityListProps) => {
 
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [recurringActivities, setRecurringActivities] = useState<RecurringActivity[]>([]);
   const [internalUpdate, setInternalUpdate] = useState(updated);
   const [, setLoading] = useState(true);
   const [, setError] = useState(false);
@@ -121,14 +147,25 @@ export const ActivityList = ({
 
   useEffect(() => {
     setLoading(true);
-    plannerGetRequest<Activity[]>("/activities")
-      .then(acts => acts.map(a => {
-        a.dateTime = new Date(a.dateTime);
-        return a;
-      }))
-      .then(acts => {
+    Promise.all([
+      plannerGetRequest<Activity[]>("/activities"),
+      plannerGetRequest<RecurringActivity[]>("/recurring_activities")
+    ])
+      .then(([acts, recurringActs]) => {
+        acts = acts.map(a => {
+          a.dateTime = new Date(a.dateTime);
+          return a;
+        });
+        recurringActs = recurringActs.map(a => {
+          a.dateTimeStart = new Date(a.dateTimeStart);
+          return a;
+        });
+        return [acts, recurringActs] as [Activity[], RecurringActivity[]];
+      })
+      .then(([acts, recurringActs]) => {
         setError(false);
         setActivities(acts);
+        setRecurringActivities(recurringActs);
       })
       .catch(() => {
         setError(true);
@@ -152,6 +189,7 @@ export const ActivityList = ({
       return <DaysActivities key={date} 
         date={x} 
         activities={activityDayMap[date]}
+        recurringActivities={recurringActivities}
         onUpdate={setInternalUpdate}/>;
     })}
   </div>;
