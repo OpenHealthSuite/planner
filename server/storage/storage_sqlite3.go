@@ -364,7 +364,7 @@ func getSqliteStorageClient(filepath string) (Storage, error) {
 		return Storage{}, err
 	}
 	// Do migrations
-	createTableSQL := `
+	migrations := []string{`
 	CREATE TABLE IF NOT EXISTS activities (
 			id TEXT PRIMARY KEY,
 			userId TEXT,
@@ -375,17 +375,19 @@ func getSqliteStorageClient(filepath string) (Storage, error) {
 			timeRelevant BOOLEAN,
 			completed BOOLEAN,
 			notes TEXT
-	);
-	CREATE TABLE IF NOT EXISTS plans (
+	);`,
+		`CREATE TABLE IF NOT EXISTS plans (
 			id TEXT PRIMARY KEY,
 			userId TEXT,
 			name TEXT,
 			active BOOLEAN
 	);
-	`
-	_, err = db.Exec(createTableSQL)
-	if err != nil {
-		return Storage{}, err
+	`}
+	for _, migration := range migrations {
+		_, err = db.Exec(migration)
+		if err != nil {
+			return Storage{}, err
+		}
 	}
 	return Storage{
 		Activity: Sqlite3ActivityStorage{DB: db},
