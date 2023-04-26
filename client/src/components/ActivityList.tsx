@@ -3,7 +3,7 @@ import { addDays, format, subDays, isAfter, addMinutes, differenceInDays } from 
 import { ViewIcon, CheckIcon, RepeatIcon } from "@chakra-ui/icons";
 import { Activity, ActivityApiSubmission, RecurringActivity } from "../types";
 import { useCallback, useEffect, useState } from "react";
-import { plannerGetRequest, plannerPutRequest } from "../utilities/apiRequest";
+import { plannerGetRequest, plannerPostRequest, plannerPutRequest } from "../utilities/apiRequest";
 import { ActivityForm, InitialFormValues } from "./ActivityEditor";
 import { ActivityDetails } from "./ActivityDetails";
 
@@ -88,7 +88,29 @@ const ActivitySummary = ({ activity, onUpdate } : { activity: Activity,
 };
 
 
-const RecurringActivitySummary = ({ activity } : { activity: RecurringActivity }) => {
+const RecurringActivitySummary = ({ daysActivities, activity, activityDay, onUpdate } : { daysActivities?: Activity[] ,activity: RecurringActivity, activityDay: Date, onUpdate: (str: string) => void }) => {
+  const [loading, isLoading] = useState(false);
+
+  const createAssociatedCompleteActivity = useCallback((recurringActivity: RecurringActivity) => {
+    isLoading(true);
+    const {summary, stages, timeRelevant} = recurringActivity;
+    const activity: ActivityApiSubmission = {
+      summary,
+      stages,
+      timeRelevant,
+      recurringActivityId: recurringActivity.id,
+      dateTime: activityDay.toISOString(),
+      completed: true,
+      notes: "Completed from Recurring Activity"
+    };
+    plannerPostRequest<ActivityApiSubmission, string>("/activities", activity)
+      .then(onUpdate)
+      .finally(() => isLoading(false));
+  }, [isLoading, onUpdate]);
+
+  const tomorrow = addDays(new Date(new Date().toISOString().split("T")[0]), 1);
+  const isCompletable = isAfter(tomorrow, activityDay);
+  const isCompleted = daysActivities && daysActivities.findIndex(da => da.recurringActivityId === activity.id) === -1;
   return <Flex margin="0.25em 0"
     padding="0.25em 0.25em 0.25em 0.5em"
     marginRight="1em"
@@ -96,8 +118,15 @@ const RecurringActivitySummary = ({ activity } : { activity: RecurringActivity }
     backgroundColor="white"
     borderRadius="0.25em"
     alignItems={"center"}>
-    <RepeatIcon />
+    <RepeatIcon marginRight={"0.5em"}/>
     <Text>{activity.summary}</Text>
+    {!isCompleted && isCompletable && <IconButton size="sm"
+      aria-label="Mark Done"
+      marginLeft={"auto"}
+      marginRight={0}
+      onClick={() => createAssociatedCompleteActivity(activity)}
+      isDisabled={loading}
+      icon={<CheckIcon />} />}
   </Flex>;
 };
 
@@ -121,6 +150,12 @@ const DaysActivities = ({ date, activities, recurringActivities, onUpdate }: {
     const dayDiff = differenceInDays(new Date(date.toISOString().split("T")[0]), new Date(ra.dateTimeStart.toISOString().split("T")[0]));
     return dayDiff === 0 || (dayDiff > 0 && dayDiff % ra.recurrEachDays === 0);
   });
+  const completedRecurringActivityIds = activities ? activities.reduce<string[]>((acc, curr) => {
+    if (!curr.recurringActivityId) {
+      return acc;
+    }
+    return [...acc, curr.recurringActivityId];
+  }, []) : [];
   return <Flex margin={"0.5em 0"} 
     borderBottom={date.getDay() === 6 ? "1px dashed black" : undefined}
     background={date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0] ? TODAY_BACKGROUND : undefined}>
@@ -138,7 +173,10 @@ const DaysActivities = ({ date, activities, recurringActivities, onUpdate }: {
       {activities && activities.map(x => <ActivitySummary key={x.id} 
         activity={x}
         onUpdate={onUpdate}/>)}
-      {relevantRecurringActivities.map(x => <RecurringActivitySummary key={x.id} 
+      {relevantRecurringActivities.filter(x => !completedRecurringActivityIds.includes(x.id)).map(x => <RecurringActivitySummary 
+        key={x.id}
+        activityDay={date}
+        onUpdate={onUpdate}
         activity={x}/>)}</Box>
   </Flex>;
 };

@@ -13,6 +13,7 @@ export type ActivityStage = {
 export type Activity = {
 	id: string
 	userId: string
+	recurringActivityId?: string
 	planId?: string
 	summary: string
 	stages: ActivityStage[]
@@ -40,6 +41,6 @@ export type Plan = {
 	active: boolean
 }
 
-export type ActivityApiSubmission = Omit<Activity, "dateTime"> & { dateTime: string }
+export type ActivityApiSubmission = Omit<Activity, "dateTime" | "id" | "userId"> & { id?: string, dateTime: string }
 
-export type RecurringActivityApiSubmission = Omit<Activity, "dateTimeStart"> & { dateTimeStart: string }
+export type RecurringActivityApiSubmission = Omit<Activity, "dateTimeStart" | "id" | "userId"> & { id?: string, dateTimeStart: string }
