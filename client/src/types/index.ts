@@ -22,6 +22,17 @@ export type Activity = {
 	notes: string
 }
 
+export type RecurringActivity = {
+	id: string
+	userId: string
+	planId?: string
+	summary: string
+	stages: ActivityStage[]
+	recurrEachDays: number
+	dateTimeStart: Date
+	timeRelevant: boolean
+}
+
 export type Plan = {
 	id: string,
 	name: string,
@@ -30,3 +41,5 @@ export type Plan = {
 }
 
 export type ActivityApiSubmission = Omit<Activity, "dateTime"> & { dateTime: string }
+
+export type RecurringActivityApiSubmission = Omit<Activity, "dateTime"> & { dateTime: string }
