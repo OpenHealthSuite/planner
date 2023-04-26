@@ -42,4 +42,4 @@ export type Plan = {
 
 export type ActivityApiSubmission = Omit<Activity, "dateTime"> & { dateTime: string }
 
-export type RecurringActivityApiSubmission = Omit<Activity, "dateTime"> & { dateTime: string }
+export type RecurringActivityApiSubmission = Omit<Activity, "dateTimeStart"> & { dateTimeStart: string }

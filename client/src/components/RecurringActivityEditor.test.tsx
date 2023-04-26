@@ -30,7 +30,7 @@ describe("Add Recurring Activity Interface", () => {
     await waitForElementToBeRemoved(() => screen.queryByText("Adding Recurring Activity"));
 
     expect(fakeSaver).toBeCalledWith({
-      dateTime: "2023-04-03T00:00:00.000Z",
+      dateTimeStart: "2023-04-03T00:00:00.000Z",
       recurrEachDays: 1,
       stages: [],
       summary: "Test name activity",
@@ -74,7 +74,7 @@ describe("Add Recurring Activity Interface", () => {
     await waitForElementToBeRemoved(() => screen.queryByText("Adding Recurring Activity"));
 
     expect(fakeSaver).toBeCalledWith({
-      dateTime: "2023-04-03T00:00:00.000Z",
+      dateTimeStart: "2023-04-03T00:00:00.000Z",
       recurrEachDays: 4,
       stages: [
         {description: "My Custom Stage",
