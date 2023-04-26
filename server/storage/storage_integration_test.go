@@ -34,8 +34,9 @@ func TestActivityCreateReadUpdateDelete(t *testing.T) {
 			return
 		}
 		createActivity := Activity{
-			UserId:  userId,
-			Summary: "Test Item",
+			UserId:              userId,
+			Summary:             "Test Item",
+			RecurringActivityId: nil,
 			Stages: []ActivityStage{
 				{
 					Order:       0,

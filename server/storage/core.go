@@ -20,15 +20,27 @@ type ActivityStage struct {
 }
 
 type Activity struct {
-	Id           uuid.UUID       `json:"id"`
-	UserId       string          `json:"userId"`
-	PlanId       *uuid.UUID      `json:"planId"`
-	Summary      string          `json:"summary"`
-	Stages       []ActivityStage `json:"stages"`
-	DateTime     time.Time       `json:"dateTime"`
-	TimeRelevant bool            `json:"timeRelevant"`
-	Completed    bool            `json:"completed"`
-	Notes        string          `json:"notes"`
+	Id                  uuid.UUID       `json:"id"`
+	RecurringActivityId *uuid.UUID      `json:"recurringActivityId"`
+	UserId              string          `json:"userId"`
+	PlanId              *uuid.UUID      `json:"planId"`
+	Summary             string          `json:"summary"`
+	Stages              []ActivityStage `json:"stages"`
+	DateTime            time.Time       `json:"dateTime"`
+	TimeRelevant        bool            `json:"timeRelevant"`
+	Completed           bool            `json:"completed"`
+	Notes               string          `json:"notes"`
+}
+
+type RecurringActivity struct {
+	Id             uuid.UUID       `json:"id"`
+	UserId         string          `json:"userId"`
+	PlanId         *uuid.UUID      `json:"planId"`
+	Summary        string          `json:"summary"`
+	Stages         []ActivityStage `json:"stages"`
+	RecurrEachDays int32           `json:"recurrEachDays"`
+	DateTimeStart  time.Time       `json:"dateTimeStart"`
+	TimeRelevant   bool            `json:"timeRelevant"`
 }
 
 type Plan struct {
@@ -59,6 +71,16 @@ type ActivityStorage interface {
 	Read(userId string, id uuid.UUID) (*Activity, error)
 	Query(query ActivityStorageQuery) (*[]Activity, error)
 	Update(activity Activity) error
+	Delete(userId string, id uuid.UUID) error
+	DeleteForPlan(userId string, planId uuid.UUID) error
+}
+
+//go:generate mockery --name ActivityStorage
+type RecurringActivityStorage interface {
+	Create(activity Activity) (RecurringActivity, error)
+	Read(userId string, id uuid.UUID) (*RecurringActivity, error)
+	Query(query ActivityStorageQuery) (*[]RecurringActivity, error)
+	Update(activity RecurringActivity) error
 	Delete(userId string, id uuid.UUID) error
 	DeleteForPlan(userId string, planId uuid.UUID) error
 }

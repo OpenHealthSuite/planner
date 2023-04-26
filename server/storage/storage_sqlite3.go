@@ -19,6 +19,7 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 			INSERT INTO activities (
 				id,
 				userId,
+				recurringActivityId,
 				planId,
 				summary,
 				stages,
@@ -28,6 +29,7 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 				notes
 			)
 			VALUES (
+				?,
 				?,
 				?,
 				?,
@@ -46,6 +48,7 @@ func (stg Sqlite3ActivityStorage) Create(activity Activity) (Activity, error) {
 	_, insertErr := stg.DB.Exec(insertSQL,
 		newId,
 		activity.UserId,
+		activity.RecurringActivityId,
 		activity.PlanId,
 		activity.Summary,
 		jsonStr,
@@ -66,6 +69,7 @@ func (stg Sqlite3ActivityStorage) Read(userId string, id uuid.UUID) (*Activity, 
 			SELECT 
 				id,
 				userId,
+				recurringActivityId,
 				planId,
 				summary,
 				stages,
@@ -89,6 +93,7 @@ func (stg Sqlite3ActivityStorage) Read(userId string, id uuid.UUID) (*Activity, 
 		err = rows.Scan(
 			&activity.Id,
 			&activity.UserId,
+			&activity.RecurringActivityId,
 			&activity.PlanId,
 			&activity.Summary,
 			&rawStages,
@@ -120,6 +125,7 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 	SELECT 
 		id,
 		userId,
+		recurringActivityId,
 		planId,
 		summary,
 		stages,
@@ -148,6 +154,7 @@ func (stg Sqlite3ActivityStorage) Query(query ActivityStorageQuery) (*[]Activity
 		err = rows.Scan(
 			&activity.Id,
 			&activity.UserId,
+			&activity.RecurringActivityId,
 			&activity.PlanId,
 			&activity.Summary,
 			&rawStages,
@@ -173,7 +180,7 @@ func (stg Sqlite3ActivityStorage) Update(activity Activity) error {
 	updateSQL := `
 			UPDATE activities
 			SET 
-				userId = ?,
+				recurringActivityId = ?,
 				planId = ?,
 				summary = ?,
 				stages = ?,
@@ -181,14 +188,14 @@ func (stg Sqlite3ActivityStorage) Update(activity Activity) error {
 				timeRelevant = ?,
 				completed = ?,
 				notes = ?
-			WHERE id = ?;
+			WHERE id = ? AND userId = ?;
 	`
 	jsonStr, err := json.Marshal(activity.Stages)
 	if err != nil {
 		return err
 	}
 	_, updateErr := stg.DB.Exec(updateSQL,
-		activity.UserId,
+		activity.RecurringActivityId,
 		activity.PlanId,
 		activity.Summary,
 		jsonStr,
@@ -197,6 +204,7 @@ func (stg Sqlite3ActivityStorage) Update(activity Activity) error {
 		activity.Completed,
 		activity.Notes,
 		activity.Id,
+		activity.UserId,
 	)
 	if updateErr != nil {
 		return updateErr

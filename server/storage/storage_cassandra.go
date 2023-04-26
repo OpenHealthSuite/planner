@@ -26,6 +26,7 @@ func (stg CassandraActivityStorage) Create(activity Activity) (Activity, error) 
 			INSERT INTO ohs_planner.activities (
 				id,
 				userId,
+				recurringActivityId,
 				planId,
 				summary,
 				stages,
@@ -35,6 +36,7 @@ func (stg CassandraActivityStorage) Create(activity Activity) (Activity, error) 
 				notes
 			)
 			VALUES (
+				?,
 				?,
 				?,
 				?,
@@ -55,9 +57,15 @@ func (stg CassandraActivityStorage) Create(activity Activity) (Activity, error) 
 		dirString := activity.PlanId.String()
 		planIdString = &dirString
 	}
+	var recurringIdString *string
+	if activity.RecurringActivityId != nil {
+		dirString := activity.RecurringActivityId.String()
+		recurringIdString = &dirString
+	}
 	insertErr := session.Query(insertCQL,
 		newId.String(),
 		activity.UserId,
+		recurringIdString,
 		planIdString,
 		activity.Summary,
 		jsonStr,
@@ -83,6 +91,7 @@ func (stg CassandraActivityStorage) Read(userId string, id uuid.UUID) (*Activity
 			SELECT 
 				id,
 				userId,
+				recurringActivityId,
 				planId,
 				summary,
 				stages,
@@ -100,9 +109,11 @@ func (stg CassandraActivityStorage) Read(userId string, id uuid.UUID) (*Activity
 		rawStages := "[]"
 		rawId := ""
 		rawPlanId := ""
+		rawRecurringId := ""
 		err = scanner.Scan(
 			&rawId,
 			&activity.UserId,
+			&rawRecurringId,
 			&rawPlanId,
 			&activity.Summary,
 			&rawStages,
@@ -123,6 +134,10 @@ func (stg CassandraActivityStorage) Read(userId string, id uuid.UUID) (*Activity
 			dirRef := uuid.MustParse(rawPlanId)
 			activity.PlanId = &dirRef
 		}
+		if rawRecurringId != "" {
+			dirRef := uuid.MustParse(rawRecurringId)
+			activity.RecurringActivityId = &dirRef
+		}
 		return &activity, nil
 	}
 	return nil, nil
@@ -139,6 +154,7 @@ func (stg CassandraActivityStorage) Query(query ActivityStorageQuery) (*[]Activi
 	SELECT 
 		id,
 		userId,
+		recurringActivityId,
 		planId,
 		summary,
 		stages,
@@ -168,9 +184,11 @@ func (stg CassandraActivityStorage) Query(query ActivityStorageQuery) (*[]Activi
 		rawStages := "[]"
 		rawId := ""
 		rawPlanId := ""
+		rawRecurringId := ""
 		err = rows.Scan(
 			&rawId,
 			&activity.UserId,
+			&rawRecurringId,
 			&rawPlanId,
 			&activity.Summary,
 			&rawStages,
@@ -192,6 +210,10 @@ func (stg CassandraActivityStorage) Query(query ActivityStorageQuery) (*[]Activi
 			dirRef := uuid.MustParse(rawPlanId)
 			activity.PlanId = &dirRef
 		}
+		if rawRecurringId != "" {
+			dirRef := uuid.MustParse(rawRecurringId)
+			activity.RecurringActivityId = &dirRef
+		}
 		activities = append(activities, activity)
 	}
 	return &activities, nil
@@ -207,6 +229,7 @@ func (stg CassandraActivityStorage) Update(activity Activity) error {
 			UPDATE ohs_planner.activities
 			SET 
 				planId = ?,
+				recurringActivityId = ?,
 				summary = ?,
 				stages = ?,
 				dateTime = ?,
@@ -224,8 +247,14 @@ func (stg CassandraActivityStorage) Update(activity Activity) error {
 		dirString := activity.PlanId.String()
 		planIdString = &dirString
 	}
+	var recurringActivityIdString *string
+	if activity.RecurringActivityId != nil {
+		dirString := activity.RecurringActivityId.String()
+		recurringActivityIdString = &dirString
+	}
 	updateErr := session.Query(updateCQL,
 		planIdString,
+		recurringActivityIdString,
 		activity.Summary,
 		jsonStr,
 		activity.DateTime,
