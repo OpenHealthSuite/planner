@@ -159,7 +159,7 @@ export const ActivityList = ({
   useEffect(() => {
     const element = document.getElementById("initial-scrollto-target");
     if (element) {
-      element.scrollIntoView({ behavior: "instant" });
+      element.scrollIntoView();
     }
   }, []);
 
