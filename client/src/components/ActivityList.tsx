@@ -8,7 +8,7 @@ import { SingularActivitySummary } from "./internal/ActivityList/SingularActivit
 import { RecurringActivitySummary } from "./internal/ActivityList/RecurringActivityEntry";
 
 export type ActivityListProps = {
-    targetDate?: Date
+  initialDate?: Date
 }
 
 const TODAY_BACKGROUND = `repeating-linear-gradient(
@@ -19,7 +19,8 @@ const TODAY_BACKGROUND = `repeating-linear-gradient(
     #FFFFFF 14px
   );`;
 
-const DaysActivities = ({ date, activities, recurringActivities, onUpdate }: { 
+const DaysActivities = ({ id, date, activities, recurringActivities, onUpdate }: {
+    id: string | undefined,
     date: Date,
     activities: Activity[],
     recurringActivities: RecurringActivity[],
@@ -31,7 +32,8 @@ const DaysActivities = ({ date, activities, recurringActivities, onUpdate }: {
     }
     return [...acc, curr.recurringActivityId];
   }, []) : [];
-  return <Flex margin={"0.5em 0"} 
+  return <Flex id={id}
+    margin={"0.5em 0"}
     borderBottom={date.getDay() === 6 ? "1px dashed black" : undefined}
     background={date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0] ? TODAY_BACKGROUND : undefined}>
     <Box w={"4em"} 
@@ -57,11 +59,15 @@ const DaysActivities = ({ date, activities, recurringActivities, onUpdate }: {
 };
 
 export const ActivityList = ({
-  targetDate = new Date() 
+  initialDate = new Date() 
 } : ActivityListProps) => {
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [recurringActivities, setRecurringActivities] = useState<RecurringActivity[]>([]);
+
+  const [activityDayMap, setActivityDayMap] = useState<{[key: string]: Activity[]}>({});
+  const [recurringActivityDayMap, setRecurringActivityDayMap] = useState<{[key: string]: RecurringActivity[]}>({});
+
   const {latestCreatedActivityId: updated, setLatestCreatedActivityId} = useContext(ApplicationContext);
   const [, setLoading] = useState(true);
   const [, setError] = useState(false);
@@ -69,7 +75,7 @@ export const ActivityList = ({
   const totalDaysToLoad = 21;
   const preceedingDays = 7;
   const daysToDisplay = Array.apply(null, Array(totalDaysToLoad))
-    .map((_, i) => addDays(subDays(targetDate, preceedingDays), i));
+    .map((_, i) => addDays(subDays(initialDate, preceedingDays), i));
 
   useEffect(() => {
     setLoading(true);
@@ -99,36 +105,55 @@ export const ActivityList = ({
       .finally(() => setLoading(false));
   }, [updated, setActivities, setLoading, setError]);
 
-  
-  const activityDayMap = activities.reduce<{[key: string]: Activity[]}>((acc, curr)=>{
-    const date = curr.dateTime.toISOString().split("T")[0];
-    if (acc[date]) {
-      acc[date] = [...acc[date], curr];
-    } else {
-      acc[date] = [curr];
+  useEffect(() => {
+    const newActivities = activities.reduce<{[key: string]: Activity[]}>((acc, curr)=>{
+      const date = curr.dateTime.toISOString().split("T")[0];
+      if (acc[date]) {
+        acc[date] = [...acc[date], curr];
+      } else {
+        acc[date] = [curr];
+      }
+      return acc;
+    }, {});
+    setActivityDayMap({ ...activityDayMap, ...newActivities });
+  }, [activities, setActivityDayMap]);
+
+  useEffect(() => {
+    const newRecurring = daysToDisplay.reduce<{[key: string]: RecurringActivity[]}>((recAcc, curr)=>{
+      // I'm sure this could be more efficient, but it's already
+      // coming out of a lower loop
+      const date = curr.toISOString().split("T")[0];
+      recAcc[date] = recurringActivities.filter(ra => {
+        const dayDiff = differenceInDays(new Date(date), new Date(ra.dateTimeStart.toISOString().split("T")[0]));
+        return dayDiff === 0 || (dayDiff > 0 && dayDiff % ra.recurrEachDays === 0);
+      });
+      return recAcc;
+    }, {});
+    setRecurringActivityDayMap({ ...recurringActivityDayMap, ...newRecurring });
+  }, [recurringActivities, setRecurringActivityDayMap]);
+
+  useEffect(() => {
+    const element = document.getElementById("initial-scrollto-target");
+    if (element) {
+      element.scrollIntoView({ behavior: "instant" });
     }
-    return acc;
-  }, {});
+  }, [initialDate]);
 
-  const recurringActivityDayMap = daysToDisplay.reduce<{[key: string]: RecurringActivity[]}>((recAcc, curr)=>{
-    // I'm sure this could be more efficient, but it's already
-    // coming out of a lower loop
-    const date = curr.toISOString().split("T")[0];
-    recAcc[date] = recurringActivities.filter(ra => {
-      const dayDiff = differenceInDays(new Date(date), new Date(ra.dateTimeStart.toISOString().split("T")[0]));
-      return dayDiff === 0 || (dayDiff > 0 && dayDiff % ra.recurrEachDays === 0);
-    });
-    return recAcc;
-  }, {});
+  const initialDateScrolltoTarget = subDays(initialDate, 1).toISOString().split("T")[0];
 
-  return <div>
+  return <Flex flexDirection={"column"}
+    maxHeight={"100%"}
+    width={"100%"}
+    overflow={"scroll"}
+  >
     {daysToDisplay.map(x => {
       const date = x.toISOString().split("T")[0];
-      return <DaysActivities key={date} 
-        date={x} 
+      return <DaysActivities key={date}
+        date={x}
+        id={date === initialDateScrolltoTarget ? "initial-scrollto-target" : undefined}
         activities={activityDayMap[date] ?? []}
-        recurringActivities={recurringActivityDayMap[date]}
+        recurringActivities={recurringActivityDayMap[date] ?? []}
         onUpdate={setLatestCreatedActivityId}/>;
     })}
-  </div>;
+  </Flex>;
 };

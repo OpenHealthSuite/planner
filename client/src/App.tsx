@@ -53,6 +53,7 @@ function App() {
           right={0}
           padding={"1em"}
           margin={"1em"}
+          zIndex={9999}
           onClick={onOpen}>
       Menu
         </Button>
