@@ -1,7 +1,7 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
+import { Box, Button, CircularProgress, Flex, Text } from "@chakra-ui/react";
 import { addDays, format, subDays, differenceInDays } from "date-fns";
 import { Activity, RecurringActivity } from "../types";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { plannerGetRequest } from "../utilities/apiRequest";
 import { ApplicationContext } from "../App";
 import { SingularActivitySummary } from "./internal/ActivityList/SingularActivityEntry";
@@ -34,20 +34,22 @@ const DaysActivities = ({ id, date, activities, recurringActivities, onUpdate }:
   }, []) : [];
   return <Flex id={id}
     margin={"0.5em 0"}
+    paddingBottom={date.getDay() === 6 ? "1em" : undefined}
     borderBottom={date.getDay() === 6 ? "1px dashed black" : undefined}
     background={date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0] ? TODAY_BACKGROUND : undefined}>
-    <Box w={"4em"} 
+    <Box w={"4.5em"} 
       paddingRight={"0.5em"}
       marginRight={"0.5em"} 
       textAlign={"right"}
       borderRight={"1px solid black"}>
       <Text>{format(date, "eee")}</Text>
+      <Text fontSize='xs'>{format(date, "LLL do")}</Text>
     </Box>
     <Box flex='1'>
-      {!activities && !recurringActivities && <Box margin="0.25em 0" padding="0.25em">
+      {activities.length === 0 && recurringActivities.length === 0 && <Box margin="0.25em 0" padding="0.25em">
         <Text>Rest</Text>
       </Box>}
-      {activities && activities.map(x => <SingularActivitySummary key={x.id} 
+      {activities.map(x => <SingularActivitySummary key={x.id} 
         activity={x}
         onUpdate={onUpdate}/>)}
       {recurringActivities.filter(x => !completedRecurringActivityIds.includes(x.id)).map(x => <RecurringActivitySummary 
@@ -56,6 +58,11 @@ const DaysActivities = ({ id, date, activities, recurringActivities, onUpdate }:
         onUpdate={onUpdate}
         activity={x}/>)}</Box>
   </Flex>;
+};
+
+const generateDatesArray = (totalDaysToLoad: number, firstDay: Date, preceedingDays: number) => {
+  return Array.apply(null, Array(totalDaysToLoad))
+    .map((_, i) => addDays(subDays(firstDay, preceedingDays), i));
 };
 
 export const ActivityList = ({
@@ -69,18 +76,18 @@ export const ActivityList = ({
   const [recurringActivityDayMap, setRecurringActivityDayMap] = useState<{[key: string]: RecurringActivity[]}>({});
 
   const {latestCreatedActivityId: updated, setLatestCreatedActivityId} = useContext(ApplicationContext);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [, setError] = useState(false);
-  
+
   const totalDaysToLoad = 21;
   const preceedingDays = 7;
-  const daysToDisplay = Array.apply(null, Array(totalDaysToLoad))
-    .map((_, i) => addDays(subDays(initialDate, preceedingDays), i));
-
-  useEffect(() => {
+  
+  const [daysToDisplay, setDaysToDisplay] = useState(generateDatesArray(totalDaysToLoad, initialDate, preceedingDays));
+  
+  const getActivities = useCallback((startDate: Date, endDate: Date) => {
     setLoading(true);
     Promise.all([
-      plannerGetRequest<Activity[]>("/activities"),
+      plannerGetRequest<Activity[]>(`/activities?timeStart=${startDate.toISOString()}&timeEnd=${endDate.toISOString()}`),
       plannerGetRequest<RecurringActivity[]>("/recurring_activities")
     ])
       .then(([acts, recurringActs]) => {
@@ -103,7 +110,24 @@ export const ActivityList = ({
         setError(true);
       })
       .finally(() => setLoading(false));
-  }, [updated, setActivities, setLoading, setError]);
+  }, [setActivities, setLoading, setError]);
+  
+  const scrollCallback = useCallback((event: React.UIEvent<HTMLDivElement, UIEvent>, amLoading: boolean) => {
+    const element = event.target as HTMLElement;
+    const buffer = 10;
+    const shouldLoadBottom = ((element.scrollHeight - element.clientHeight) - element.scrollTop) < buffer;
+    if (!amLoading && shouldLoadBottom) {
+      setDaysToDisplay([...daysToDisplay, ...generateDatesArray(14, addDays(daysToDisplay[daysToDisplay.length - 1], 1), 0)]);
+    }
+  }, [daysToDisplay, setDaysToDisplay]);
+
+  const preceedingLoad = useCallback(() => {
+    setDaysToDisplay([...generateDatesArray(7, daysToDisplay[0], 7), ...daysToDisplay]);
+  }, [daysToDisplay, setDaysToDisplay]);
+
+  useEffect(() => {
+    getActivities(daysToDisplay[0], daysToDisplay[daysToDisplay.length - 1]);
+  }, [updated, getActivities]);
 
   useEffect(() => {
     const newActivities = activities.reduce<{[key: string]: Activity[]}>((acc, curr)=>{
@@ -130,14 +154,14 @@ export const ActivityList = ({
       return recAcc;
     }, {});
     setRecurringActivityDayMap({ ...recurringActivityDayMap, ...newRecurring });
-  }, [recurringActivities, setRecurringActivityDayMap]);
+  }, [daysToDisplay, recurringActivities, setRecurringActivityDayMap]);
 
   useEffect(() => {
     const element = document.getElementById("initial-scrollto-target");
     if (element) {
       element.scrollIntoView({ behavior: "instant" });
     }
-  }, [initialDate]);
+  }, []);
 
   const initialDateScrolltoTarget = subDays(initialDate, 1).toISOString().split("T")[0];
 
@@ -145,7 +169,10 @@ export const ActivityList = ({
     maxHeight={"100%"}
     width={"100%"}
     overflow={"scroll"}
+    onScroll={event => scrollCallback(event, loading)}
   >
+    {loading && <CircularProgress />}
+    {!loading && <Button onClick={preceedingLoad} padding={"1em"} margin={"0.5em"}>Load More</Button>}
     {daysToDisplay.map(x => {
       const date = x.toISOString().split("T")[0];
       return <DaysActivities key={date}
@@ -155,5 +182,6 @@ export const ActivityList = ({
         recurringActivities={recurringActivityDayMap[date] ?? []}
         onUpdate={setLatestCreatedActivityId}/>;
     })}
+    {loading && <CircularProgress />}
   </Flex>;
 };
