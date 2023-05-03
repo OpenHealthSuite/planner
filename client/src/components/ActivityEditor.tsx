@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, FormControl, FormLabel, Input, Checkbox, Divider } from "@chakra-ui/react";
 import { Activity, ActivityApiSubmission } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
@@ -11,7 +12,7 @@ const defaultActivitySubmission = (activity: ActivityApiSubmission) => {
 
 type AddActivityInterfaceProps = { 
   activitySubmission?: typeof defaultActivitySubmission
-  onCreated?: (newId: string) => void
+  onUpdate?: (newId: string) => void
 }
 
 export type InitialFormValues = Partial<Activity> &
@@ -20,7 +21,8 @@ export type InitialFormValues = Partial<Activity> &
 
 type ActivityFormProps = { 
   activitySubmission: typeof defaultActivitySubmission
-  onCreated: (newId: string) => void
+  onUpdate: (newId: string) => void
+  onDelete?: (deleteId: string) => Promise<void>
   onClose?: () => void
   initialActivity: InitialFormValues
 } 
@@ -49,7 +51,8 @@ const ActivitySchema =  Yup.object().shape({
 
 export const ActivityForm = ({
   activitySubmission,
-  onCreated,
+  onUpdate,
+  onDelete,
   onClose,
   initialActivity
 }: ActivityFormProps) => {
@@ -62,7 +65,7 @@ export const ActivityForm = ({
       try {
         const id = await activitySubmission(submission as unknown as ActivityApiSubmission);
         onClose ? onClose() : () => { return; };
-        onCreated(id);
+        onUpdate(id);
       } catch {
         console.error("Bad Request");
       }
@@ -100,6 +103,7 @@ export const ActivityForm = ({
         </Flex>
         <Divider margin={"1em 0"} />
         <Flex w={"100%"} justifyContent={"space-between"}>
+          {onClose && onDelete && initialActivity.id && <Button onClick={() => onDelete(initialActivity.id!).then(() => onUpdate(Math.random().toString())).then(onClose)} variant='outline' type="button">Delete</Button>}
           {onClose && <Button onClick={onClose} variant='ghost' type="button">Cancel</Button>}
           <Button type="submit" isDisabled={!dirty || !isValid}>
              Save
@@ -112,7 +116,7 @@ export const ActivityForm = ({
 
 export const AddActivityInterface = ({ 
   activitySubmission = defaultActivitySubmission,
-  onCreated = () => { return; }
+  onUpdate = () => { return; }
 }: AddActivityInterfaceProps) => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -128,7 +132,7 @@ export const AddActivityInterface = ({
         <ModalCloseButton />
         <ModalBody>
           <ActivityForm activitySubmission={activitySubmission}
-            onCreated={onCreated}
+            onUpdate={onUpdate}
             onClose={onClose}
             initialActivity={{
               summary: "",

@@ -74,8 +74,8 @@ function App() {
             </DrawerBody>
 
             <DrawerFooter display={"flex"} flexDirection={"column"}>
-              <AddActivityInterface onCreated={setLatestCreatedActivityId} />
-              <AddRecurringActivityInterface onCreated={setLatestCreatedActivityId}/>
+              <AddActivityInterface onUpdate={setLatestCreatedActivityId} />
+              <AddRecurringActivityInterface onUpdate={setLatestCreatedActivityId}/>
             </DrawerFooter>
           </DrawerContent>
         </Drawer>

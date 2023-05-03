@@ -3,13 +3,17 @@ import { isAfter, addMinutes } from "date-fns";
 import { ViewIcon, CheckIcon } from "@chakra-ui/icons";
 import { Activity, ActivityApiSubmission } from "../../../types";
 import { useCallback, useState } from "react";
-import { plannerPutRequest } from "../../../utilities/apiRequest";
+import { plannerDeleteRequest, plannerPutRequest } from "../../../utilities/apiRequest";
 import { ActivityForm, InitialFormValues } from "../../ActivityEditor";
 import { ActivityDetails } from "../../ActivityDetails";
 
 const defaultActivitySubmission = (activity: ActivityApiSubmission) => {
   return plannerPutRequest<ActivityApiSubmission, Activity>(`/activities/${activity.id}`, activity)
     .then(() => Math.random().toString());
+};
+
+const defaultActivityDelete = async (activityId: string) => {
+  await plannerDeleteRequest(`/activities/${activityId}`);
 };
 
 export const SingularActivitySummary = ({ activity, onUpdate } : { activity: Activity,
@@ -70,7 +74,9 @@ export const SingularActivitySummary = ({ activity, onUpdate } : { activity: Act
             </TabPanel>
             <TabPanel>
               <ActivityForm activitySubmission={defaultActivitySubmission}
-                onCreated={onUpdate}
+                onUpdate={onUpdate}
+                onDelete={defaultActivityDelete}
+                onClose={onClose}
                 initialActivity={editActivity}/>
             </TabPanel>
           </TabPanels>

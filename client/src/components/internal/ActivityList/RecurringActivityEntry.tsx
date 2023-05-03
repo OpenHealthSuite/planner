@@ -3,13 +3,18 @@ import { addDays, isAfter } from "date-fns";
 import { CheckIcon, RepeatIcon, ViewIcon } from "@chakra-ui/icons";
 import { Activity, ActivityApiSubmission, RecurringActivity, RecurringActivityApiSubmission } from "../../../types";
 import { useCallback, useState } from "react";
-import { plannerPostRequest, plannerPutRequest } from "../../../utilities/apiRequest";
+import { plannerDeleteRequest, plannerPostRequest, plannerPutRequest } from "../../../utilities/apiRequest";
 import { ActivityDetails } from "../../ActivityDetails";
 import { RecurringActivityForm } from "../../RecurringActivityEditor";
 
 const editRecurringActivitySubmission = (activity: RecurringActivityApiSubmission) => {
   return plannerPutRequest<RecurringActivityApiSubmission, string>(`/recurring_activities/${activity.id}`, activity);
 };
+
+const defaultRecurringActivityDelete = async (activityId: string) => {
+  await plannerDeleteRequest(`/recurring_activities/${activityId}`);
+};
+
 
 export const RecurringActivitySummary = ({ daysActivities, activity, activityDay, onUpdate } : { daysActivities?: Activity[] ,activity: RecurringActivity, activityDay: Date, onUpdate: (str: string) => void }) => {
   const [loading, isLoading] = useState(false);
@@ -74,8 +79,9 @@ export const RecurringActivitySummary = ({ daysActivities, activity, activityDay
             </TabPanel>
             <TabPanel>
               <RecurringActivityForm activitySubmission={editRecurringActivitySubmission}
-                onCreated={onUpdate}
-                onClose={() => { return; }}
+                onUpdate={onUpdate}
+                onDelete={defaultRecurringActivityDelete}
+                onClose={onClose}
                 initialRecurringActivity={{...activity, date: activity.dateTimeStart.toISOString().split("T")[0]}}/>
             </TabPanel>
           </TabPanels>

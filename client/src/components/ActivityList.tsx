@@ -126,8 +126,11 @@ export const ActivityList = ({
   }, [daysToDisplay, setDaysToDisplay]);
 
   useEffect(() => {
+    // We do this as when there is an update, we need
+    // to clear out the existing map
+    setActivityDayMap({});
     getActivities(daysToDisplay[0], daysToDisplay[daysToDisplay.length - 1]);
-  }, [updated, getActivities]);
+  }, [updated, getActivities, setActivityDayMap]);
 
   useEffect(() => {
     const newActivities = activities.reduce<{[key: string]: Activity[]}>((acc, curr)=>{

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, FormControl, FormLabel, Input, Divider } from "@chakra-ui/react";
 import { RecurringActivity, RecurringActivityApiSubmission } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
@@ -11,7 +12,7 @@ const defaultRecurringActivitySubmission = (activity: RecurringActivityApiSubmis
 
 type AddRecurringActivityInterfaceProps = { 
   activitySubmission?: typeof defaultRecurringActivitySubmission
-  onCreated?: (newId: string) => void
+  onUpdate?: (newId: string) => void
 }
 
 export type InitialFormValues = Partial<RecurringActivity> &
@@ -20,7 +21,8 @@ export type InitialFormValues = Partial<RecurringActivity> &
 
 type RecurringActivityFormProps = { 
   activitySubmission: typeof defaultRecurringActivitySubmission
-  onCreated: (newId: string) => void
+  onUpdate: (newId: string) => void
+  onDelete?: (deleteId: string) => Promise<void>
   onClose: () => void
   initialRecurringActivity: InitialFormValues
 } 
@@ -50,7 +52,8 @@ const RecurringActivitySchema =  Yup.object().shape({
 
 export const RecurringActivityForm = ({
   activitySubmission,
-  onCreated,
+  onUpdate,
+  onDelete,
   onClose,
   initialRecurringActivity
 }: RecurringActivityFormProps) => {
@@ -63,7 +66,7 @@ export const RecurringActivityForm = ({
       try {
         const id = await activitySubmission(submission as unknown as RecurringActivityApiSubmission);
         onClose();
-        onCreated(id);
+        onUpdate(id);
       } catch {
         console.error("Bad Request");
       }
@@ -103,6 +106,7 @@ export const RecurringActivityForm = ({
         </Flex>
         <Divider margin={"1em 0"} />
         <Flex w={"100%"} justifyContent={"space-between"}>
+          {onClose && onDelete && initialRecurringActivity.id && <Button onClick={() => onDelete(initialRecurringActivity.id!).then(() => onUpdate(Math.random().toString())).then(onClose)} variant='outline' type="button">Delete</Button>}
           <Button onClick={onClose} variant='ghost' type="button">Cancel</Button>
           <Button type="submit" isDisabled={!dirty || !isValid}>
              Save
@@ -115,7 +119,7 @@ export const RecurringActivityForm = ({
 
 export const AddRecurringActivityInterface = ({ 
   activitySubmission = defaultRecurringActivitySubmission,
-  onCreated = () => { return; }
+  onUpdate = () => { return; }
 }: AddRecurringActivityInterfaceProps) => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -131,7 +135,7 @@ export const AddRecurringActivityInterface = ({
         <ModalCloseButton />
         <ModalBody>
           <RecurringActivityForm activitySubmission={activitySubmission}
-            onCreated={onCreated}
+            onUpdate={onUpdate}
             onClose={onClose}
             initialRecurringActivity={{
               summary: "",
