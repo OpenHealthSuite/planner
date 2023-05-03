@@ -1,4 +1,4 @@
-import { Button, ChakraProvider, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Spinner, extendTheme, useDisclosure } from "@chakra-ui/react";
+import { Button, ChakraProvider, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Spinner, extendTheme, useDisclosure } from "@chakra-ui/react";
 import { createContext, useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { AddActivityInterface } from "./components/ActivityEditor";
@@ -48,7 +48,7 @@ function App() {
         latestCreatedActivityId,
         setLatestCreatedActivityId
       }}>
-        <Button position={"fixed"}
+        {!isOpen && <Button position={"fixed"}
           bottom={0}
           right={0}
           padding={"1em"}
@@ -56,7 +56,7 @@ function App() {
           zIndex={9999}
           onClick={onOpen}>
       Menu
-        </Button>
+        </Button>}
         <Drawer
           isOpen={isOpen}
           placement='right'
@@ -64,6 +64,7 @@ function App() {
         >
           <DrawerOverlay />
           <DrawerContent>
+            <DrawerCloseButton />
             <DrawerHeader>Planner</DrawerHeader>
 
             <DrawerBody display={"flex"} 
