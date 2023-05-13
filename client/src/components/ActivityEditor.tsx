@@ -25,6 +25,7 @@ type ActivityFormProps = {
   onDelete?: (deleteId: string) => Promise<void>
   onClose?: () => void
   initialActivity: InitialFormValues
+  isAdding?: boolean
 } 
 
 const ActivitySchema =  Yup.object().shape({
@@ -54,10 +55,12 @@ export const ActivityForm = ({
   onUpdate,
   onDelete,
   onClose,
-  initialActivity
+  initialActivity,
+  isAdding
 }: ActivityFormProps) => {
   return <Formik
     initialValues={initialActivity}
+    isInitialValid={!isAdding}
     validationSchema={ActivitySchema}
     onSubmit={async (values) => {
       const { date, ...submission } = values;
@@ -140,7 +143,8 @@ export const AddActivityInterface = ({
               timeRelevant: false,
               completed: false,
               notes: ""
-            }}/>
+            }}
+            isAdding={true}/>
         </ModalBody>
       </ModalContent>
     </Modal>

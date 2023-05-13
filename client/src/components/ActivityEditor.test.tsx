@@ -147,17 +147,39 @@ describe("Add Activity Interface", () => {
     expect(fakeClose).toBeCalled();
   });
 
+  describe("Validation", () => {
 
-  test("Validation", async () => {
-    const user = userEvent.setup();
-    const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
-    const fakeCallback = vi.fn();
-    render(<AddActivityInterface activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
-    await user.click(screen.getByText("Add Activity"));
-    expect(screen.getByText("Save")).toBeDisabled();
-    await user.type(screen.getByLabelText("Summary"), "Test name activity");
-    expect(screen.getByText("Save")).toBeDisabled();
-    await user.type(screen.getByLabelText("Date"), "2023-04-03");
-    expect(screen.getByText("Save")).not.toBeDisabled();
+    test("Add New Validation", async () => {
+      const user = userEvent.setup();
+      const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
+      const fakeCallback = vi.fn();
+      render(<AddActivityInterface activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
+      await user.click(screen.getByText("Add Activity"));
+      expect(screen.getByText("Save")).toBeDisabled();
+      await user.type(screen.getByLabelText("Summary"), "Test name activity");
+      expect(screen.getByText("Save")).toBeDisabled();
+      await user.type(screen.getByLabelText("Date"), "2023-04-03");
+      expect(screen.getByText("Save")).not.toBeDisabled();
+    });
+
+
+    test("Edit Validation", async () => {
+      const user = userEvent.setup();
+      const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
+      const fakeCallback = vi.fn();
+      const initalActivity = {
+        completed: false,
+        date: "2023-04-03",
+        notes: "",
+        stages: [],
+        summary: "Test name activity",
+        timeRelevant: false,
+      };
+      render(<ActivityForm initialActivity={initalActivity} onUpdate={fakeSaver} activitySubmission={fakeCallback}/>);
+      expect(screen.getByText("Save")).not.toBeDisabled();
+      await user.clear(screen.getByLabelText("Summary"));
+      expect(screen.getByText("Save")).toBeDisabled();
+      await user.type(screen.getByLabelText("Summary"), "Test name activity edit");
+    });
   });
 });
