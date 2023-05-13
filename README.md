@@ -50,6 +50,7 @@ That probably comprises the MVP of the system - we can then tie it into the dash
 
 # Configuration
 
+- `PLANNER_SINGLE_USERID`: Sets the userid to a single user, no default
 - `PLANNER_USERID_HEADER`: Sets the userid header, defaults to `x-planner-userid`
 - `PLANNER_PORT`: Sets port serving app, defaults to `3333`
 - `PLANNER_STORAGE_TYPE`: pick from `sqlite` or `cassandra`. Defaults to `sqlite`.
