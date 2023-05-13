@@ -74,7 +74,6 @@ export const ActivityForm = ({
     {({
       values,
       isValid,
-      dirty,
       handleChange,
       handleSubmit,
       validateForm
@@ -103,9 +102,9 @@ export const ActivityForm = ({
         </Flex>
         <Divider margin={"1em 0"} />
         <Flex w={"100%"} justifyContent={"space-between"}>
-          {onClose && onDelete && initialActivity.id && <Button onClick={() => onDelete(initialActivity.id!).then(() => onUpdate(Math.random().toString())).then(onClose)} variant='outline' type="button">Delete</Button>}
+          {onClose && onDelete && initialActivity.id && <Button data-testid="delete-activity" onClick={() => onDelete(initialActivity.id!).then(() => onUpdate(Math.random().toString())).then(onClose)} variant='outline' type="button">Delete</Button>}
           {onClose && <Button onClick={onClose} variant='ghost' type="button">Cancel</Button>}
-          <Button type="submit" isDisabled={!dirty || !isValid}>
+          <Button data-testid="save-activity" type="submit" isDisabled={!isValid}>
              Save
           </Button>
         </Flex>

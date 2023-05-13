@@ -1,5 +1,5 @@
 import { Button, ChakraProvider, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Spinner, extendTheme, useDisclosure } from "@chakra-ui/react";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { AddActivityInterface } from "./components/ActivityEditor";
 import { Plan } from "./types";
@@ -39,6 +39,11 @@ function App() {
       .finally(() => setLoading(false));
   }, []);
 
+  const updateAndClose = useCallback((newId: string) => {
+    setLatestCreatedActivityId(newId);
+    onClose();
+  }, [onClose, setLatestCreatedActivityId]);
+
   return (
     <ChakraProvider theme={theme}>
       {loading && <Spinner size='xl' />}
@@ -75,8 +80,8 @@ function App() {
             </DrawerBody>
 
             <DrawerFooter display={"flex"} flexDirection={"column"}>
-              <AddActivityInterface onUpdate={setLatestCreatedActivityId} />
-              <AddRecurringActivityInterface onUpdate={setLatestCreatedActivityId}/>
+              <AddActivityInterface onUpdate={updateAndClose} />
+              <AddRecurringActivityInterface onUpdate={updateAndClose}/>
             </DrawerFooter>
           </DrawerContent>
         </Drawer>

@@ -44,7 +44,8 @@ export const SingularActivitySummary = ({ activity, onUpdate } : { activity: Act
     border={ activity.completed ? undefined : "1px solid black"}
     backgroundColor="white"
     borderRadius="0.25em"
-    alignItems={"center"}>
+    alignItems={"center"}
+    data-testid="singular-activity">
     <Text>{activity.summary}</Text>
     {!activity.completed && isCompletable && <IconButton size="sm"
       aria-label="Mark Done"
@@ -65,8 +66,8 @@ export const SingularActivitySummary = ({ activity, onUpdate } : { activity: Act
         <ModalCloseButton />
         <Tabs>
           <TabList>
-            <Tab>View</Tab>
-            <Tab>Edit</Tab>
+            <Tab data-testid="activity-view-tab">View</Tab>
+            <Tab data-testid="activity-edit-tab">Edit</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
