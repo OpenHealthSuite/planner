@@ -1,0 +1,1 @@
+docker stop local-cassandra || true && docker rm local-cassandra || true
