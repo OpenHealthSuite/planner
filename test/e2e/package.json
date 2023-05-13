@@ -1,6 +1,7 @@
 {
   "scripts": {
     "start": "cypress open",
+    "test": "cypress run",
     "lint": "eslint ."
   },
   "dependencies": {
