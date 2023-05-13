@@ -28,8 +28,13 @@ spec:
             - name: web
               containerPort: 3024
           env:
+          {{ if .Values.singleuserid }}
+            - name: PLANNER_SINGLE_USERID
+              value: {{ .Values.singleuserid }}
+          {{ else }}
             - name: PLANNER_USERID_HEADER
               value: x-auth-request-user
+          {{ end }}
             - name: PLANNER_PORT
               value: "3024"
             - name: PLANNER_STORAGE_TYPE
