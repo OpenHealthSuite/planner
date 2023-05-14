@@ -100,12 +100,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y install skopeo
+      
       - name: Tag Version
         if: ${{ inputs.PUSH_VERSION }}
         run: |
           skopeo copy --dest-creds=${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
           docker://ghcr.io/openhealthsuite/planner:${{ github.sha }} \
           docker://ghcr.io/openhealthsuite/planner:${{ inputs.PUSH_VERSION }}
+      
       - name: Tag Latest
         if: ${{ inputs.PUSH_LATEST }}
         run: |
