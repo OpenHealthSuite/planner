@@ -53,8 +53,7 @@ describe("activity", () => {
     cy.findByTestId("save-activity")
       .click();
 
-    cy.findAllByTestId("singular-activity")
-      .contains(summaryText)
+    cy.contains(summaryText)
       .should("not.exist");
 
     findAndOpenBySummary(editedSummaryText);
@@ -65,12 +64,10 @@ describe("activity", () => {
     cy.findByTestId("delete-activity")
       .click();
 
-    cy.findAllByTestId("singular-activity")
-      .contains(summaryText)
+    cy.contains(summaryText)
       .should("not.exist");
 
-    cy.findAllByTestId("singular-activity")
-      .contains(editedSummaryText)
+    cy.contains(editedSummaryText)
       .should("not.exist");
   });
 });
