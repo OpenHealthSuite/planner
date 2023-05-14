@@ -18,8 +18,7 @@ jobs:
       - build-and-test-server
     uses: ./.github/workflows/build_docker_image.yml
     with:
-      VERSION: ${{ github.ref_name }}
-      PUSH: true
+      PUSH_VERSION: ${{ github.ref_name }}
       PUSH_LATEST: true
 
   publish-release:

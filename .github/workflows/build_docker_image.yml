@@ -3,12 +3,8 @@ name: Build and Publish OpenFoodDiary Container
 on:
   workflow_call:
     inputs:
-      VERSION:
+      PUSH_VERSION:
         type: string
-        required: true
-      PUSH:
-        type: boolean
-        default: false
         required: false
       PUSH_LATEST:
         type: boolean
@@ -16,7 +12,7 @@ on:
         required: false
 
 jobs:
-  build-and-publish:
+  build-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -27,17 +23,27 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: "./test/server/system/.nvmrc"
-
       - name: Build the Container image
         working-directory: .
         run: |
           sudo apt update
           sudo apt install qemu-user-static
           platarch=linux/arm/v7,linux/arm64/v8,linux/amd64
-          podman build --jobs=6 --platform=$platarch --manifest ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }} .
+          podman build --jobs=6 --platform=$platarch --manifest ghcr.io/openhealthsuite/planner:${{ github.sha }} .
+
+      - name: Push SHA Image
+        run: |
+          podman manifest push ghcr.io/openhealthsuite/planner:${{ github.sha }} ghcr.io/openhealthsuite/planner:${{ github.sha }}
+
+  system-test:
+    runs-on: ubuntu-latest
+    needs: 
+      - build-image
+    steps: 
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "./test/server/system/.nvmrc"
 
       - name: Install Test Dependancies
         working-directory: test/server/system
@@ -48,15 +54,62 @@ jobs:
         run: |
           podman run -d \
             -p 3333:3333 \
-            ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }}
+            ghcr.io/openhealthsuite/planner:${{ github.sha }}
           npm test
 
-      - name: Push Version
-        if: ${{ inputs.PUSH }}
-        run: podman manifest push ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }} ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }}
+  e2e-test:
+    runs-on: ubuntu-latest
+    needs: 
+      - build-image
+    steps: 
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "./test/e2e/.nvmrc"
 
-      - name: Push Latest
-        if: ${{ inputs.PUSH && inputs.PUSH_LATEST }}
+      - name: Install Test Dependancies
+        working-directory: test/e2e
+        run: npm ci
+
+      - name: Test the Image
+        working-directory: test/e2e
         run: |
-          podman tag ghcr.io/openhealthsuite/planner:${{ inputs.VERSION }} ghcr.io/openhealthsuite/planner:latest
-          podman manifest push ghcr.io/openhealthsuite/planner:latest ghcr.io/openhealthsuite/planner:latest
+          podman run -d \
+            -p 3333:3333 \
+            -e PLANNER_SINGLE_USERID="cypress-test-user-id" \
+            ghcr.io/openhealthsuite/planner:${{ github.sha }}
+          CYPRESS_BASE_URL=http://localhost:3333 npm test
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        name: Upload test results
+        with:
+          name: cypress-test-results
+          path: |
+            test/e2e/cypress/screenshots
+            test/e2e/cypress/videos
+
+  tag-image-with-versions:
+    needs: 
+      - system-test
+      - e2e-test
+    runs-on: ubuntu-latest
+    if: ${{ inputs.PUSH_VERSION || inputs.PUSH_LATEST }}
+    steps:
+      - name: Install Skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install skopeo
+      - name: Tag Version
+        if: ${{ inputs.PUSH_VERSION }}
+        run: |
+          skopeo copy --dest-creds=${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
+          docker://ghcr.io/openhealthsuite/planner:${{ github.sha }} \
+          docker://ghcr.io/openhealthsuite/planner:${{ inputs.PUSH_VERSION }}
+      - name: Tag Latest
+        if: ${{ inputs.PUSH_LATEST }}
+        run: |
+          skopeo copy --dest-creds=${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
+          docker://ghcr.io/openhealthsuite/planner:${{ github.sha }} \
+          docker://ghcr.io/openhealthsuite/planner:latest
+      
