@@ -11,7 +11,7 @@ const VALIDATED_HEADER = "x-validated-planner-userid"
 
 func RequiresUserIdHeader(headerName string) Middleware {
 	return func(handler http.Handler) http.Handler {
-		singleUserId := os.Getenv("PLANNER_PORT")
+		singleUserId := os.Getenv("PLANNER_SINGLE_USERID")
 		if singleUserId != "" {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set(VALIDATED_HEADER, singleUserId)
