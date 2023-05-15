@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.20 as server-builder
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.20 as server-builder
 
 WORKDIR /usr/src/app
 
@@ -7,7 +7,7 @@ COPY server/go.mod server/go.sum ./
 RUN go mod download && go mod verify
 
 COPY server .
-RUN make
+RUN GOOS=linux GOARCH=$TARGETPLATFORM go build -o dist/planner main.go
 
 FROM --platform=$BUILDPLATFORM docker.io/node:18.7.0 as client-builder
 WORKDIR /app
