@@ -17,23 +17,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Login to GHCR
-        uses: redhat-actions/podman-login@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build the Container image
-        working-directory: .
-        run: |
-          sudo apt update
-          sudo apt install qemu-user-static
-          platarch=linux/arm/v7,linux/arm64/v8,linux/amd64
-          podman build --jobs=6 --platform=$platarch --manifest ghcr.io/openhealthsuite/planner:${{ github.sha }} .
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Push SHA Image
+      - name: Build the Container image
         run: |
-          podman manifest push ghcr.io/openhealthsuite/planner:${{ github.sha }} ghcr.io/openhealthsuite/planner:${{ github.sha }}
+          platarch=linux/arm,linux/arm64,linux/amd64
+          docker buildx build --platform=$platarch --tag ghcr.io/openhealthsuite/planner:${{ github.sha }} --push -f Containerfile .
 
   system-test:
     runs-on: ubuntu-latest
