@@ -31,7 +31,7 @@ jobs:
 
       - name: Build the Container image
         run: |
-          platarch=linux/arm,linux/arm64,linux/amd64
+          platarch=linux/arm64,linux/amd64
           docker buildx build --platform=$platarch --tag ghcr.io/openhealthsuite/planner:${{ github.sha }} --push -f Containerfile .
 
   system-test:
