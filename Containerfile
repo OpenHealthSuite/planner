@@ -2,16 +2,9 @@ FROM --platform=$BUILDPLATFORM docker.io/golang:1.20 as server-builder
 ARG TARGETPLATFORM
 WORKDIR /usr/src/app
 
-RUN dpkg --add-architecture arm64
-RUN apt update
-RUN apt install -y libsqlite3-dev:arm64
-
-# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
-COPY server/go.mod server/go.sum ./
-RUN go mod download && go mod verify
-
 COPY server .
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=$(echo $TARGETPLATFORM | sed 's/linux\///') go build -o dist/planner main.go
+RUN GOOS=linux GOARCH=$(echo $TARGETPLATFORM | sed 's/linux\///') \
+  go build -o dist/planner main.go
 
 FROM --platform=$BUILDPLATFORM docker.io/node:18.7.0 as client-builder
 WORKDIR /app
