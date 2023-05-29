@@ -15,7 +15,7 @@ k8s_yaml(namespace_inject(read_file('.development/cassandra.yaml'), development_
 # Create from helm chart
 
 chart = helm(
-  './helm/ohs-planner',
+  './helm',
   name='ohs-planner-development',
   namespace=development_namespace,
   # values=['./path/to/chart/dir/values-dev.yaml'],
