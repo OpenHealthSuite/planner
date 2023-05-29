@@ -1,6 +1,6 @@
 replicas: 3
 image: ghcr.io/openhealthsuite/planner
-tag: v0.0.3
+tag: v0.0.4
 
 cassandra:
   # expects a "cassandrauser" and "cassandrapassword" data key
