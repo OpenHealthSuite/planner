@@ -1,4 +1,4 @@
-helm upgrade ohs-planner ./ohs-planner \
+helm upgrade ohs-planner ./helm \
   --namespace openhealthsuite \
   --create-namespace \
   --install \
