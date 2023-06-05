@@ -38,6 +38,20 @@ docker_build('ghcr.io/openhealthsuite/planner', '.', dockerfile='Containerfile')
 k8s_resource('cassandra', labels=["services"])
 k8s_resource('ohs-planner', port_forwards="4024:3024", labels=["application"],  resource_deps=['cassandra'])
 
+# Local Client
+local_resource('ohs-planner client',
+  serve_dir='client',
+  serve_cmd='npm run dev',
+  auto_init=False,
+  trigger_mode=TRIGGER_MODE_MANUAL,
+  labels=["local"],
+  env={
+    'VITE_API_HOST': 'http://localhost:4024'
+  },
+  links=["http://localhost:3000"]
+)
+
+
 # Tests: Cypress tests
 local_resource('cypress-install',
   cmd='npm ci',
