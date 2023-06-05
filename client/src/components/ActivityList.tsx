@@ -80,7 +80,7 @@ export const ActivityList = ({
   const [, setError] = useState(false);
 
   const totalDaysToLoad = 21;
-  const preceedingDays = 7;
+  const preceedingDays = 2;
   
   const [daysToDisplay, setDaysToDisplay] = useState(generateDatesArray(totalDaysToLoad, initialDate, preceedingDays));
   
@@ -122,7 +122,7 @@ export const ActivityList = ({
   }, [daysToDisplay, setDaysToDisplay]);
 
   const preceedingLoad = useCallback(() => {
-    setDaysToDisplay([...generateDatesArray(7, daysToDisplay[0], 7), ...daysToDisplay]);
+    setDaysToDisplay([...generateDatesArray(5, daysToDisplay[0], 5), ...daysToDisplay]);
   }, [daysToDisplay, setDaysToDisplay]);
 
   useEffect(() => {
@@ -159,13 +159,6 @@ export const ActivityList = ({
     setRecurringActivityDayMap({ ...recurringActivityDayMap, ...newRecurring });
   }, [daysToDisplay, recurringActivities, setRecurringActivityDayMap]);
 
-  useEffect(() => {
-    const element = document.getElementById("initial-scrollto-target");
-    if (element) {
-      element.scrollIntoView();
-    }
-  }, []);
-
   const initialDateScrolltoTarget = subDays(initialDate, 1).toISOString().split("T")[0];
 
   return <Flex flexDirection={"column"}
@@ -175,7 +168,7 @@ export const ActivityList = ({
     onScroll={event => scrollCallback(event, loading)}
   >
     {loading && <CircularProgress />}
-    {!loading && <Button onClick={preceedingLoad} padding={"1em"} margin={"0.5em"}>Load More</Button>}
+    {!loading && <Button onClick={preceedingLoad} padding={"1em"} margin={"0.5em"}>Load Previous</Button>}
     {daysToDisplay.map(x => {
       const date = x.toISOString().split("T")[0];
       return <DaysActivities key={date}
