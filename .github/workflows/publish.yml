@@ -44,10 +44,10 @@ jobs:
       - name: Set new version
         run: | 
           VERSION_REF=${{ github.ref_name }}
-          yq e -i ".version = '${VERSION_REF:1}'" helm/Chart.yaml
+          yq e -i ".version = \"${VERSION_REF:1}\"" helm/Chart.yaml
       - name: Commit and Push version
         run: |
           git config --global user.name 'Lee Martin[Automated]'
           git config --global user.email 'leemartin77@users.noreply.github.com'
-          git commit -am "New Planner Version"
+          git commit -am "New Planner Version [skip ci]"
           git push
