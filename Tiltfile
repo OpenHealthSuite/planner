@@ -31,7 +31,7 @@ k8s_yaml(chart)
 
 # Build: tell Tilt what images to build from which directories
 
-docker_build('ghcr.io/openhealthsuite/planner', '.', dockerfile='Containerfile')
+docker_build('ghcr.io/openhealthsuite/planner', '.')
 
 # Watch: tell Tilt how to connect locally (optional)
 

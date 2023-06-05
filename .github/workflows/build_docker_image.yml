@@ -16,6 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Login to GHCR
         uses: docker/login-action@v2
         with:
@@ -23,16 +30,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build the Container image
-        run: |
-          platarch=linux/arm64,linux/amd64
-          docker buildx build --platform=$platarch --tag ghcr.io/openhealthsuite/planner:${{ github.sha }} --push -f Containerfile .
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          tags: |
+            ghcr.io/openhealthsuite/planner:${{ github.sha }}
+          context: .
+          platforms: linux/arm64/v8,linux/amd64
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   system-test:
     runs-on: ubuntu-latest
@@ -95,22 +102,44 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.PUSH_VERSION || inputs.PUSH_LATEST }}
     steps:
-      - name: Install Skopeo
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install skopeo
-      
-      - name: Tag Version
+
+      - uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
         if: ${{ inputs.PUSH_VERSION }}
-        run: |
-          skopeo copy --dest-creds=${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
-          docker://ghcr.io/openhealthsuite/planner:${{ github.sha }} \
-          docker://ghcr.io/openhealthsuite/planner:${{ inputs.PUSH_VERSION }}
-      
-      - name: Tag Latest
+        with:
+          tags: |
+            ghcr.io/openhealthsuite/planner:${{ inputs.PUSH_VERSION }}
+          context: .
+          platforms: linux/arm64/v8,linux/amd64
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: Build and push
+        uses: docker/build-push-action@v4
         if: ${{ inputs.PUSH_LATEST }}
-        run: |
-          skopeo copy --dest-creds=${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
-          docker://ghcr.io/openhealthsuite/planner:${{ github.sha }} \
-          docker://ghcr.io/openhealthsuite/planner:latest
+        with:
+          tags: |
+            ghcr.io/openhealthsuite/planner:latest
+          context: .
+          platforms: linux/arm64/v8,linux/amd64
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       
