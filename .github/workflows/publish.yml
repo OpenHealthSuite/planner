@@ -30,3 +30,24 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           prerelease: false
+  
+  bump-helm-chart:
+    needs:
+      - publish-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ github.token }}
+      - name: Set new version
+        run: yq e -i '.tag = "${{ github.ref_name }}"' helm/values.yaml
+      - name: Set new version
+        run: | 
+          VERSION_REF=${{ github.ref_name }}
+          yq e -i ".version = '${VERSION_REF:1}'" helm/Chart.yaml
+      - name: Commit and Push version
+        run: |
+          git config --global user.name 'Lee Martin[Automated]'
+          git config --global user.email 'leemartin77@users.noreply.github.com'
+          git commit -am "New Planner Version"
+          git push
