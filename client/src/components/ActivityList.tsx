@@ -117,13 +117,17 @@ export const ActivityList = ({
     const buffer = 10;
     const shouldLoadBottom = ((element.scrollHeight - element.clientHeight) - element.scrollTop) < buffer;
     if (!amLoading && shouldLoadBottom) {
-      setDaysToDisplay([...daysToDisplay, ...generateDatesArray(14, addDays(daysToDisplay[daysToDisplay.length - 1], 1), 0)]);
+      const followingDays = generateDatesArray(14, addDays(daysToDisplay[daysToDisplay.length - 1], 1), 0);
+      getActivities(followingDays[0], followingDays[followingDays.length - 1]);
+      setDaysToDisplay([...daysToDisplay, ...followingDays]);
     }
-  }, [daysToDisplay, setDaysToDisplay]);
+  }, [daysToDisplay, setDaysToDisplay, getActivities]);
 
   const preceedingLoad = useCallback(() => {
-    setDaysToDisplay([...generateDatesArray(5, daysToDisplay[0], 5), ...daysToDisplay]);
-  }, [daysToDisplay, setDaysToDisplay]);
+    const preceedingDays = generateDatesArray(5, daysToDisplay[0], 5);
+    getActivities(preceedingDays[0], preceedingDays[preceedingDays.length - 1]);
+    setDaysToDisplay([...preceedingDays, ...daysToDisplay]);
+  }, [daysToDisplay, setDaysToDisplay, getActivities]);
 
   useEffect(() => {
     // We do this as when there is an update, we need
