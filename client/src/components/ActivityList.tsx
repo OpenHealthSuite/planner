@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Flex, Text } from "@chakra-ui/react";
-import { addDays, format, subDays, differenceInDays } from "date-fns";
+import { addDays, format, subDays, differenceInDays, startOfDay, endOfDay, addHours } from "date-fns";
 import { Activity, RecurringActivity } from "../types";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { plannerGetRequest } from "../utilities/apiRequest";
@@ -61,8 +61,11 @@ const DaysActivities = ({ id, date, activities, recurringActivities, onUpdate }:
 };
 
 const generateDatesArray = (totalDaysToLoad: number, firstDay: Date, preceedingDays: number) => {
-  return Array.apply(null, Array(totalDaysToLoad))
+  const days = Array.apply(null, Array(totalDaysToLoad))
     .map((_, i) => addDays(subDays(firstDay, preceedingDays), i));
+  days[0] = addHours(startOfDay(days[0]), 12);
+  days[days.length - 1] = addHours(endOfDay(days[days.length - 1]), -12);
+  return days;
 };
 
 export const ActivityList = ({
