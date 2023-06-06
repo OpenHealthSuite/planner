@@ -1,18 +1,36 @@
 import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { ActivityForm, AddActivityInterface, InitialFormValues } from "./ActivityEditor";
+import { ActivityForm, AddActivityInterface, InitialFormValues, type AddActivityInterfaceProps, type ActivityFormProps } from "./ActivityEditor";
+import { ApplicationContext, type ApplicationContextType } from "../App";
+import { Plan } from "../types";
+
+const AddActivityInterfaceWithContext = ({ context, ...rest }: {
+  context: ApplicationContextType
+} & AddActivityInterfaceProps) => (<ApplicationContext.Provider value={context}>
+  <AddActivityInterface {...rest} />
+</ApplicationContext.Provider>);
+
+const ActivityFormWithContext = ({ context, ...rest }: {
+  context: ApplicationContextType
+} & ActivityFormProps) => (<ApplicationContext.Provider value={context}>
+  <ActivityForm {...rest} />
+</ApplicationContext.Provider>);
+
+const happyContext = {
+  userPlans: [] as Plan[]
+} as ApplicationContextType;
 
 describe("Add Activity Interface", () => {
   test("Initial Load :: Has Button, No Modal Visible", () => {
-    render(<AddActivityInterface />);
+    render(<AddActivityInterfaceWithContext context={happyContext} />);
     expect(screen.getByText("Add Activity")).toBeInTheDocument();
     expect(screen.queryByText("Adding Activity")).not.toBeInTheDocument();
   });
 
   test("Click Button :: Loads Modal", async () => {
     const user = userEvent.setup();
-    render(<AddActivityInterface />);
+    render(<AddActivityInterfaceWithContext context={happyContext} />);
     await user.click(screen.getByText("Add Activity"));
     expect(screen.queryByText("Adding Activity")).toBeInTheDocument();
   });
@@ -21,7 +39,7 @@ describe("Add Activity Interface", () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
     const fakeCallback = vi.fn();
-    render(<AddActivityInterface activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
+    render(<AddActivityInterfaceWithContext context={happyContext} activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
     await user.click(screen.getByText("Add Activity"));
     await user.type(screen.getByLabelText("Summary"), "Test name activity");
     await user.type(screen.getByLabelText("Date"), "2023-04-03");
@@ -45,7 +63,7 @@ describe("Add Activity Interface", () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
     const fakeCallback = vi.fn();
-    render(<AddActivityInterface activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
+    render(<AddActivityInterfaceWithContext context={happyContext} activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
     await user.click(screen.getByText("Add Activity"));
     await user.type(screen.getByLabelText("Summary"), "Test name activity");
     await user.type(screen.getByLabelText("Date"), "2023-04-03");
@@ -95,7 +113,7 @@ describe("Add Activity Interface", () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
     const fakeCallback = vi.fn();
-    render(<AddActivityInterface activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
+    render(<AddActivityInterfaceWithContext context={happyContext} activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
     
     await user.click(screen.getByText("Add Activity"));
 
@@ -153,7 +171,7 @@ describe("Add Activity Interface", () => {
       const user = userEvent.setup();
       const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
       const fakeCallback = vi.fn();
-      render(<AddActivityInterface activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
+      render(<AddActivityInterfaceWithContext context={happyContext} activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
       await user.click(screen.getByText("Add Activity"));
       expect(screen.getByText("Save")).toBeDisabled();
       await user.type(screen.getByLabelText("Summary"), "Test name activity");
@@ -175,7 +193,7 @@ describe("Add Activity Interface", () => {
         summary: "Test name activity",
         timeRelevant: false,
       };
-      render(<ActivityForm initialActivity={initalActivity} onUpdate={fakeSaver} activitySubmission={fakeCallback}/>);
+      render(<ActivityFormWithContext context={happyContext} initialActivity={initalActivity} onUpdate={fakeSaver} activitySubmission={fakeCallback}/>);
       expect(screen.getByText("Save")).not.toBeDisabled();
       await user.clear(screen.getByLabelText("Summary"));
       expect(screen.getByText("Save")).toBeDisabled();

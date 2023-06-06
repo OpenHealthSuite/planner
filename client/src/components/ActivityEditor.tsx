@@ -10,7 +10,7 @@ const defaultActivitySubmission = (activity: ActivityApiSubmission) => {
   return plannerPostRequest<ActivityApiSubmission, string>("/activities", activity);
 };
 
-type AddActivityInterfaceProps = { 
+export type AddActivityInterfaceProps = { 
   activitySubmission?: typeof defaultActivitySubmission
   onUpdate?: (newId: string) => void
 }
@@ -19,7 +19,7 @@ export type InitialFormValues = Partial<Activity> &
   Omit<Activity, "id" | "userId" | "dateTime"> &
   { date: string; }
 
-type ActivityFormProps = { 
+export type ActivityFormProps = { 
   activitySubmission: typeof defaultActivitySubmission
   onUpdate: (newId: string) => void
   onDelete?: (deleteId: string) => Promise<void>
