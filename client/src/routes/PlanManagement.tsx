@@ -1,14 +1,15 @@
 import { Button, IconButton, List, ListIcon, ListItem } from "@chakra-ui/react";
 import { TimeIcon, PlusSquareIcon, DeleteIcon } from "@chakra-ui/icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Plan } from "../types";
 import { plannerDeleteRequest, plannerGetRequest, plannerPostRequest } from "../utilities/apiRequest";
 import { Input } from "@chakra-ui/react";
+import { ApplicationContext } from "../App";
 
 // TODO: This is a "working" component, we should
 // deconstruct this at some point
 export default function PlanManagement() {
-  const [plans, setPlans] = useState<Plan[]>([]);
+  const { userPlans, setUserPlans } = useContext(ApplicationContext);
   const [loading, setLoading] = useState(true);
   const [newPlanId, setNewPlanId] = useState("");
 
@@ -35,17 +36,17 @@ export default function PlanManagement() {
     setLoading(true);
     plannerGetRequest<Plan[]>("/plans")
       .then(plans => {
-        setPlans(plans);
+        setUserPlans(plans);
       })
       .finally(() => setLoading(false));
-  }, [setPlans, setLoading, newPlanId, setNewPlanId]);
+  }, [setUserPlans, setLoading, newPlanId, setNewPlanId]);
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return <List spacing={3}>
-    {plans.map(plan => <ListItem key={plan.id}>
+    {userPlans.map(plan => <ListItem key={plan.id}>
       <ListIcon as={TimeIcon} color='green.500' />
       {plan.name}
       <IconButton aria-label="Delete" icon={<DeleteIcon />} onClick={() => deletePlan(plan.id)}/>
