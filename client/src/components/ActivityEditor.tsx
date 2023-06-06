@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, FormControl, FormLabel, Input, Checkbox, Divider } from "@chakra-ui/react";
+import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, FormControl, FormLabel, Input, Checkbox, Divider, Select } from "@chakra-ui/react";
 import { Activity, ActivityApiSubmission } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { ActivityStageEditor } from "./internal/ActivityStageEditor";
+import { useContext } from "react";
+import { ApplicationContext } from "../App";
 
 const defaultActivitySubmission = (activity: ActivityApiSubmission) => {
   return plannerPostRequest<ActivityApiSubmission, string>("/activities", activity);
@@ -50,6 +52,8 @@ const ActivitySchema =  Yup.object().shape({
   )
 });
 
+const NONE_VALUE = "NONE_VALUE";
+
 export const ActivityForm = ({
   activitySubmission,
   onUpdate,
@@ -58,12 +62,17 @@ export const ActivityForm = ({
   initialActivity,
   isAdding
 }: ActivityFormProps) => {
+  const { userPlans } = useContext(ApplicationContext);
   return <Formik
-    initialValues={initialActivity}
+    initialValues={{
+      ...initialActivity,
+      planId: initialActivity.planId || NONE_VALUE
+    } as InitialFormValues}
     isInitialValid={!isAdding}
     validationSchema={ActivitySchema}
     onSubmit={async (values) => {
       const { date, ...submission } = values;
+      submission.planId = submission.planId === NONE_VALUE ? undefined : submission.planId;
       (submission as unknown as ActivityApiSubmission).dateTime = new Date(Date.parse(date)).toISOString();
       try {
         const id = await activitySubmission(submission as unknown as ActivityApiSubmission);
@@ -90,6 +99,16 @@ export const ActivityForm = ({
               name="summary"
               type='text' onChange={handleChange} value={values.summary}/>
           </FormControl>
+          {userPlans && <FormControl>
+            <FormLabel htmlFor="planId">Plan</FormLabel>
+            <Select 
+              id="planId"
+              name="planId"
+              onChange={handleChange} value={values.planId}>
+              <option value={NONE_VALUE}>None</option>
+              {userPlans.map(up => <option key={up.id} value={up.id}>{up.name}</option>)}
+            </Select>
+          </FormControl>}
           <FormControl>
             <FormLabel htmlFor="date">Date</FormLabel>
             <Input 

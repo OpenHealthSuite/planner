@@ -147,7 +147,8 @@ describe("Add Activity Interface", () => {
       completed: false,
       notes: ""
     };
-    render(<ActivityForm 
+    render(<ActivityFormWithContext
+      context={happyContext} 
       activitySubmission={fakeSaver} 
       onUpdate={fakeCallback}
       onClose={fakeClose}
@@ -163,6 +164,68 @@ describe("Add Activity Interface", () => {
     expect(fakeDelete).toBeCalledWith(initialActivity.id);
     expect(fakeCallback).toBeCalled();
     expect(fakeClose).toBeCalled();
+  });
+
+  test("Can add activity to plan from context", async () => {
+    const user = userEvent.setup();
+    const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
+    const fakeCallback = vi.fn();
+    const context = {
+      userPlans: [{
+        id: "some-user-plan-id",
+        name: "My Plan",
+      }]
+    } as ApplicationContextType;
+    render(<AddActivityInterfaceWithContext context={context} activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
+    await user.click(screen.getByText("Add Activity"));
+    await user.type(screen.getByLabelText("Summary"), "Test name activity");
+    await user.type(screen.getByLabelText("Date"), "2023-04-03");
+    await user.selectOptions(screen.getByLabelText("Plan"), context.userPlans[0].name);
+    expect(screen.getByText("Save")).not.toBeDisabled();
+    await user.click(screen.getByText("Save"));
+
+    expect(fakeSaver).toBeCalledWith( {
+      "completed": false,
+      "dateTime": "2023-04-03T00:00:00.000Z",
+      "notes": "",
+      "planId": "some-user-plan-id",
+      "stages": [],
+      "summary": "Test name activity",
+      "timeRelevant": false,
+    });
+  });
+
+
+  test("Can unset plan from activity", async () => {
+    const user = userEvent.setup();
+    const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
+    const fakeCallback = vi.fn();
+    const context = {
+      userPlans: [{
+        id: "some-user-plan-id",
+        name: "My Plan",
+      }]
+    } as ApplicationContextType;
+    const initalActivity = {
+      completed: false,
+      date: "2023-04-03",
+      notes: "",
+      planId: context.userPlans[0].id,
+      stages: [],
+      summary: "Test name activity",
+      timeRelevant: false,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+    render(<ActivityFormWithContext context={happyContext} initialActivity={initalActivity} onUpdate={fakeSaver} activitySubmission={fakeCallback}/>);
+
+    await user.selectOptions(screen.getByLabelText("Plan"), "None");
+    expect(screen.getByText("Save")).not.toBeDisabled();
+    await user.click(screen.getByText("Save"));
+
+    delete initalActivity.planId;
+    initalActivity.dateTime = new Date(Date.parse(initalActivity.date)).toISOString();
+    delete initalActivity.date;
+    expect(fakeCallback).toBeCalledWith(initalActivity);
   });
 
   describe("Validation", () => {
