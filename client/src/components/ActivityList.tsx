@@ -1,7 +1,7 @@
-import { Box, Button, CircularProgress, Flex, Text } from "@chakra-ui/react";
+import { Box, Button, CircularProgress, Flex, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverFooter, PopoverHeader, PopoverTrigger, Text, useDisclosure } from "@chakra-ui/react";
 import { addDays, format, subDays, differenceInDays, startOfDay, endOfDay, addHours } from "date-fns";
 import { Activity, RecurringActivity } from "../types";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { plannerGetRequest } from "../utilities/apiRequest";
 import { ApplicationContext } from "../App";
 import { SingularActivitySummary } from "./internal/ActivityList/SingularActivityEntry";
@@ -68,22 +68,57 @@ const generateDatesArray = (totalDaysToLoad: number, firstDay: Date, preceedingD
   return days;
 };
 
-const SelectPlan = ({ selectedPlanId, setSelectedPlanId}: { selectedPlanId: string | undefined, setSelectedPlanId: (id: string | undefined) => void }) => {
-  const { userPlans } = useContext(ApplicationContext);
-  const selected = userPlans.findIndex(x => x.id === selectedPlanId) > -1;
-  return <Button 
-    onClick={() => setSelectedPlanId(selected ? undefined : userPlans[0].id)}
-    position={"fixed"}
-    bottom={0}
-    borderLeft={0}
-    padding={"1em"}
-    margin={"1em"}
-    zIndex={9999}>Filter{selected && <>*</>}</Button>;
-};
-
 const PLANLESS_VALUE = "PLANLESS_ID_FILTER";
 
-const planFilter = (activity: Activity | RecurringActivity, selectedPlanId: string | undefined) => selectedPlanId === undefined || selectedPlanId === activity.planId || (selectedPlanId === PLANLESS_VALUE && activity.planId === undefined);
+const planFilter = (activity: Activity | RecurringActivity, selectedPlanId: string | undefined) => 
+  selectedPlanId === undefined || 
+  selectedPlanId === activity.planId || 
+  (selectedPlanId === PLANLESS_VALUE && !activity.planId);
+
+const SelectPlan = ({ selectedPlanId, setSelectedPlanId: origSetSelectedPlanId }: { selectedPlanId: string | undefined, setSelectedPlanId: (id: string | undefined) => void }) => {
+  const { userPlans } = useContext(ApplicationContext);
+  const { isOpen, onToggle, onClose } = useDisclosure();
+  const selected = userPlans.findIndex(x => x.id === selectedPlanId);
+  const unselectedSelected = selectedPlanId === PLANLESS_VALUE;
+  const setSelectedPlanId = useCallback((id: string | undefined) => {
+    origSetSelectedPlanId(id);
+    onClose();
+  }, [origSetSelectedPlanId, onClose]);
+  if (!userPlans || userPlans.length === 0) {
+    return <></>;
+  }
+  return <Popover placement='top' isOpen={isOpen}>
+    <PopoverTrigger>
+      <Button 
+        onClick={onToggle}
+        position={"fixed"}
+        bottom={0}
+        borderLeft={0}
+        padding={"1em"}
+        margin={"1em"}
+        zIndex={9999}>{selected !== -1 || unselectedSelected ? `Viewing ${userPlans[selected]?.name ?? "Unplanned"}` : "Filter"}</Button>
+    </PopoverTrigger>
+    <PopoverContent>
+      <PopoverHeader pt={4} fontWeight='bold' border='0'>
+          Filter Activities by Plan
+      </PopoverHeader>
+      <PopoverArrow />
+      <PopoverCloseButton onClick={onClose}/>
+      <PopoverBody display={"flex"} flexDirection={"column"} gap={"0.5em"}>
+        <Button variant={unselectedSelected ? "outline" : "solid"}
+          onClick={() => setSelectedPlanId(unselectedSelected ? undefined : PLANLESS_VALUE)}>
+          {unselectedSelected && <>* </>}Planless
+        </Button>
+        {userPlans.map((plan, i) => {
+          return <Button key={plan.id} variant={selected === i ? "outline" : "solid"}
+            onClick={() => setSelectedPlanId(selected === i ? undefined : plan.id)}>
+            {selected === i && <>* </>}{plan.name}
+          </Button>;
+        })}
+      </PopoverBody>
+    </PopoverContent>
+  </Popover>;
+};
 
 export const ActivityList = ({
   initialDate = new Date() 
