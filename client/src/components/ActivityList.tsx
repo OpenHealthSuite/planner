@@ -1,7 +1,7 @@
-import { Box, Button, CircularProgress, Flex, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverFooter, PopoverHeader, PopoverTrigger, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, CircularProgress, Flex, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Text, useDisclosure } from "@chakra-ui/react";
 import { addDays, format, subDays, differenceInDays, startOfDay, endOfDay, addHours } from "date-fns";
 import { Activity, RecurringActivity } from "../types";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { plannerGetRequest } from "../utilities/apiRequest";
 import { ApplicationContext } from "../App";
 import { SingularActivitySummary } from "./internal/ActivityList/SingularActivityEntry";
