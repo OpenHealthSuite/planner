@@ -68,6 +68,23 @@ const generateDatesArray = (totalDaysToLoad: number, firstDay: Date, preceedingD
   return days;
 };
 
+const SelectPlan = ({ selectedPlanId, setSelectedPlanId}: { selectedPlanId: string | undefined, setSelectedPlanId: (id: string | undefined) => void }) => {
+  const { userPlans } = useContext(ApplicationContext);
+  const selected = userPlans.findIndex(x => x.id === selectedPlanId) > -1;
+  return <Button 
+    onClick={() => setSelectedPlanId(selected ? undefined : userPlans[0].id)}
+    position={"fixed"}
+    bottom={0}
+    borderLeft={0}
+    padding={"1em"}
+    margin={"1em"}
+    zIndex={9999}>Filter{selected && <>*</>}</Button>;
+};
+
+const PLANLESS_VALUE = "PLANLESS_ID_FILTER";
+
+const planFilter = (activity: Activity | RecurringActivity, selectedPlanId: string | undefined) => selectedPlanId === undefined || selectedPlanId === activity.planId || (selectedPlanId === PLANLESS_VALUE && activity.planId === undefined);
+
 export const ActivityList = ({
   initialDate = new Date() 
 } : ActivityListProps) => {
@@ -81,6 +98,7 @@ export const ActivityList = ({
   const {latestCreatedActivityId: updated, setLatestCreatedActivityId} = useContext(ApplicationContext);
   const [loading, setLoading] = useState(true);
   const [, setError] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | undefined>();
 
   const totalDaysToLoad = 21;
   const preceedingDays = 2;
@@ -174,6 +192,7 @@ export const ActivityList = ({
     overflow={"scroll"}
     onScroll={event => scrollCallback(event, loading)}
   >
+    {<SelectPlan {...{selectedPlanId, setSelectedPlanId}}/>}
     {loading && <CircularProgress />}
     {!loading && <Button onClick={preceedingLoad} padding={"1em"} margin={"0.5em"}>Load Previous</Button>}
     {daysToDisplay.map(x => {
@@ -181,8 +200,8 @@ export const ActivityList = ({
       return <DaysActivities key={date}
         date={x}
         id={date === initialDateScrolltoTarget ? "initial-scrollto-target" : undefined}
-        activities={activityDayMap[date] ?? []}
-        recurringActivities={recurringActivityDayMap[date] ?? []}
+        activities={(activityDayMap[date] ?? []).filter(x => planFilter(x, selectedPlanId))}
+        recurringActivities={(recurringActivityDayMap[date] ?? []).filter(x => planFilter(x, selectedPlanId))}
         onUpdate={setLatestCreatedActivityId}/>;
     })}
     {loading && <CircularProgress />}
