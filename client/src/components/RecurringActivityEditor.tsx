@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, FormControl, FormLabel, Input, Divider } from "@chakra-ui/react";
+import { Button, Flex, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, FormControl, FormLabel, Input, Divider, Select } from "@chakra-ui/react";
 import { RecurringActivity, RecurringActivityApiSubmission } from "../types";
 import { plannerPostRequest } from "../utilities/apiRequest";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { ActivityStageEditor } from "./internal/ActivityStageEditor";
+import { useContext } from "react";
+import { ApplicationContext } from "../App";
 
 const defaultRecurringActivitySubmission = (activity: RecurringActivityApiSubmission) => {
   return plannerPostRequest<RecurringActivityApiSubmission, string>("/recurring_activities", activity);
 };
 
-type AddRecurringActivityInterfaceProps = { 
+export type AddRecurringActivityInterfaceProps = { 
   activitySubmission?: typeof defaultRecurringActivitySubmission
   onUpdate?: (newId: string) => void
 }
@@ -19,7 +21,7 @@ export type InitialFormValues = Partial<RecurringActivity> &
   Omit<RecurringActivity, "id" | "userId" | "dateTimeStart"> &
   { date: string; }
 
-type RecurringActivityFormProps = { 
+export type RecurringActivityFormProps = { 
   activitySubmission: typeof defaultRecurringActivitySubmission
   onUpdate: (newId: string) => void
   onDelete?: (deleteId: string) => Promise<void>
@@ -50,6 +52,8 @@ const RecurringActivitySchema =  Yup.object().shape({
   )
 });
 
+const NONE_VALUE = "NONE_VALUE";
+
 export const RecurringActivityForm = ({
   activitySubmission,
   onUpdate,
@@ -57,11 +61,16 @@ export const RecurringActivityForm = ({
   onClose,
   initialRecurringActivity
 }: RecurringActivityFormProps) => {
+  const { userPlans } = useContext(ApplicationContext);
   return <Formik
-    initialValues={initialRecurringActivity}
+    initialValues={{
+      ...initialRecurringActivity,
+      planId: initialRecurringActivity.planId || NONE_VALUE
+    } as InitialFormValues}
     validationSchema={RecurringActivitySchema}
     onSubmit={async (values) => {
       const { date, ...submission } = values;
+      submission.planId = submission.planId === NONE_VALUE ? undefined : submission.planId;
       (submission as unknown as RecurringActivityApiSubmission).dateTimeStart = new Date(Date.parse(date)).toISOString();
       try {
         const id = await activitySubmission(submission as unknown as RecurringActivityApiSubmission);
@@ -89,6 +98,16 @@ export const RecurringActivityForm = ({
               name="summary"
               type='text' onChange={handleChange} value={values.summary}/>
           </FormControl>
+          {userPlans && <FormControl>
+            <FormLabel htmlFor="planId">Plan</FormLabel>
+            <Select 
+              id="planId"
+              name="planId"
+              onChange={handleChange} value={values.planId}>
+              <option value={NONE_VALUE}>None</option>
+              {userPlans.map(up => <option key={up.id} value={up.id}>{up.name}</option>)}
+            </Select>
+          </FormControl>}
           <FormControl>
             <FormLabel htmlFor="date">Date</FormLabel>
             <Input 
