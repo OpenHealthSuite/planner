@@ -1,9 +1,22 @@
-import { Button, IconButton, List, ListIcon, ListItem, Input } from "@chakra-ui/react";
+import { Button, IconButton, List, ListIcon, ListItem, Input, Flex } from "@chakra-ui/react";
 import { TimeIcon, PlusSquareIcon, DeleteIcon } from "@chakra-ui/icons";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Plan } from "../types";
 import { plannerDeleteRequest, plannerGetRequest, plannerPostRequest } from "../utilities/apiRequest";
 import { ApplicationContext } from "../App";
+
+function PlanListItem ({ plan, deletePlan }: {plan: Plan, deletePlan: (planId: string) => void}): JSX.Element {
+  return <ListItem display={"flex"} alignItems={"center"} gap={"0.5em"}>
+    <ListIcon as={TimeIcon} color='green.500' />
+    {plan.name}
+    <IconButton aria-label="Delete"
+      marginRight={0}
+      marginLeft={"auto"}
+      icon={<DeleteIcon />}
+      onClick={() => deletePlan(plan.id)}
+    />
+  </ListItem>;
+}
 
 export const PlanManager = () => {
   const { userPlans, setUserPlans } = useContext(ApplicationContext);
@@ -41,17 +54,20 @@ export const PlanManager = () => {
     return <div>Loading...</div>;
   }
 
-  return <List spacing={3}>
-    {userPlans.map(plan => <ListItem key={plan.id}>
-      <ListIcon as={TimeIcon} color='green.500' />
-      {plan.name}
-      <IconButton aria-label="Delete" icon={<DeleteIcon />} onClick={() => deletePlan(plan.id)}/>
-    </ListItem>)}
+  return <Flex padding={"1em"}>
+    <List spacing={3}>
+      {userPlans.map(plan => <PlanListItem key={plan.id} plan={plan} deletePlan={deletePlan}/>)}
 
-    <ListItem>
-      <ListIcon as={PlusSquareIcon} color='green.500' />
-      <Input placeholder="Add new plan" value={value} onChange={handleChange}/>
-      <Button isDisabled={!value} onClick={() => createPlan(value)}>Add Plan</Button>
-    </ListItem>
-  </List>;
+      <ListItem display={"flex"} alignItems={"center"} gap={"0.5em"}>
+        <ListIcon as={PlusSquareIcon} color='green.500' />
+        <Input placeholder="Add new plan" value={value} onChange={handleChange}/>
+        <Button aria-label="Delete"
+          marginRight={0}
+          marginLeft={"auto"}
+          isDisabled={!value} onClick={() => createPlan(value)}>
+            Add Plan
+        </Button>
+      </ListItem>
+    </List>
+  </Flex>;
 };
