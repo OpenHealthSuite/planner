@@ -29,6 +29,7 @@
     "@vitejs/plugin-react-swc": "^3.0.0",
     "date-fns": "^2.29.3",
     "eslint": "^8.38.0",
+    "eslint-config-standard": "^17.1.0",
     "eslint-plugin-react": "^7.32.2",
     "formik": "^2.2.9",
     "jsdom": "^21.1.1",

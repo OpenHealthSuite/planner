@@ -12,7 +12,7 @@ const defaultActivitySubmission = (activity: ActivityApiSubmission) => {
   return plannerPostRequest<ActivityApiSubmission, string>("/activities", activity);
 };
 
-export type AddActivityInterfaceProps = { 
+export type AddActivityInterfaceProps = {
   activitySubmission?: typeof defaultActivitySubmission
   onUpdate?: (newId: string) => void
 }
@@ -21,16 +21,16 @@ export type InitialFormValues = Partial<Activity> &
   Omit<Activity, "id" | "userId" | "dateTime"> &
   { date: string; }
 
-export type ActivityFormProps = { 
+export type ActivityFormProps = {
   activitySubmission: typeof defaultActivitySubmission
   onUpdate: (newId: string) => void
   onDelete?: (deleteId: string) => Promise<void>
   onClose?: () => void
   initialActivity: InitialFormValues
   isAdding?: boolean
-} 
+}
 
-const ActivitySchema =  Yup.object().shape({
+const ActivitySchema = Yup.object().shape({
   summary: Yup.string()
     .min(1, "Needs at least one character")
     .required("Required"),
@@ -46,7 +46,7 @@ const ActivitySchema =  Yup.object().shape({
         amount: Yup.number().min(0).required(),
         unit: Yup.string()
           .min(1, "Needs at least one character")
-          .required("Required"),
+          .required("Required")
       }))
     })
   )
@@ -76,7 +76,9 @@ export const ActivityForm = ({
       (submission as unknown as ActivityApiSubmission).dateTime = new Date(Date.parse(date)).toISOString();
       try {
         const id = await activitySubmission(submission as unknown as ActivityApiSubmission);
-        onClose ? onClose() : () => { return; };
+        if (onClose) {
+          onClose();
+        }
         onUpdate(id);
       } catch {
         console.error("Bad Request");
@@ -94,14 +96,14 @@ export const ActivityForm = ({
         <Flex flexDirection={"column"} gap={"1em"}>
           <FormControl>
             <FormLabel htmlFor="summary">Summary</FormLabel>
-            <Input 
+            <Input
               id="summary"
               name="summary"
               type='text' onChange={handleChange} value={values.summary}/>
           </FormControl>
           {userPlans && <FormControl>
             <FormLabel htmlFor="planId">Plan</FormLabel>
-            <Select 
+            <Select
               id="planId"
               name="planId"
               onChange={handleChange} value={values.planId}>
@@ -111,12 +113,12 @@ export const ActivityForm = ({
           </FormControl>}
           <FormControl>
             <FormLabel htmlFor="date">Date</FormLabel>
-            <Input 
+            <Input
               id="date"
               name="date" type='date' onChange={handleChange} value={values.date} />
           </FormControl>
           <FormControl>
-            <Checkbox 
+            <Checkbox
               id="completed"
               name="completed" onChange={handleChange} isChecked={values.completed}>Complete</Checkbox>
           </FormControl>
@@ -135,14 +137,14 @@ export const ActivityForm = ({
   </Formik>;
 };
 
-export const AddActivityInterface = ({ 
+export const AddActivityInterface = ({
   activitySubmission = defaultActivitySubmission,
-  onUpdate = () => { return; }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onUpdate = () => { }
 }: AddActivityInterfaceProps) => {
-
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  return <Flex flexDirection={"column"} 
+  return <Flex flexDirection={"column"}
     padding={"1em"}
     width={"100%"}>
     <Button onClick={onOpen}>Add Activity</Button>

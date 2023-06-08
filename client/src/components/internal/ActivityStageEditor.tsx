@@ -13,7 +13,7 @@ export const ActivityStageEditor = ({ values, handleChange, validateForm } : Act
   return <>{values.stages.length > 0 && <Accordion allowToggle>
     {values.stages.map((stage, i) => {
       return <AccordionItem key={stage.order}>
-        
+
         <h2>
           <AccordionButton>
             <Box as="span" flex='1' textAlign='left'>
@@ -25,14 +25,14 @@ export const ActivityStageEditor = ({ values, handleChange, validateForm } : Act
         <AccordionPanel pb={4}>
           <FormControl>
             <FormLabel htmlFor={`stages[${i}].description`}>Description</FormLabel>
-            <Input 
+            <Input
               id={`stages[${i}].description`}
               name={`stages[${i}].description`}
               type='text' onChange={handleChange} value={stage.description}/>
           </FormControl>
           <FormControl>
             <FormLabel htmlFor={`stages[${i}].repetitions`}>Repetitions</FormLabel>
-            <Input 
+            <Input
               id={`stages[${i}].repetitions`}
               name={`stages[${i}].repetitions`}
               type='number' onChange={handleChange} value={stage.repetitions}/>
@@ -42,19 +42,19 @@ export const ActivityStageEditor = ({ values, handleChange, validateForm } : Act
               return <Box key={ii}>
                 <FormControl>
                   <FormLabel htmlFor={`stages[${i}].metrics[${ii}].amount`}>Amount</FormLabel>
-                  <Input 
+                  <Input
                     id={`stages[${i}].metrics[${ii}].amount`}
                     name={`stages[${i}].metrics[${ii}].amount`}
                     type='number' onChange={handleChange} value={metric.amount}/>
                 </FormControl>
                 <FormControl>
                   <FormLabel htmlFor={`stages[${i}].metrics[${ii}].unit`}>Unit</FormLabel>
-                  <Input 
+                  <Input
                     id={`stages[${i}].metrics[${ii}].unit`}
                     name={`stages[${i}].metrics[${ii}].unit`}
                     type='text' onChange={handleChange} value={metric.unit}/>
                 </FormControl>
-                <Button width={"100%"} 
+                <Button width={"100%"}
                   mt={"1em"}
                   onClick={() => {
                     values.stages[i].metrics.splice(ii, 1);
@@ -72,11 +72,11 @@ export const ActivityStageEditor = ({ values, handleChange, validateForm } : Act
               validateForm();
             }}
           >Add Metric</Button>
-          <Button width={"100%"} 
+          <Button width={"100%"}
             mt={"1em"}
             onClick={() => {
               values.stages.splice(i, 1);
-              values.stages = values.stages.map((s, i)=> {
+              values.stages = values.stages.map((s, i) => {
                 s.order = i;
                 return s;
               });

@@ -53,11 +53,10 @@ describe("Add Activity Interface", () => {
       notes: "",
       stages: [],
       summary: "Test name activity",
-      timeRelevant: false,
+      timeRelevant: false
     });
     expect(fakeCallback).toBeCalledWith("some-fake-id");
   });
-
 
   test("Full Journey :: Clicks Button, Fills in Form with Stage and Metric, Saves, Closes", async () => {
     const user = userEvent.setup();
@@ -95,26 +94,27 @@ describe("Add Activity Interface", () => {
       dateTime: "2023-04-03T00:00:00.000Z",
       notes: "",
       stages: [
-        {description: "My Custom Stage",
+        {
+          description: "My Custom Stage",
           metrics: [
-            {amount: 11, unit: "meters"}
+            { amount: 11, unit: "meters" }
           ],
           order: 0,
-          repetitions:4}
+          repetitions: 4
+        }
       ],
       summary: "Test name activity",
-      timeRelevant: false,
+      timeRelevant: false
     });
     expect(fakeCallback).toBeCalledWith("some-fake-id");
   });
-
 
   test("Clears form on close and reopen", async () => {
     const user = userEvent.setup();
     const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
     const fakeCallback = vi.fn();
     render(<AddActivityInterfaceWithContext context={happyContext} activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
-    
+
     await user.click(screen.getByText("Add Activity"));
 
     await user.type(screen.getByLabelText("Summary"), "Test name activity");
@@ -129,7 +129,6 @@ describe("Add Activity Interface", () => {
     expect(screen.getByLabelText("Summary")).toHaveValue("");
     expect(screen.getByLabelText("Date")).toHaveValue("");
   });
-
 
   test("Initial form has id && delete fn provided :: delete button visible, calls delete method with id", async () => {
     const user = userEvent.setup();
@@ -148,14 +147,14 @@ describe("Add Activity Interface", () => {
       notes: ""
     };
     render(<ActivityFormWithContext
-      context={happyContext} 
-      activitySubmission={fakeSaver} 
+      context={happyContext}
+      activitySubmission={fakeSaver}
       onUpdate={fakeCallback}
       onClose={fakeClose}
       onDelete={fakeDelete}
       initialActivity={initialActivity}
     />);
-    
+
     expect(screen.getByLabelText("Summary")).toHaveValue(initialActivity.summary);
 
     expect(screen.getByText("Delete")).toBeInTheDocument();
@@ -173,7 +172,7 @@ describe("Add Activity Interface", () => {
     const context = {
       userPlans: [{
         id: "some-user-plan-id",
-        name: "My Plan",
+        name: "My Plan"
       }]
     } as ApplicationContextType;
     render(<AddActivityInterfaceWithContext context={context} activitySubmission={fakeSaver} onUpdate={fakeCallback}/>);
@@ -184,17 +183,16 @@ describe("Add Activity Interface", () => {
     expect(screen.getByText("Save")).not.toBeDisabled();
     await user.click(screen.getByText("Save"));
 
-    expect(fakeSaver).toBeCalledWith( {
-      "completed": false,
-      "dateTime": "2023-04-03T00:00:00.000Z",
-      "notes": "",
-      "planId": "some-user-plan-id",
-      "stages": [],
-      "summary": "Test name activity",
-      "timeRelevant": false,
+    expect(fakeSaver).toBeCalledWith({
+      completed: false,
+      dateTime: "2023-04-03T00:00:00.000Z",
+      notes: "",
+      planId: "some-user-plan-id",
+      stages: [],
+      summary: "Test name activity",
+      timeRelevant: false
     });
   });
-
 
   test("Can unset plan from activity", async () => {
     const user = userEvent.setup();
@@ -203,7 +201,7 @@ describe("Add Activity Interface", () => {
     const context = {
       userPlans: [{
         id: "some-user-plan-id",
-        name: "My Plan",
+        name: "My Plan"
       }]
     } as ApplicationContextType;
     const initalActivity = {
@@ -213,7 +211,7 @@ describe("Add Activity Interface", () => {
       planId: context.userPlans[0].id,
       stages: [],
       summary: "Test name activity",
-      timeRelevant: false,
+      timeRelevant: false
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
     render(<ActivityFormWithContext context={happyContext} initialActivity={initalActivity} onUpdate={fakeSaver} activitySubmission={fakeCallback}/>);
@@ -229,7 +227,6 @@ describe("Add Activity Interface", () => {
   });
 
   describe("Validation", () => {
-
     test("Add New Validation", async () => {
       const user = userEvent.setup();
       const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
@@ -243,7 +240,6 @@ describe("Add Activity Interface", () => {
       expect(screen.getByText("Save")).not.toBeDisabled();
     });
 
-
     test("Edit Validation", async () => {
       const user = userEvent.setup();
       const fakeSaver = vi.fn().mockResolvedValue("some-fake-id");
@@ -254,7 +250,7 @@ describe("Add Activity Interface", () => {
         notes: "",
         stages: [],
         summary: "Test name activity",
-        timeRelevant: false,
+        timeRelevant: false
       };
       render(<ActivityFormWithContext context={happyContext} initialActivity={initalActivity} onUpdate={fakeSaver} activitySubmission={fakeCallback}/>);
       expect(screen.getByText("Save")).not.toBeDisabled();

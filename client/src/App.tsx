@@ -7,7 +7,7 @@ import { plannerGetRequest } from "./utilities/apiRequest";
 import { AddRecurringActivityInterface } from "./components/RecurringActivityEditor";
 
 const colors = {
-  brand: {},
+  brand: {}
 };
 
 const theme = extendTheme({ colors });
@@ -21,12 +21,14 @@ export type ApplicationContextType = {
 
 export const ApplicationContext = createContext<ApplicationContextType>({
   userPlans: [],
-  setUserPlans: () => { return; },
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setUserPlans: () => { },
   latestCreatedActivityId: "",
-  setLatestCreatedActivityId: () => { return; }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setLatestCreatedActivityId: () => { }
 });
 
-function App() {
+function App () {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(true);
   const [userPlans, setUserPlans] = useState<Plan[]>([]);
@@ -60,7 +62,7 @@ function App() {
           margin={"1em"}
           zIndex={9999}
           onClick={onOpen}>
-      Menu
+          Menu
         </Button>}
         <Drawer
           isOpen={isOpen}
@@ -72,11 +74,11 @@ function App() {
             <DrawerCloseButton />
             <DrawerHeader>Planner</DrawerHeader>
 
-            <DrawerBody display={"flex"} 
+            <DrawerBody display={"flex"}
               flexDirection={"column"}
               gap={"1em"}>
-              <Button variant="ghost" onClick={() => {navigate("/"); onClose();}}>Schedule</Button>
-              <Button variant="ghost" onClick={() => {navigate("/plans"); onClose();}}>Plans</Button>
+              <Button variant="ghost" onClick={() => { navigate("/"); onClose(); }}>Schedule</Button>
+              <Button variant="ghost" onClick={() => { navigate("/plans"); onClose(); }}>Plans</Button>
             </DrawerBody>
 
             <DrawerFooter display={"flex"} flexDirection={"column"}>

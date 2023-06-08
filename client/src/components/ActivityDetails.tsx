@@ -13,7 +13,7 @@ export const ActivityDetails = ({ activity }: { activity: Activity | RecurringAc
         return <ListItem key={stg.order}>
           <Heading as='h4' size='xs'>{stg.repetitions > 1 ? `${stg.repetitions}x ` : ""}{stg.description}</Heading>
           {stg.metrics && <UnorderedList>
-            {stg.metrics.map((mtr, i) => <ListItem key={"mtr-"+i}>{mtr.amount} {mtr.unit}</ListItem>)}
+            {stg.metrics.map((mtr, i) => <ListItem key={"mtr-" + i}>{mtr.amount} {mtr.unit}</ListItem>)}
           </UnorderedList>}
         </ListItem>;
       })}

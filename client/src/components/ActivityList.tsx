@@ -26,20 +26,22 @@ const DaysActivities = ({ id, date, activities, recurringActivities, onUpdate }:
     recurringActivities: RecurringActivity[],
     onUpdate: (str: string) => void
 }) => {
-  const completedRecurringActivityIds = activities ? activities.reduce<string[]>((acc, curr) => {
-    if (!curr.recurringActivityId) {
-      return acc;
-    }
-    return [...acc, curr.recurringActivityId];
-  }, []) : [];
+  const completedRecurringActivityIds = activities
+    ? activities.reduce<string[]>((acc, curr) => {
+      if (!curr.recurringActivityId) {
+        return acc;
+      }
+      return [...acc, curr.recurringActivityId];
+    }, [])
+    : [];
   return <Flex id={id}
     margin={"0.5em 0"}
     paddingBottom={date.getDay() === 6 ? "1em" : undefined}
     borderBottom={date.getDay() === 6 ? "1px dashed black" : undefined}
     background={date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0] ? TODAY_BACKGROUND : undefined}>
-    <Box w={"4.5em"} 
+    <Box w={"4.5em"}
       paddingRight={"0.5em"}
-      marginRight={"0.5em"} 
+      marginRight={"0.5em"}
       textAlign={"right"}
       borderRight={"1px solid black"}>
       <Text>{format(date, "eee")}</Text>
@@ -49,10 +51,10 @@ const DaysActivities = ({ id, date, activities, recurringActivities, onUpdate }:
       {activities.length === 0 && recurringActivities.length === 0 && <Box margin="0.25em 0" padding="0.25em">
         <Text>Rest</Text>
       </Box>}
-      {activities.map(x => <SingularActivitySummary key={x.id} 
+      {activities.map(x => <SingularActivitySummary key={x.id}
         activity={x}
         onUpdate={onUpdate}/>)}
-      {recurringActivities.filter(x => !completedRecurringActivityIds.includes(x.id)).map(x => <RecurringActivitySummary 
+      {recurringActivities.filter(x => !completedRecurringActivityIds.includes(x.id)).map(x => <RecurringActivitySummary
         key={x.id}
         activityDay={date}
         onUpdate={onUpdate}
@@ -70,9 +72,9 @@ const generateDatesArray = (totalDaysToLoad: number, firstDay: Date, preceedingD
 
 const PLANLESS_VALUE = "PLANLESS_ID_FILTER";
 
-const planFilter = (activity: Activity | RecurringActivity, selectedPlanId: string | undefined) => 
-  selectedPlanId === undefined || 
-  selectedPlanId === activity.planId || 
+const planFilter = (activity: Activity | RecurringActivity, selectedPlanId: string | undefined) =>
+  selectedPlanId === undefined ||
+  selectedPlanId === activity.planId ||
   (selectedPlanId === PLANLESS_VALUE && !activity.planId);
 
 const SelectPlan = ({ selectedPlanId, setSelectedPlanId: origSetSelectedPlanId }: { selectedPlanId: string | undefined, setSelectedPlanId: (id: string | undefined) => void }) => {
@@ -89,7 +91,7 @@ const SelectPlan = ({ selectedPlanId, setSelectedPlanId: origSetSelectedPlanId }
   }
   return <Popover placement='top' isOpen={isOpen}>
     <PopoverTrigger>
-      <Button 
+      <Button
         onClick={onToggle}
         position={"fixed"}
         bottom={0}
@@ -121,25 +123,24 @@ const SelectPlan = ({ selectedPlanId, setSelectedPlanId: origSetSelectedPlanId }
 };
 
 export const ActivityList = ({
-  initialDate = new Date() 
+  initialDate = new Date()
 } : ActivityListProps) => {
-
   const [activities, setActivities] = useState<Activity[]>([]);
   const [recurringActivities, setRecurringActivities] = useState<RecurringActivity[]>([]);
 
   const [activityDayMap, setActivityDayMap] = useState<{[key: string]: Activity[]}>({});
   const [recurringActivityDayMap, setRecurringActivityDayMap] = useState<{[key: string]: RecurringActivity[]}>({});
 
-  const {latestCreatedActivityId: updated, setLatestCreatedActivityId} = useContext(ApplicationContext);
+  const { latestCreatedActivityId: updated, setLatestCreatedActivityId } = useContext(ApplicationContext);
   const [loading, setLoading] = useState(true);
   const [, setError] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string | undefined>();
 
   const totalDaysToLoad = 21;
   const preceedingDays = 2;
-  
+
   const [daysToDisplay, setDaysToDisplay] = useState(generateDatesArray(totalDaysToLoad, initialDate, preceedingDays));
-  
+
   const getActivities = useCallback((startDate: Date, endDate: Date) => {
     setLoading(true);
     Promise.all([
@@ -167,7 +168,7 @@ export const ActivityList = ({
       })
       .finally(() => setLoading(false));
   }, [setActivities, setLoading, setError]);
-  
+
   const scrollCallback = useCallback((event: React.UIEvent<HTMLDivElement, UIEvent>, amLoading: boolean) => {
     const element = event.target as HTMLElement;
     const buffer = 10;
@@ -193,7 +194,7 @@ export const ActivityList = ({
   }, [updated, getActivities, setActivityDayMap]);
 
   useEffect(() => {
-    const newActivities = activities.reduce<{[key: string]: Activity[]}>((acc, curr)=>{
+    const newActivities = activities.reduce<{[key: string]: Activity[]}>((acc, curr) => {
       const date = curr.dateTime.toISOString().split("T")[0];
       if (acc[date]) {
         acc[date] = [...acc[date], curr];
@@ -206,7 +207,7 @@ export const ActivityList = ({
   }, [activities, setActivityDayMap]);
 
   useEffect(() => {
-    const newRecurring = daysToDisplay.reduce<{[key: string]: RecurringActivity[]}>((recAcc, curr)=>{
+    const newRecurring = daysToDisplay.reduce<{[key: string]: RecurringActivity[]}>((recAcc, curr) => {
       // I'm sure this could be more efficient, but it's already
       // coming out of a lower loop
       const date = curr.toISOString().split("T")[0];
@@ -227,7 +228,7 @@ export const ActivityList = ({
     overflow={"scroll"}
     onScroll={event => scrollCallback(event, loading)}
   >
-    {<SelectPlan {...{selectedPlanId, setSelectedPlanId}}/>}
+    {<SelectPlan {...{ selectedPlanId, setSelectedPlanId }}/>}
     {loading && <CircularProgress />}
     {!loading && <Button onClick={preceedingLoad} padding={"1em"} margin={"0.5em"}>Load Previous</Button>}
     {daysToDisplay.map(x => {

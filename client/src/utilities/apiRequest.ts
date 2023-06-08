@@ -1,6 +1,6 @@
 const API_ROOT = "/api";
 
-export async function plannerGetRequest<T>(
+export async function plannerGetRequest<T> (
   path: string,
   fnFetch = fetch,
   apiRoot = API_ROOT
@@ -16,7 +16,7 @@ export async function plannerGetRequest<T>(
   }
 }
 
-export async function plannerPostRequest<R, T>(
+export async function plannerPostRequest<R, T> (
   path: string,
   body: R,
   fnFetch = fetch,
@@ -27,7 +27,7 @@ export async function plannerPostRequest<R, T>(
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   if (response.status === 200) {
     return (await response.json()) as T;
@@ -39,7 +39,7 @@ export async function plannerPostRequest<R, T>(
   }
 }
 
-export async function plannerPutRequest<R, T>(
+export async function plannerPutRequest<R, T> (
   path: string,
   body: R,
   fnFetch = fetch,
@@ -50,7 +50,7 @@ export async function plannerPutRequest<R, T>(
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   if (response.status === 200) {
     return (await response.json()) as T;
@@ -62,8 +62,7 @@ export async function plannerPutRequest<R, T>(
   }
 }
 
-
-export async function plannerDeleteRequest<T>(
+export async function plannerDeleteRequest<T> (
   path: string,
   fnFetch = fetch,
   apiRoot = API_ROOT

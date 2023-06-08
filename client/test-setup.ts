@@ -10,10 +10,11 @@ global.CSS = {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  supports: (k, v) => false,
+  supports: (k, v) => false
 };
 
-window.scrollTo = () => { return; };
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+window.scrollTo = () => { };
 
 // runs a cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {

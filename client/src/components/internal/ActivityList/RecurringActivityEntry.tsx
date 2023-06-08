@@ -1,4 +1,4 @@
-import { Button, Flex, IconButton,Modal,ModalCloseButton,ModalContent,ModalOverlay,Tab,TabList,TabPanel,TabPanels,Tabs,Text, useDisclosure } from "@chakra-ui/react";
+import { Button, Flex, IconButton, Modal, ModalCloseButton, ModalContent, ModalOverlay, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure } from "@chakra-ui/react";
 import { addDays, isAfter } from "date-fns";
 import { CheckIcon, RepeatIcon, ViewIcon } from "@chakra-ui/icons";
 import { Activity, ActivityApiSubmission, RecurringActivity, RecurringActivityApiSubmission } from "../../../types";
@@ -15,15 +15,14 @@ const defaultRecurringActivityDelete = async (activityId: string) => {
   await plannerDeleteRequest(`/recurring_activities/${activityId}`);
 };
 
-
-export const RecurringActivitySummary = ({ daysActivities, activity, activityDay, onUpdate } : { daysActivities?: Activity[] ,activity: RecurringActivity, activityDay: Date, onUpdate: (str: string) => void }) => {
+export const RecurringActivitySummary = ({ daysActivities, activity, activityDay, onUpdate } : { daysActivities?: Activity[], activity: RecurringActivity, activityDay: Date, onUpdate: (str: string) => void }) => {
   const [loading, isLoading] = useState(false);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
+
   const createAssociatedActivity = useCallback((recurringActivity: RecurringActivity, completed: boolean) => {
     isLoading(true);
-    const {summary, stages, timeRelevant} = recurringActivity;
+    const { summary, stages, timeRelevant } = recurringActivity;
     const activity: ActivityApiSubmission = {
       summary,
       stages,
@@ -59,7 +58,7 @@ export const RecurringActivitySummary = ({ daysActivities, activity, activityDay
       icon={<CheckIcon />} />}
     <IconButton size="sm"
       aria-label="View"
-      marginLeft={!isCompletable ? "auto" : "0.5em"} 
+      marginLeft={!isCompletable ? "auto" : "0.5em"}
       marginRight={0}
       onClick={onOpen}
       icon={<ViewIcon />} />
@@ -82,7 +81,7 @@ export const RecurringActivitySummary = ({ daysActivities, activity, activityDay
                 onUpdate={onUpdate}
                 onDelete={defaultRecurringActivityDelete}
                 onClose={onClose}
-                initialRecurringActivity={{...activity, date: activity.dateTimeStart.toISOString().split("T")[0]}}/>
+                initialRecurringActivity={{ ...activity, date: activity.dateTimeStart.toISOString().split("T")[0] }}/>
             </TabPanel>
           </TabPanels>
         </Tabs>

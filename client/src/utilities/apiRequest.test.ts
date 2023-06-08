@@ -1,7 +1,7 @@
 import {
   plannerGetRequest,
   plannerPostRequest,
-  plannerPutRequest,
+  plannerPutRequest
 } from "./apiRequest";
 
 describe("plannerGetRequest", () => {
@@ -27,7 +27,7 @@ describe("plannerGetRequest", () => {
     const response = { whoami: "ReturnedSettings" };
     const fakeFetch = vi.fn().mockResolvedValue({
       status: 200,
-      json: vi.fn().mockResolvedValue(response),
+      json: vi.fn().mockResolvedValue(response)
     });
     const fakeRequestRoute = "/fakeRequestRoute";
     const fakeApiRoot = "http://localhost:9090";
@@ -45,7 +45,7 @@ describe("plannerGetRequest", () => {
     const response = { whoami: "ReturnedSettings" };
     const fakeFetch = vi.fn().mockResolvedValue({
       status: 500,
-      json: vi.fn().mockResolvedValue(response),
+      json: vi.fn().mockResolvedValue(response)
     });
     const fakeRequestRoute = "/fakeRequestRoute";
     const fakeApiRoot = "http://localhost:9090";
@@ -61,11 +61,11 @@ describe("plannerGetRequest", () => {
     const response = { whoami: "ReturnedSettings" };
     const fakeFetch = vi.fn().mockResolvedValue({
       status,
-      json: vi.fn().mockResolvedValue(response),
+      json: vi.fn().mockResolvedValue(response)
     });
     const fakeRequestRoute = "/fakeRequestRoute";
     const fakeApiRoot = "http://localhost:9090";
-    
+
     await expect(
       plannerGetRequest(fakeRequestRoute, fakeFetch, fakeApiRoot)
     ).rejects.not.toBeUndefined();
@@ -101,7 +101,7 @@ describe("plannerPostRequest", () => {
     const fakeRequestBody = { whoami: "FakeRequestBody" };
     const fakeFetch = vi.fn().mockResolvedValue({
       status: 200,
-      json: vi.fn().mockResolvedValue(response),
+      json: vi.fn().mockResolvedValue(response)
     });
     const fakeRequestRoute = "/fakeRequestRoute";
     const fakeApiRoot = "http://localhost:9090";
@@ -119,14 +119,14 @@ describe("plannerPostRequest", () => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(fakeRequestBody),
+      body: JSON.stringify(fakeRequestBody)
     });
   });
   test("Non 200 status :: throws error", async () => {
     const response = { whoami: "ReturnedSettings" };
     const fakeFetch = vi.fn().mockResolvedValue({
       status: 500,
-      json: vi.fn().mockResolvedValue(response),
+      json: vi.fn().mockResolvedValue(response)
     });
     const fakeRequestRoute = "/fakeRequestRoute";
     const fakeApiRoot = "http://localhost:9090";
@@ -146,7 +146,7 @@ describe("plannerPostRequest", () => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(fakeRequestBody),
+      body: JSON.stringify(fakeRequestBody)
     });
     expect(vi.mocked(window.location.reload)).not.toBeCalled();
   });
@@ -155,7 +155,7 @@ describe("plannerPostRequest", () => {
     const response = { whoami: "ReturnedSettings" };
     const fakeFetch = vi.fn().mockResolvedValue({
       status,
-      json: vi.fn().mockResolvedValue(response),
+      json: vi.fn().mockResolvedValue(response)
     });
     const fakeRequestRoute = "/fakeRequestRoute";
     const fakeApiRoot = "http://localhost:9090";
@@ -175,7 +175,7 @@ describe("plannerPostRequest", () => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(fakeRequestBody),
+      body: JSON.stringify(fakeRequestBody)
     });
     expect(vi.mocked(window.location.reload)).toBeCalledTimes(1);
   });
@@ -205,7 +205,7 @@ describe("plannerPutRequest", () => {
     const fakeRequestBody = { whoami: "FakeRequestBody" };
     const fakeFetch = vi.fn().mockResolvedValue({
       status: 200,
-      json: vi.fn().mockResolvedValue(response),
+      json: vi.fn().mockResolvedValue(response)
     });
     const fakeRequestRoute = "/fakeRequestRoute";
     const fakeApiRoot = "http://localhost:9090";
@@ -223,14 +223,14 @@ describe("plannerPutRequest", () => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(fakeRequestBody),
+      body: JSON.stringify(fakeRequestBody)
     });
   });
   test("Non 200 status :: throws error", async () => {
     const response = { whoami: "ReturnedSettings" };
     const fakeFetch = vi.fn().mockResolvedValue({
       status: 500,
-      json: vi.fn().mockResolvedValue(response),
+      json: vi.fn().mockResolvedValue(response)
     });
     const fakeRequestRoute = "/fakeRequestRoute";
     const fakeApiRoot = "http://localhost:9090";
@@ -250,7 +250,7 @@ describe("plannerPutRequest", () => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(fakeRequestBody),
+      body: JSON.stringify(fakeRequestBody)
     });
     expect(vi.mocked(window.location.reload)).not.toBeCalled();
   });
@@ -258,7 +258,7 @@ describe("plannerPutRequest", () => {
     const response = { whoami: "ReturnedSettings" };
     const fakeFetch = vi.fn().mockResolvedValue({
       status,
-      json: vi.fn().mockResolvedValue(response),
+      json: vi.fn().mockResolvedValue(response)
     });
     const fakeRequestRoute = "/fakeRequestRoute";
     const fakeApiRoot = "http://localhost:9090";
@@ -278,7 +278,7 @@ describe("plannerPutRequest", () => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(fakeRequestBody),
+      body: JSON.stringify(fakeRequestBody)
     });
     expect(vi.mocked(window.location.reload)).toBeCalledTimes(1);
   });

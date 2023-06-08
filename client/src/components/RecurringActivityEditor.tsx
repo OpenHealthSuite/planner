@@ -12,7 +12,7 @@ const defaultRecurringActivitySubmission = (activity: RecurringActivityApiSubmis
   return plannerPostRequest<RecurringActivityApiSubmission, string>("/recurring_activities", activity);
 };
 
-export type AddRecurringActivityInterfaceProps = { 
+export type AddRecurringActivityInterfaceProps = {
   activitySubmission?: typeof defaultRecurringActivitySubmission
   onUpdate?: (newId: string) => void
 }
@@ -21,15 +21,15 @@ export type InitialFormValues = Partial<RecurringActivity> &
   Omit<RecurringActivity, "id" | "userId" | "dateTimeStart"> &
   { date: string; }
 
-export type RecurringActivityFormProps = { 
+export type RecurringActivityFormProps = {
   activitySubmission: typeof defaultRecurringActivitySubmission
   onUpdate: (newId: string) => void
   onDelete?: (deleteId: string) => Promise<void>
   onClose: () => void
   initialRecurringActivity: InitialFormValues
-} 
+}
 
-const RecurringActivitySchema =  Yup.object().shape({
+const RecurringActivitySchema = Yup.object().shape({
   summary: Yup.string()
     .min(1, "Needs at least one character")
     .required("Required"),
@@ -46,7 +46,7 @@ const RecurringActivitySchema =  Yup.object().shape({
         amount: Yup.number().min(0).required(),
         unit: Yup.string()
           .min(1, "Needs at least one character")
-          .required("Required"),
+          .required("Required")
       }))
     })
   )
@@ -93,14 +93,14 @@ export const RecurringActivityForm = ({
         <Flex flexDirection={"column"} gap={"1em"}>
           <FormControl>
             <FormLabel htmlFor="summary">Summary</FormLabel>
-            <Input 
+            <Input
               id="summary"
               name="summary"
               type='text' onChange={handleChange} value={values.summary}/>
           </FormControl>
           {userPlans && <FormControl>
             <FormLabel htmlFor="planId">Plan</FormLabel>
-            <Select 
+            <Select
               id="planId"
               name="planId"
               onChange={handleChange} value={values.planId}>
@@ -110,13 +110,13 @@ export const RecurringActivityForm = ({
           </FormControl>}
           <FormControl>
             <FormLabel htmlFor="date">Date</FormLabel>
-            <Input 
+            <Input
               id="date"
               name="date" type='date' onChange={handleChange} value={values.date} />
           </FormControl>
           <FormControl>
             <FormLabel htmlFor={"recurrEachDays"}>Recurr Every n Days</FormLabel>
-            <Input 
+            <Input
               id={"recurrEachDays"}
               name={"recurrEachDays"}
               type='number' onChange={handleChange} value={values.recurrEachDays}/>
@@ -136,14 +136,14 @@ export const RecurringActivityForm = ({
   </Formik>;
 };
 
-export const AddRecurringActivityInterface = ({ 
+export const AddRecurringActivityInterface = ({
   activitySubmission = defaultRecurringActivitySubmission,
-  onUpdate = () => { return; }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onUpdate = () => { }
 }: AddRecurringActivityInterfaceProps) => {
-
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  return <Flex flexDirection={"column"} 
+  return <Flex flexDirection={"column"}
     padding={"1em"}
     width={"100%"}>
     <Button onClick={onOpen}>Add Recurring Activity</Button>
