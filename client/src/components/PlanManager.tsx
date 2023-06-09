@@ -1,19 +1,23 @@
-import { Button, IconButton, List, ListIcon, ListItem, Input, Flex } from "@chakra-ui/react";
-import { TimeIcon, PlusSquareIcon, DeleteIcon } from "@chakra-ui/icons";
+import { Button, List, ListIcon, ListItem, Input, Flex } from "@chakra-ui/react";
+import { TimeIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Plan } from "../types";
-import { plannerDeleteRequest, plannerGetRequest, plannerPostRequest } from "../utilities/apiRequest";
+import { plannerDeleteRequest, plannerGetRequest, plannerPostRequest, plannerPutRequest } from "../utilities/apiRequest";
 import { ApplicationContext } from "../App";
+import { PlanEditor } from "./PlanEditor";
 
-function PlanListItem ({ plan, deletePlan }: {plan: Plan, deletePlan: (planId: string) => void}): JSX.Element {
+function PlanListItem ({ plan, editPlan, deletePlan }: {plan: Plan, editPlan: (plan: Plan) => void, deletePlan: (planId: string) => void}): JSX.Element {
   return <ListItem display={"flex"} alignItems={"center"} gap={"0.5em"}>
     <ListIcon as={TimeIcon} color='green.500' />
     {plan.name}
-    <IconButton aria-label="Delete"
-      marginRight={0}
-      marginLeft={"auto"}
-      icon={<DeleteIcon />}
-      onClick={() => deletePlan(plan.id)}
+    <PlanEditor
+      styleProps={{
+        marginRight: 0,
+        marginLeft: "auto"
+      }}
+      plan={plan}
+      editPlan={editPlan}
+      deletePlan={deletePlan}
     />
   </ListItem>;
 }
@@ -39,7 +43,13 @@ export const PlanManager = () => {
     setLoading(true);
     plannerDeleteRequest(`/plans/${planId}`)
       .finally(() => setNewPlanId(Math.random().toString()));
-  }, [setLoading]);
+  }, [setLoading, setNewPlanId]);
+
+  const editPlan = useCallback((plan: Plan) => {
+    setLoading(true);
+    plannerPutRequest(`/plans/${plan.id}`, plan)
+      .finally(() => setNewPlanId(Math.random().toString()));
+  }, [setLoading, setNewPlanId]);
 
   useEffect(() => {
     setLoading(true);
@@ -56,7 +66,7 @@ export const PlanManager = () => {
 
   return <Flex padding={"1em"}>
     <List spacing={3}>
-      {userPlans.map(plan => <PlanListItem key={plan.id} plan={plan} deletePlan={deletePlan}/>)}
+      {userPlans.map(plan => <PlanListItem key={plan.id} plan={plan} editPlan={editPlan} deletePlan={deletePlan}/>)}
 
       <ListItem display={"flex"} alignItems={"center"} gap={"0.5em"}>
         <ListIcon as={PlusSquareIcon} color='green.500' />
