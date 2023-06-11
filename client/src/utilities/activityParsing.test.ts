@@ -84,6 +84,43 @@ describe("parseActivityFromString", () => {
             }
           ]
         }
+      ],
+      [
+        "Some summary,2023-12-12T00:00:00,false,false,::3::Stage One,||15||min,::5::Stage Two,||20||miles,||10||km,,,,,,,",
+        {
+          summary: "Some summary",
+          dateTime: parseISO("2023-12-12T00:00:00"),
+          timeRelevant: false,
+          completed: false,
+          stages: [
+            {
+              order: 0,
+              description: "Stage One",
+              repetitions: 3,
+              metrics: [
+                {
+                  amount: 15,
+                  unit: "min"
+                }
+              ]
+            },
+            {
+              order: 1,
+              description: "Stage Two",
+              repetitions: 5,
+              metrics: [
+                {
+                  amount: 20,
+                  unit: "miles"
+                },
+                {
+                  amount: 10,
+                  unit: "km"
+                }
+              ]
+            }
+          ]
+        }
       ]
     ]
   )("Activities with stages :: parse successfully", (strActivity, activity) => {

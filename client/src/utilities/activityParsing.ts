@@ -43,6 +43,9 @@ const stageParsingReducer = (accumulator: ActivityStage[], stgPrt: string, index
       amount,
       unit
     });
+  } else if (stgPrt === "") {
+    // Skip trailing "values"
+    return accumulator;
   } else {
     throw stageError;
   }
