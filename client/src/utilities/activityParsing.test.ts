@@ -84,6 +84,12 @@ describe("parseActivityFromString", () => {
     expect(res.success && res.activity).toEqual(activity);
   });
 
+  test.each([["nondatestring"]])("Malformed date", (date) => {
+    const res = parseActivityFromString(`Some summary,${date},false,false`);
+    expect(res.success).toBeFalsy();
+    expect(!res.success && res.error).toBe("Malformed part :: Error parsing item in index 1");
+  });
+
   test.each([
     ["Some summary,2023-12-12T00:00:00,false,false,::3::Stage One,| |15||min", 6],
     ["Some summary,2023-12-12T00:00:00,false,false,::3: :Stage One,||15||min", 5],

@@ -4,7 +4,7 @@
 // };
 
 import { Activity, ActivityStage } from "../types";
-import { parseISO } from "date-fns";
+import { isValid, parseISO } from "date-fns";
 
 // export type ActivityStage = {
 //   order: number;
@@ -43,8 +43,10 @@ type ActivityParsingResult = ParsedActivity | ErrorParsingActivity;
 
 const STAGES_OFFSET = 5;
 
+const BASIC_PARSING_ERROR_MSG = "Error parsing item in index ";
+
 const stageParsingReducer = (accumulator: ActivityStage[], stgPrt: string, index: number): ActivityStage[] => {
-  const stageError = new Error("Error parsing item in index " + (index + STAGES_OFFSET));
+  const stageError = new Error(BASIC_PARSING_ERROR_MSG + (index + STAGES_OFFSET));
   if (stgPrt.startsWith("::")) {
     const [, rawRepetitions, description] = stgPrt.split("::");
     const repetitions = parseInt(rawRepetitions);
@@ -74,14 +76,18 @@ const stageParsingReducer = (accumulator: ActivityStage[], stgPrt: string, index
 };
 
 export const parseActivityFromString = (input: string): ActivityParsingResult => {
-  const [summary, dateTime, timeRelevant, completed, ...stages] = input.split(",");
-  if (summary && dateTime && timeRelevant && completed) {
+  const [summary, rawDateTime, timeRelevant, completed, ...stages] = input.split(",");
+  if (summary && rawDateTime && timeRelevant && completed) {
     try {
+      const dateTime = parseISO(rawDateTime);
+      if (!isValid(dateTime)) {
+        throw new Error(BASIC_PARSING_ERROR_MSG + 1);
+      }
       return {
         success: true,
         activity: {
           summary,
-          dateTime: parseISO(dateTime),
+          dateTime,
           timeRelevant: timeRelevant === "true",
           completed: completed === "true",
           stages: stages.reduce(stageParsingReducer, [])
