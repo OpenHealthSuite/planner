@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ActivityParsingResult, parseActivityFromString } from "../utilities/activityParsing";
+import { ActivityApiSubmission } from "../types";
+import { plannerPostRequest } from "../utilities/apiRequest";
 
 type UploadStages = "start" | "processing" | "validating" | "uploading" | "complete"
 
@@ -17,10 +19,39 @@ const defaultSummary: ParsingSummary = {
   errors: []
 };
 
+const activityCreation = (activity: ActivityApiSubmission) => {
+  return plannerPostRequest<ActivityApiSubmission, string>("/activities", activity);
+};
+
 export const PlanBulkActivityUploader = ({ planId } : { planId: string }) => {
   const [stage, setStage] = useState<UploadStages>("start");
   const [parsed, setParsed] = useState<ActivityParsingResult[]>([]);
   const [parsingSummary, setParsingSummary] = useState<ParsingSummary>(defaultSummary);
+  const [uploadCount, setUploadCount] = useState(0);
+
+  const uploadParsedActivities = useCallback(async (planId: string, parsed: ActivityParsingResult[]): Promise<void> => {
+    for (const act of parsed) {
+      try {
+        if (act.success) {
+          await activityCreation({
+            planId,
+            summary: act.activity.summary,
+            stages: act.activity.stages,
+            timeRelevant: act.activity.timeRelevant,
+            completed: act.activity.completed,
+            notes: "",
+            dateTime: act.activity.dateTime.toISOString()
+          });
+          setUploadCount((prev) => {
+            return prev + 1;
+          });
+        }
+      } catch {
+        console.error("Something went wrong");
+      }
+    }
+  }, [setUploadCount]);
+
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -48,6 +79,13 @@ export const PlanBulkActivityUploader = ({ planId } : { planId: string }) => {
     }
   }, [setParsed, setStage, setParsingSummary]);
 
+  const handleUpload = useCallback((parsed: ActivityParsingResult[]) => {
+    setStage("uploading");
+    uploadParsedActivities(planId, parsed).then(() => {
+      setStage("complete");
+    });
+  }, [planId, setStage]);
+
   return <>
     {stage === "start" && <form name="bulkactivityuploader" onSubmit={(e) => handleSubmit(e)}>
       <input
@@ -69,6 +107,13 @@ export const PlanBulkActivityUploader = ({ planId } : { planId: string }) => {
           </li>)}
         </ul>
       </li>}
+      <li><button onClick={() => handleUpload(parsed)}>Upload</button></li>
     </ul>}
+    {stage === "uploading" && <>
+      {uploadCount}/{parsingSummary.validCount} Uploaded
+    </>}
+    {stage === "complete" && <>
+      {uploadCount}/{parsingSummary.validCount} Uploaded, all done!
+    </>}
   </>;
 };
