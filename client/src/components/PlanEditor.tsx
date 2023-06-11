@@ -1,8 +1,9 @@
-import { Button, Checkbox, FormControl, FormLabel, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure } from "@chakra-ui/react";
+import { Button, Checkbox, FormControl, FormLabel, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Tab, TabList, TabPanel, TabPanels, Tabs, useDisclosure } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import { Plan } from "../types";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { PlanBulkActivityUploader } from "./PlanBulkActivityUploader";
 
 type PlanEditorFormProps = {
   plan: Plan,
@@ -78,12 +79,31 @@ export const PlanEditor = ({ plan, editPlan, deletePlan, styleProps }: PlanEdito
   <Modal isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader>Edit plan</ModalHeader>
       <ModalCloseButton />
-      <PlanEditorForm plan={plan}
-        editPlan={editPlan}
-        deletePlan={deletePlan}
-        onClose={onClose} />
+      <Tabs>
+        <ModalHeader>
+          <TabList>
+            <Tab>Edit</Tab>
+            <Tab>Upload</Tab>
+          </TabList>
+        </ModalHeader>
+        <TabPanels>
+          <TabPanel>
+            <PlanEditorForm plan={plan}
+              editPlan={editPlan}
+              deletePlan={deletePlan}
+              onClose={onClose} />
+          </TabPanel>
+          <TabPanel>
+            <ModalBody>
+              <PlanBulkActivityUploader planId={plan.id} />
+            </ModalBody>
+            <ModalFooter>
+              <Button variant={"ghost"} onClick={onClose}>Close</Button>
+            </ModalFooter>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </ModalContent>
   </Modal></>;
 };
