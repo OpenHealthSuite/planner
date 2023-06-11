@@ -13,7 +13,7 @@ type ErrorParsingActivity = {
   original: string
 }
 
-type ActivityParsingResult = ParsedActivity | ErrorParsingActivity;
+export type ActivityParsingResult = ParsedActivity | ErrorParsingActivity;
 
 const STAGES_OFFSET = 5;
 
