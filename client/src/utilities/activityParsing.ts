@@ -1,33 +1,5 @@
-// export type ActivityStageMetric = {
-//   amount: number;
-//   unit: string;
-// };
-
 import { Activity, ActivityStage } from "../types";
 import { isValid, parseISO } from "date-fns";
-
-// export type ActivityStage = {
-//   order: number;
-//   description: string;
-//   metrics: ActivityStageMetric[];
-//   repetitions: number;
-// };
-
-// export type Activity = {
-//   id: string;
-//   userId: string;
-//   recurringActivityId?: string;
-//   planId?: string;
-//   summary: string;
-//   stages: ActivityStage[];
-//   dateTime: Date;
-//   timeRelevant: boolean;
-//   completed: boolean;
-//   notes: string;
-// };
-
-// summary, dateTime, timeRelevant, completed, ::stageDesc::reps, ||amount||metric
-// Some summary, 2023-12-12, false, false, ::3::Stage One, ||15||min, ||20||min, ||Stage Two||5, ||23||min
 
 type ParsedActivity = {
   success: true,
