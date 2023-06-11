@@ -53,6 +53,7 @@ const stageParsingReducer = (accumulator: ActivityStage[], stgPrt: string, index
 };
 
 export const parseActivityFromString = (input: string): ActivityParsingResult => {
+  input = input.trim();
   const [summary, rawDateTime, timeRelevant, completed, ...stages] = input.split(",");
   if (summary && rawDateTime && timeRelevant && completed) {
     try {
