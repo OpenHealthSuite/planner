@@ -56,6 +56,9 @@ export const PlanBulkActivityUploader = ({ planId } : { planId: string }) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     setStage("processing");
+    setParsed([]);
+    setParsingSummary(defaultSummary);
+    setUploadCount(0);
     try {
       // It's really unhappy about this - ignore it, and just handle the error
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -71,13 +74,13 @@ export const PlanBulkActivityUploader = ({ planId } : { planId: string }) => {
           acc.errors.push([index, curr.original, curr.error]);
         }
         return acc;
-      }, defaultSummary));
+      }, structuredClone(defaultSummary)));
       setStage("validating");
     } catch {
       console.error("Error accessing data");
       setStage("start");
     }
-  }, [setParsed, setStage, setParsingSummary]);
+  }, [setParsed, setUploadCount, setStage, setParsingSummary]);
 
   const handleUpload = useCallback((parsed: ActivityParsingResult[]) => {
     setStage("uploading");
