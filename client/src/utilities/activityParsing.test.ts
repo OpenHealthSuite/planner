@@ -38,6 +38,14 @@ describe("parseActivityFromString", () => {
     expect(res.success && res.activity).toEqual(activity);
   });
 
+  test.each([
+    ["somebadlymalformedstring"],
+    ["Some other summary,2023-11-04T09:00:00,true,true"]
+  ])("Both error and success return source string", (str) => {
+    const res = parseActivityFromString(str);
+    expect(res.original).toBe(str);
+  });
+
   test.each(
     [
       [

@@ -3,12 +3,14 @@ import { isValid, parseISO } from "date-fns";
 
 type ParsedActivity = {
   success: true,
-  activity: Omit<Activity, "id" | "userId" | "recurringActivityId" | "notes">
+  activity: Omit<Activity, "id" | "userId" | "recurringActivityId" | "notes">,
+  original: string
 };
 
 type ErrorParsingActivity = {
   success: false,
-  error: string
+  error: string,
+  original: string
 }
 
 type ActivityParsingResult = ParsedActivity | ErrorParsingActivity;
@@ -63,18 +65,21 @@ export const parseActivityFromString = (input: string): ActivityParsingResult =>
           timeRelevant: timeRelevant === "true",
           completed: completed === "true",
           stages: stages.reduce(stageParsingReducer, [])
-        }
+        },
+        original: input
       };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (ex: any) {
       return {
         success: false,
-        error: "Malformed part :: " + ex.message
+        error: "Malformed part :: " + ex.message,
+        original: input
       };
     }
   }
   return {
     success: false,
-    error: "Missing minimum data"
+    error: "Missing minimum data",
+    original: input
   };
 };
