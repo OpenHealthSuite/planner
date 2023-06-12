@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Flex, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Text, useDisclosure } from "@chakra-ui/react";
 import { addDays, format, subDays, differenceInDays, startOfDay, endOfDay, addHours } from "date-fns";
-import { Activity, RecurringActivity } from "../types";
+import { Activity, Plan, RecurringActivity } from "../types";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { plannerGetRequest } from "../utilities/apiRequest";
 import { ApplicationContext } from "../App";
@@ -72,21 +72,27 @@ const generateDatesArray = (totalDaysToLoad: number, firstDay: Date, preceedingD
 
 const PLANLESS_VALUE = "PLANLESS_ID_FILTER";
 
-const planFilter = (activity: Activity | RecurringActivity, selectedPlanId: string | undefined) =>
-  selectedPlanId === undefined ||
-  selectedPlanId === activity.planId ||
-  (selectedPlanId === PLANLESS_VALUE && !activity.planId);
+const planFilter = (activity: Activity | RecurringActivity, selectedPlanId: string | undefined, inactivePlanIds: Set<string>) =>
+  (!activity.planId || !inactivePlanIds.has(activity.planId)) && (
+    selectedPlanId === undefined ||
+    selectedPlanId === activity.planId ||
+    (selectedPlanId === PLANLESS_VALUE && !activity.planId)
+  );
 
 const SelectPlan = ({ selectedPlanId, setSelectedPlanId: origSetSelectedPlanId }: { selectedPlanId: string | undefined, setSelectedPlanId: (id: string | undefined) => void }) => {
   const { userPlans } = useContext(ApplicationContext);
+  const [activeUserPlans, setActiveUserPlans] = useState<Plan[]>(userPlans.filter(x => x.active));
+  useEffect(() => {
+    setActiveUserPlans(userPlans.filter(x => x.active));
+  }, [JSON.stringify(userPlans), setActiveUserPlans]);
   const { isOpen, onToggle, onClose } = useDisclosure();
-  const selected = userPlans.findIndex(x => x.id === selectedPlanId);
+  const selected = activeUserPlans.findIndex(x => x.id === selectedPlanId);
   const unselectedSelected = selectedPlanId === PLANLESS_VALUE;
   const setSelectedPlanId = useCallback((id: string | undefined) => {
     origSetSelectedPlanId(id);
     onClose();
   }, [origSetSelectedPlanId, onClose]);
-  if (!userPlans || userPlans.length === 0) {
+  if (!activeUserPlans || activeUserPlans.length === 0) {
     return <></>;
   }
   return <Popover placement='top' isOpen={isOpen}>
@@ -98,7 +104,7 @@ const SelectPlan = ({ selectedPlanId, setSelectedPlanId: origSetSelectedPlanId }
         borderLeft={0}
         padding={"1em"}
         margin={"1em"}
-        zIndex={9999}>{selected !== -1 || unselectedSelected ? `Viewing ${userPlans[selected]?.name ?? "Unplanned"}` : "Filter"}</Button>
+        zIndex={10}>{selected !== -1 || unselectedSelected ? `Viewing ${activeUserPlans[selected]?.name ?? "Unplanned"}` : "Filter"}</Button>
     </PopoverTrigger>
     <PopoverContent>
       <PopoverHeader pt={4} fontWeight='bold' border='0'>
@@ -111,7 +117,7 @@ const SelectPlan = ({ selectedPlanId, setSelectedPlanId: origSetSelectedPlanId }
           onClick={() => setSelectedPlanId(unselectedSelected ? undefined : PLANLESS_VALUE)}>
           {unselectedSelected && <>* </>}Planless
         </Button>
-        {userPlans.map((plan, i) => {
+        {activeUserPlans.map((plan, i) => {
           return <Button key={plan.id} variant={selected === i ? "outline" : "solid"}
             onClick={() => setSelectedPlanId(selected === i ? undefined : plan.id)}>
             {selected === i && <>* </>}{plan.name}
@@ -140,6 +146,18 @@ export const ActivityList = ({
   const preceedingDays = 2;
 
   const [daysToDisplay, setDaysToDisplay] = useState(generateDatesArray(totalDaysToLoad, initialDate, preceedingDays));
+
+  const { userPlans } = useContext(ApplicationContext);
+  const [inactivePlanIds, setInactivePlanIds] = useState<Set<string>>(new Set<string>());
+
+  useEffect(() => {
+    setInactivePlanIds(userPlans.reduce<Set<string>>((acc, curr) => {
+      if (!curr.active) {
+        acc.add(curr.id);
+      }
+      return acc;
+    }, new Set<string>()));
+  }, [JSON.stringify(userPlans), setInactivePlanIds]);
 
   const getActivities = useCallback((startDate: Date, endDate: Date) => {
     setLoading(true);
@@ -236,8 +254,8 @@ export const ActivityList = ({
       return <DaysActivities key={date}
         date={x}
         id={date === initialDateScrolltoTarget ? "initial-scrollto-target" : undefined}
-        activities={(activityDayMap[date] ?? []).filter(x => planFilter(x, selectedPlanId))}
-        recurringActivities={(recurringActivityDayMap[date] ?? []).filter(x => planFilter(x, selectedPlanId))}
+        activities={(activityDayMap[date] ?? []).filter(x => planFilter(x, selectedPlanId, inactivePlanIds))}
+        recurringActivities={(recurringActivityDayMap[date] ?? []).filter(x => planFilter(x, selectedPlanId, inactivePlanIds))}
         onUpdate={setLatestCreatedActivityId}/>;
     })}
     {loading && <CircularProgress />}
