@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Flex, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Text, useDisclosure } from "@chakra-ui/react";
-import { addDays, format, subDays, differenceInDays, startOfDay, endOfDay, addHours } from "date-fns";
+import { addDays, format, subDays, startOfDay, endOfDay, addHours } from "date-fns";
 import { Activity, Plan, RecurringActivity } from "../types";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { plannerGetRequest } from "../utilities/apiRequest";
@@ -128,6 +128,25 @@ const SelectPlan = ({ selectedPlanId, setSelectedPlanId: origSetSelectedPlanId }
   </Popover>;
 };
 
+export const createRecurringDateMap = (daysToDisplay: Date[], recurringActivities: RecurringActivity[]): { [key: string]: RecurringActivity[] } => {
+  const retval = daysToDisplay.reduce<{[key: string]: RecurringActivity[]}>((recAcc, curr) => {
+    // I'm sure this could be more efficient, but it's already
+    // coming out of a lower loop
+    const date = curr.toISOString().split("T")[0];
+    recAcc[date] = recurringActivities.filter(ra => {
+      // We do this manually rather than using datefns because we want to fudge around DST
+      const [year, month, day] = date.split("-").map(x => parseInt(x));
+      const [yr, mnt, dy] = ra.dateTimeStart.toISOString().split("T")[0].split("-").map(x => parseInt(x));
+      const oneDay = 24 * 60 * 60 * 1000;
+      const diffDays = Math.round(Math.abs(Date.UTC(year, month - 1, day) - Date.UTC(yr, mnt - 1, dy) / oneDay));
+      return diffDays === 0 || (diffDays > 0 && diffDays % ra.recurrEachDays === 0);
+    });
+    return recAcc;
+  }, {});
+
+  return retval;
+};
+
 export const ActivityList = ({
   initialDate = new Date()
 } : ActivityListProps) => {
@@ -225,16 +244,7 @@ export const ActivityList = ({
   }, [activities, setActivityDayMap]);
 
   useEffect(() => {
-    const newRecurring = daysToDisplay.reduce<{[key: string]: RecurringActivity[]}>((recAcc, curr) => {
-      // I'm sure this could be more efficient, but it's already
-      // coming out of a lower loop
-      const date = curr.toISOString().split("T")[0];
-      recAcc[date] = recurringActivities.filter(ra => {
-        const dayDiff = differenceInDays(new Date(date), new Date(ra.dateTimeStart.toISOString().split("T")[0]));
-        return dayDiff === 0 || (dayDiff > 0 && dayDiff % ra.recurrEachDays === 0);
-      });
-      return recAcc;
-    }, {});
+    const newRecurring = createRecurringDateMap(daysToDisplay, recurringActivities);
     setRecurringActivityDayMap({ ...recurringActivityDayMap, ...newRecurring });
   }, [daysToDisplay, recurringActivities, setRecurringActivityDayMap]);
 
