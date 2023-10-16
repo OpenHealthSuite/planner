@@ -69,7 +69,7 @@ describe("Add Activity Interface", () => {
 
     await user.click(screen.getByText("Add Stage"));
 
-    await user.click(screen.getByText("Stage 1"));
+    await user.click(screen.getByLabelText("stage-0-toggle"));
 
     await user.clear(screen.getByLabelText("Description"));
     await user.type(screen.getByLabelText("Description"), "My Custom Stage");

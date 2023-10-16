@@ -16,20 +16,23 @@ export const ActivityStageEditor = ({ values, handleChange, validateForm } : Act
 
         <h2>
           <AccordionButton>
-            <Box as="span" flex='1' textAlign='left'>
-              {stage.repetitions > 1 ? stage.repetitions + " x " : ""}{stage.description}
+            <Box as="span" display='flex' flex='1' textAlign='left' gap='1em'>
+              {stage.repetitions > 1 && <div>{stage.repetitions + " x "}</div>}
+
+              <FormControl>
+                <Input
+                  aria-label="Description"
+                  id={`stages[${i}].description`}
+                  name={`stages[${i}].description`}
+                  type='text' onChange={handleChange} value={stage.description}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </FormControl>
             </Box>
-            <AccordionIcon />
+            <AccordionIcon style={{ marginLeft: "1em" }} aria-label={"stage-" + i + "-toggle"} />
           </AccordionButton>
         </h2>
         <AccordionPanel pb={4}>
-          <FormControl>
-            <FormLabel htmlFor={`stages[${i}].description`}>Description</FormLabel>
-            <Input
-              id={`stages[${i}].description`}
-              name={`stages[${i}].description`}
-              type='text' onChange={handleChange} value={stage.description}/>
-          </FormControl>
           <FormControl>
             <FormLabel htmlFor={`stages[${i}].repetitions`}>Repetitions</FormLabel>
             <Input
