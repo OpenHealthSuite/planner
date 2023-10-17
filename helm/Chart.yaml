@@ -2,4 +2,4 @@ apiVersion: v2
 name: ohs-planner
 description: An application for planning physical activity
 type: application
-version: 0.1.8
+version: 0.1.9
