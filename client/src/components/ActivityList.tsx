@@ -138,7 +138,7 @@ export const createRecurringDateMap = (daysToDisplay: Date[], recurringActivitie
       const [year, month, day] = date.split("-").map(x => parseInt(x));
       const [yr, mnt, dy] = ra.dateTimeStart.toISOString().split("T")[0].split("-").map(x => parseInt(x));
       const oneDay = 24 * 60 * 60 * 1000;
-      const diffDays = Math.round(Math.abs(Date.UTC(year, month - 1, day) - Date.UTC(yr, mnt - 1, dy) / oneDay));
+      const diffDays = Math.round(Math.abs(Date.UTC(year, month - 1, day) / oneDay - Date.UTC(yr, mnt - 1, dy) / oneDay));
       return diffDays === 0 || (diffDays > 0 && diffDays % ra.recurrEachDays === 0);
     });
     return recAcc;
