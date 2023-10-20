@@ -60,6 +60,7 @@ describe("parseActivityFromString", () => {
               order: 0,
               description: "Stage One",
               repetitions: 3,
+              completed: false,
               metrics: [
                 {
                   amount: 15,
@@ -71,6 +72,7 @@ describe("parseActivityFromString", () => {
               order: 1,
               description: "Stage Two",
               repetitions: 5,
+              completed: false,
               metrics: [
                 {
                   amount: 20,
@@ -97,6 +99,7 @@ describe("parseActivityFromString", () => {
               order: 0,
               description: "Stage One",
               repetitions: 3,
+              completed: false,
               metrics: [
                 {
                   amount: 15,
@@ -108,6 +111,7 @@ describe("parseActivityFromString", () => {
               order: 1,
               description: "Stage Two",
               repetitions: 5,
+              completed: false,
               metrics: [
                 {
                   amount: 20,

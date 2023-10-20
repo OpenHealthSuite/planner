@@ -96,6 +96,7 @@ describe("Add Activity Interface", () => {
       stages: [
         {
           description: "My Custom Stage",
+          completed: false,
           metrics: [
             { amount: 11, unit: "meters" }
           ],
