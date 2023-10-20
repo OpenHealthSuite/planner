@@ -1,4 +1,4 @@
-import { Button, Flex, IconButton, Modal, ModalCloseButton, ModalContent, ModalOverlay, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure } from "@chakra-ui/react";
+import { Button, Flex, IconButton, Modal, ModalCloseButton, ModalContent, ModalFooter, ModalOverlay, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure } from "@chakra-ui/react";
 import { addDays, isAfter } from "date-fns";
 import { CheckIcon, RepeatIcon, ViewIcon } from "@chakra-ui/icons";
 import { Activity, ActivityApiSubmission, RecurringActivity, RecurringActivityApiSubmission } from "../../../types";
@@ -73,7 +73,9 @@ export const RecurringActivitySummary = ({ daysActivities, activity, activityDay
           <TabPanels>
             <TabPanel>
               <ActivityDetails activity={activity}/>
-              <Button onClick={() => createAssociatedActivity(activity, false).then(onClose)}>Create Related Activity</Button>
+              <ModalFooter display={"flex"} justifyContent={"center"}>
+                <Button onClick={() => createAssociatedActivity(activity, false).then(onClose)}>Create Related Activity</Button>
+              </ModalFooter>
             </TabPanel>
             <TabPanel>
               <RecurringActivityForm activitySubmission={editRecurringActivitySubmission}

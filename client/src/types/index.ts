@@ -8,6 +8,7 @@ export type ActivityStage = {
   description: string;
   metrics: ActivityStageMetric[];
   repetitions: number;
+  completed: boolean;
 };
 
 export type Activity = {

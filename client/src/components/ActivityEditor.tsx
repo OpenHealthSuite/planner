@@ -122,7 +122,7 @@ export const ActivityForm = ({
               id="completed"
               name="completed" onChange={handleChange} isChecked={values.completed}>Complete</Checkbox>
           </FormControl>
-          <ActivityStageEditor values={values} handleChange={handleChange} validateForm={validateForm}/>
+          <ActivityStageEditor values={values} showCompleted={true} handleChange={handleChange} validateForm={validateForm}/>
         </Flex>
         <Divider margin={"1em 0"} />
         <Flex w={"100%"} justifyContent={"space-between"}>

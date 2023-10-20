@@ -17,6 +17,7 @@ type ActivityStage struct {
 	Description string                `json:"description"`
 	Metrics     []ActivityStageMetric `json:"metrics"`
 	Repetitions int                   `json:"repetitions"`
+	Completed   bool                  `json:"completed"`
 }
 
 type Activity struct {

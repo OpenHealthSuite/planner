@@ -31,7 +31,8 @@ const stageParsingReducer = (accumulator: ActivityStage[], stgPrt: string, index
       order: accumulator.length,
       description,
       repetitions,
-      metrics: []
+      metrics: [],
+      completed: false
     });
   } else if (stgPrt.startsWith("||")) {
     const [, rawAmount, unit] = stgPrt.split("||");

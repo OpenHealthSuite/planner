@@ -1,15 +1,16 @@
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box, Button, Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box, Button, Checkbox, Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
 import { ActivityStage } from "../../types";
 
 type ActivityStageEditorProps = {
   values: {
     stages: ActivityStage[]
   },
+  showCompleted?: boolean,
   handleChange?: React.ChangeEventHandler<HTMLInputElement> | undefined,
   validateForm: () => void
 }
 
-export const ActivityStageEditor = ({ values, handleChange, validateForm } : ActivityStageEditorProps) => {
+export const ActivityStageEditor = ({ values, showCompleted = false, handleChange, validateForm } : ActivityStageEditorProps) => {
   return <>{values.stages.length > 0 && <Accordion allowToggle>
     {values.stages.map((stage, i) => {
       return <AccordionItem key={stage.order}>
@@ -75,6 +76,12 @@ export const ActivityStageEditor = ({ values, handleChange, validateForm } : Act
               validateForm();
             }}
           >Add Metric</Button>
+
+          {showCompleted && <FormControl>
+            <Checkbox
+              id={`stages[${i}].completed`}
+              name={`stages[${i}].completed`} onChange={handleChange} isChecked={stage.completed}>Complete</Checkbox>
+          </FormControl>}
           <Button width={"100%"}
             mt={"1em"}
             onClick={() => {
@@ -94,7 +101,8 @@ export const ActivityStageEditor = ({ values, handleChange, validateForm } : Act
       order: values.stages.length,
       repetitions: 1,
       metrics: [],
-      description: `Stage ${values.stages.length + 1}`
+      description: `Stage ${values.stages.length + 1}`,
+      completed: false
     });
     validateForm();
   }}>Add Stage</Button>
