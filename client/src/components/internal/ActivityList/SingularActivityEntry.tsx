@@ -1,4 +1,4 @@
-import { Flex, IconButton, Modal, ModalCloseButton, ModalContent, ModalOverlay, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure } from "@chakra-ui/react";
+import { Button, Flex, IconButton, Modal, ModalCloseButton, ModalContent, ModalFooter, ModalOverlay, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure } from "@chakra-ui/react";
 import { isAfter, addMinutes } from "date-fns";
 import { ViewIcon, CheckIcon } from "@chakra-ui/icons";
 import { Activity, ActivityApiSubmission } from "../../../types";
@@ -29,7 +29,7 @@ export const SingularActivitySummary = ({ activity, onUpdate } : { activity: Act
   const markComplete = useCallback((activity: Activity) => {
     isLoading(true);
     activity.completed = true;
-    plannerPutRequest(`/activities/${activity.id}`, activity)
+    return plannerPutRequest(`/activities/${activity.id}`, activity)
       .finally(() => isLoading(false));
   }, [isLoading]);
 
@@ -71,6 +71,9 @@ export const SingularActivitySummary = ({ activity, onUpdate } : { activity: Act
           <TabPanels>
             <TabPanel>
               <ActivityDetails activity={activity}/>
+              <ModalFooter display={"flex"} justifyContent={"center"}>
+                {!activity.completed && isCompletable && <Button aria-label="Mark Complete" disabled={loading} onClick={() => { markComplete(activity).then(onClose); }}>Mark Complete</Button>}
+              </ModalFooter>
             </TabPanel>
             <TabPanel>
               <ActivityForm activitySubmission={defaultActivitySubmission}
