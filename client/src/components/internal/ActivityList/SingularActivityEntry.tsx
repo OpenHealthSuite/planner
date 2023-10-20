@@ -63,7 +63,6 @@ export const SingularActivitySummary = ({ activity, onUpdate } : { activity: Act
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalCloseButton />
         <Tabs>
           <TabList>
             <Tab data-testid="activity-view-tab">View</Tab>
@@ -82,6 +81,7 @@ export const SingularActivitySummary = ({ activity, onUpdate } : { activity: Act
             </TabPanel>
           </TabPanels>
         </Tabs>
+        <ModalCloseButton />
       </ModalContent>
     </Modal>
   </Flex>;

@@ -65,7 +65,6 @@ export const RecurringActivitySummary = ({ daysActivities, activity, activityDay
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalCloseButton />
         <Tabs>
           <TabList>
             <Tab>View</Tab>
@@ -85,6 +84,7 @@ export const RecurringActivitySummary = ({ daysActivities, activity, activityDay
             </TabPanel>
           </TabPanels>
         </Tabs>
+        <ModalCloseButton />
       </ModalContent>
     </Modal>
   </Flex>;
