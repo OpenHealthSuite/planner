@@ -10,7 +10,7 @@ describe('recurring activities', () => {
       summary: "Some activity name",
       planId: null,
       stages: [
-        { order: 0, description: "desc", metrics: [{amount: 1, unit: "unt"}], repetitions: 3}
+        { order: 0, description: "desc", metrics: [{amount: 1, unit: "unt"}], repetitions: 3, completed: false }
       ],
       recurrEachDays: 7,
       dateTimeStart: new Date().toISOString(),

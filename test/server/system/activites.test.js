@@ -11,7 +11,7 @@ describe('activities', () => {
       planId: null,
       recurringActivityId: null,
       stages: [
-        { order: 0, description: "desc", metrics: [{amount: 1, unit: "unt"}], repetitions: 3}
+        { order: 0, description: "desc", metrics: [{amount: 1, unit: "unt"}], repetitions: 3, completed: false }
       ],
       dateTime: new Date().toISOString(),
       timeRelevant: false,
