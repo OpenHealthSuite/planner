@@ -181,7 +181,7 @@ export const ActivityList = ({
   const getActivities = useCallback((startDate: Date, endDate: Date) => {
     setLoading(true);
     Promise.all([
-      plannerGetRequest<Activity[]>(`/activities?timeStart=${startDate.toISOString()}&timeEnd=${endDate.toISOString()}`),
+      plannerGetRequest<Activity[]>(`/activities?timeStart=${startOfDay(startDate).toISOString()}&timeEnd=${endOfDay(endDate).toISOString()}`),
       plannerGetRequest<RecurringActivity[]>("/recurring_activities")
     ])
       .then(([acts, recurringActs]) => {
