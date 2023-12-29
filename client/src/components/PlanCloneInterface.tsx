@@ -31,7 +31,7 @@ type PlanEditorFormProps = {
 
 const PlanSchema = Yup.object().shape({
   date: Yup.date().required("Required"),
-  shiftOnStart: Yup.boolean().required("Required")
+  shiftOnStart: Yup.boolean()
 });
 
 export const PlanCloneInterface = ({ plan, clonePlan = defaultClonePlan, onClose }: PlanEditorFormProps) => {
@@ -46,7 +46,6 @@ export const PlanCloneInterface = ({ plan, clonePlan = defaultClonePlan, onClose
     {({
       values,
       isValid,
-      dirty,
       handleChange,
       handleSubmit
     }) => (
@@ -71,7 +70,7 @@ export const PlanCloneInterface = ({ plan, clonePlan = defaultClonePlan, onClose
         </ModalBody>
         <ModalFooter>
           <Button variant={"ghost"} onClick={onClose}>Cancel</Button>
-          <Button type="submit" isDisabled={!dirty || !isValid}>Clone</Button>
+          <Button type="submit" isDisabled={!isValid}>Clone</Button>
         </ModalFooter>
       </form>)}
   </Formik>;
