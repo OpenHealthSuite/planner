@@ -38,6 +38,7 @@ func registerPlanId(strg storage.PlanStorage, actStrg storage.ActivityStorage, r
 
 		if id == "clone" && r.Method == http.MethodPost {
 			handleClonePlan(w, r, strg, actStrg, recActStrg)
+			return
 		}
 
 		uuid, err := uuid.Parse(id)
@@ -250,10 +251,12 @@ func handleClonePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanSt
 		return
 	}
 
-	storedPlan.Id = uuid.Nil
-	storedPlan.Name = "Cloned - " + storedPlan.Name
+	newPlan := *storedPlan
 
-	created, err := strg.Create(*storedPlan)
+	newPlan.Id = uuid.Nil
+	newPlan.Name = "Cloned - " + storedPlan.Name
+
+	created, err := strg.Create(newPlan)
 	str := created.Id.String()
 	jsonData, err := json.Marshal(str)
 	if err != nil {
@@ -281,6 +284,7 @@ func cloneActivities(actStrg storage.ActivityStorage, userId string, originPlanI
 	if err != nil {
 		return err
 	}
+
 	if len(*acts) == 0 {
 		return nil
 	}
@@ -306,7 +310,10 @@ func cloneActivities(actStrg storage.ActivityStorage, userId string, originPlanI
 		oldAct.Id = uuid.Nil
 		oldAct.DateTime = oldAct.DateTime.Add(*offset)
 		oldAct.PlanId = &targetPlanId
-		actStrg.Create(oldAct)
+		_, err := actStrg.Create(oldAct)
+		if err != nil {
+			fmt.Printf("Error creating new activity:\n\n%v", err)
+		}
 	}
 
 	return nil
