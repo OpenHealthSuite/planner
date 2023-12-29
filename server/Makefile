@@ -8,6 +8,9 @@ build:
 run:
 	go run main.go
 
+run-cassandra:
+	PLANNER_STORAGE_TYPE="cassandra"  go run main.go
+
 test:
 	go test -v ./...
 
