@@ -186,8 +186,9 @@ func TestHappyPathClonePlanHandler_StartDateShift(t *testing.T) {
 
 	existingActs := []storage.Activity{
 		{
-			Summary:  "First",
-			DateTime: time.Date(2023, 12, 10, 11, 30, 00, 00, &time.Location{}),
+			Summary:   "First",
+			DateTime:  time.Date(2023, 12, 10, 11, 30, 00, 00, &time.Location{}),
+			Completed: true,
 		},
 		{
 			Summary:  "Second",
@@ -201,9 +202,10 @@ func TestHappyPathClonePlanHandler_StartDateShift(t *testing.T) {
 	}).Return(&existingActs, nil)
 
 	mockActStorage.EXPECT().Create(storage.Activity{
-		Summary:  "First",
-		PlanId:   &actExpected.Id,
-		DateTime: time.Date(2023, 12, 12, 11, 30, 00, 00, &time.Location{}),
+		Summary:   "First",
+		PlanId:    &actExpected.Id,
+		Completed: false,
+		DateTime:  time.Date(2023, 12, 12, 11, 30, 00, 00, &time.Location{}),
 	}).Return(storage.Activity{}, nil).Times(1)
 	mockActStorage.EXPECT().Create(storage.Activity{
 		Summary:  "Second",

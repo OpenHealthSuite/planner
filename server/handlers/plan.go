@@ -310,6 +310,7 @@ func cloneActivities(actStrg storage.ActivityStorage, userId string, originPlanI
 		oldAct.Id = uuid.Nil
 		oldAct.DateTime = oldAct.DateTime.Add(*offset)
 		oldAct.PlanId = &targetPlanId
+		oldAct.Completed = false
 		_, err := actStrg.Create(oldAct)
 		if err != nil {
 			fmt.Printf("Error creating new activity:\n\n%v", err)
