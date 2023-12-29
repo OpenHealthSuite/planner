@@ -228,7 +228,7 @@ func TestHappyPathClonePlanHandler_StartDateShift(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
-	assert.NotEqual(t, actExpected.Id.String(), rr.Body.String())
+	assert.Equal(t, fmt.Sprintf("\"%s\"", actExpected.Id.String()), rr.Body.String())
 }
 
 func TestHappyPathClonePlanHandler_EndDateShift(t *testing.T) {
@@ -299,5 +299,5 @@ func TestHappyPathClonePlanHandler_EndDateShift(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
-	assert.NotEqual(t, actExpected.Id.String(), rr.Body.String())
+	assert.Equal(t, fmt.Sprintf("\"%s\"", actExpected.Id.String()), rr.Body.String())
 }
