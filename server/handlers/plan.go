@@ -8,6 +8,7 @@ import (
 	"planner/middlewares"
 	"planner/storage"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -35,6 +36,10 @@ func registerPlanId(strg storage.PlanStorage, actStrg storage.ActivityStorage, r
 		parts := strings.Split(r.URL.Path, "/")
 		id := parts[3]
 
+		if id == "clone" && r.Method == http.MethodPost {
+			handleClonePlan(w, r, strg, actStrg, recActStrg)
+		}
+
 		uuid, err := uuid.Parse(id)
 
 		if err != nil {
@@ -58,6 +63,20 @@ func registerPlanId(strg storage.PlanStorage, actStrg storage.ActivityStorage, r
 
 func parsePlan(rdr io.Reader) (storage.Plan, error) {
 	var plan storage.Plan
+	decoder := json.NewDecoder(rdr)
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&plan)
+	return plan, err
+}
+
+type PlanClone struct {
+	Id               string     `json:"id"`
+	NewStartDateTime *time.Time `json:"newStartDateTime,omitempty"`
+	NewEndDateTime   *time.Time `json:"newEndDateTime,omitempty"`
+}
+
+func parsePlanClone(rdr io.Reader) (PlanClone, error) {
+	var plan PlanClone
 	decoder := json.NewDecoder(rdr)
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&plan)
@@ -196,4 +215,99 @@ func handleDeletePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanS
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{ "status": "ok" }`))
+}
+
+func handleClonePlan(w http.ResponseWriter, r *http.Request, strg storage.PlanStorage, actStrg storage.ActivityStorage, recActStrg storage.RecurringActivityStorage) {
+	userId := w.Header().Get(middlewares.VALIDATED_HEADER)
+
+	plan, err := parsePlanClone(r.Body)
+
+	id, err := uuid.Parse(plan.Id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if plan.NewStartDateTime == nil && plan.NewEndDateTime == nil {
+		http.Error(w, "Need to provide newStartDateTime or newEndDateTime", http.StatusBadRequest)
+		return
+	}
+
+	if plan.NewStartDateTime != nil && plan.NewEndDateTime != nil {
+		http.Error(w, "Need to provide either newStartDateTime or newEndDateTime", http.StatusBadRequest)
+		return
+	}
+
+	storedPlan, err := strg.Read(userId, id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if storedPlan == nil || storedPlan.UserId != userId {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+
+	storedPlan.Id = uuid.Nil
+	storedPlan.Name = "Cloned - " + storedPlan.Name
+
+	created, err := strg.Create(*storedPlan)
+	str := created.Id.String()
+	jsonData, err := json.Marshal(str)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = cloneActivities(actStrg, userId, storedPlan.Id, created.Id, plan.NewStartDateTime, plan.NewEndDateTime)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
+}
+
+func cloneActivities(actStrg storage.ActivityStorage, userId string, originPlanId uuid.UUID, targetPlanId uuid.UUID, newStartDate *time.Time, newEndDate *time.Time) error {
+	acts, err := actStrg.Query(storage.ActivityStorageQuery{
+		UserId: userId,
+		PlanId: &originPlanId,
+	})
+
+	if err != nil {
+		return err
+	}
+	if len(*acts) == 0 {
+		return nil
+	}
+
+	var offset *time.Duration
+
+	for _, oldAct := range *acts {
+		if newStartDate != nil {
+			newDuration := (*newStartDate).Sub(oldAct.DateTime)
+			if offset == nil || *offset < newDuration {
+				offset = &newDuration
+			}
+		}
+		if newEndDate != nil {
+			newDuration := (*newEndDate).Sub(oldAct.DateTime)
+			if offset == nil || *offset > newDuration {
+				offset = &newDuration
+			}
+		}
+	}
+
+	for _, oldAct := range *acts {
+		oldAct.Id = uuid.Nil
+		oldAct.DateTime = oldAct.DateTime.Add(*offset)
+		oldAct.PlanId = &targetPlanId
+		actStrg.Create(oldAct)
+	}
+
+	return nil
 }

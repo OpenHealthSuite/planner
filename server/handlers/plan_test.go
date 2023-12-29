@@ -9,6 +9,7 @@ import (
 	"planner/storage"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -155,4 +156,146 @@ func TestHappyPathReadPlanHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Equal(t, string(expectedBody), rr.Body.String())
+}
+
+func TestHappyPathClonePlanHandler_StartDateShift(t *testing.T) {
+	mockStorage := storage.NewMockPlanStorage(t)
+	mockActStorage := storage.NewMockActivityStorage(t)
+	mockRecActStorage := storage.NewMockRecurringActivityStorage(t)
+	testUserId := "some-valid-expected-userid"
+
+	returnedPlan := storage.Plan{
+		Id:     uuid.New(),
+		UserId: testUserId,
+		Name:   "Some Plan Name",
+	}
+	mockStorage.EXPECT().Read(testUserId, returnedPlan.Id).Return(&returnedPlan, nil).Once()
+
+	actExpected := storage.Plan{
+		Id:     uuid.New(),
+		UserId: testUserId,
+		Name:   "Cloned - Some Plan Name",
+	}
+
+	expectedInput := storage.Plan{
+		UserId: testUserId,
+		Name:   "Cloned - Some Plan Name",
+	}
+
+	mockStorage.EXPECT().Create(expectedInput).Return(actExpected, nil).Once()
+
+	existingActs := []storage.Activity{
+		{
+			Summary:  "First",
+			DateTime: time.Date(2023, 12, 10, 11, 30, 00, 00, &time.Location{}),
+		},
+		{
+			Summary:  "Second",
+			DateTime: time.Date(2023, 12, 13, 11, 30, 00, 00, &time.Location{}),
+		},
+	}
+
+	mockActStorage.EXPECT().Query(storage.ActivityStorageQuery{
+		UserId: testUserId,
+		PlanId: &returnedPlan.Id,
+	}).Return(&existingActs, nil)
+
+	mockActStorage.EXPECT().Create(storage.Activity{
+		Summary:  "First",
+		PlanId:   &actExpected.Id,
+		DateTime: time.Date(2023, 12, 12, 11, 30, 00, 00, &time.Location{}),
+	}).Return(storage.Activity{}, nil).Times(1)
+	mockActStorage.EXPECT().Create(storage.Activity{
+		Summary:  "Second",
+		PlanId:   &actExpected.Id,
+		DateTime: time.Date(2023, 12, 15, 11, 30, 00, 00, &time.Location{}),
+	}).Return(storage.Activity{}, nil).Times(1)
+
+	cloneBody := fmt.Sprintf(`{
+		"id": "%s",
+		"newStartDateTime": "2023-12-12T11:30:00Z"
+	}`, returnedPlan.Id.String())
+	req, err := http.NewRequest("POST", "/api/plans/clone", strings.NewReader(cloneBody))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
+
+	handler := http.Handler(registerPlanId(mockStorage, mockActStorage, mockRecActStorage))
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.NotEqual(t, actExpected.Id.String(), rr.Body.String())
+}
+
+func TestHappyPathClonePlanHandler_EndDateShift(t *testing.T) {
+	mockStorage := storage.NewMockPlanStorage(t)
+	mockActStorage := storage.NewMockActivityStorage(t)
+	mockRecActStorage := storage.NewMockRecurringActivityStorage(t)
+	testUserId := "some-valid-expected-userid"
+
+	returnedPlan := storage.Plan{
+		Id:     uuid.New(),
+		UserId: testUserId,
+		Name:   "Some Plan Name",
+	}
+	mockStorage.EXPECT().Read(testUserId, returnedPlan.Id).Return(&returnedPlan, nil).Once()
+
+	actExpected := storage.Plan{
+		Id:     uuid.New(),
+		UserId: testUserId,
+		Name:   "Cloned - Some Plan Name",
+	}
+
+	expectedInput := storage.Plan{
+		UserId: testUserId,
+		Name:   "Cloned - Some Plan Name",
+	}
+
+	mockStorage.EXPECT().Create(expectedInput).Return(actExpected, nil).Once()
+
+	existingActs := []storage.Activity{
+		{
+			Summary:  "First",
+			DateTime: time.Date(2023, 12, 10, 11, 30, 00, 00, &time.Location{}),
+		},
+		{
+			Summary:  "Second",
+			DateTime: time.Date(2023, 12, 13, 11, 30, 00, 00, &time.Location{}),
+		},
+	}
+
+	mockActStorage.EXPECT().Query(storage.ActivityStorageQuery{
+		UserId: testUserId,
+		PlanId: &returnedPlan.Id,
+	}).Return(&existingActs, nil)
+
+	mockActStorage.EXPECT().Create(storage.Activity{
+		Summary:  "First",
+		PlanId:   &actExpected.Id,
+		DateTime: time.Date(2023, 12, 9, 11, 30, 00, 00, &time.Location{}),
+	}).Return(storage.Activity{}, nil).Times(1)
+	mockActStorage.EXPECT().Create(storage.Activity{
+		Summary:  "Second",
+		PlanId:   &actExpected.Id,
+		DateTime: time.Date(2023, 12, 12, 11, 30, 00, 00, &time.Location{}),
+	}).Return(storage.Activity{}, nil).Times(1)
+
+	cloneBody := fmt.Sprintf(`{
+		"id": "%s",
+		"newEndDateTime": "2023-12-12T11:30:00Z"
+	}`, returnedPlan.Id.String())
+	req, err := http.NewRequest("POST", "/api/plans/clone", strings.NewReader(cloneBody))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	rr.Header().Set(middlewares.VALIDATED_HEADER, testUserId)
+
+	handler := http.Handler(registerPlanId(mockStorage, mockActStorage, mockRecActStorage))
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.NotEqual(t, actExpected.Id.String(), rr.Body.String())
 }
