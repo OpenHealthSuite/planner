@@ -4,6 +4,7 @@ import { Plan } from "../types";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { PlanBulkActivityUploader } from "./PlanBulkActivityUploader";
+import { PlanCloneInterface } from "./PlanCloneInterface";
 
 type PlanEditorFormProps = {
   plan: Plan,
@@ -16,6 +17,7 @@ type PlanEditorProps = {
   plan: Plan,
   editPlan: (plan: Plan) => void,
   deletePlan: (planId: string) => void,
+  clonePlan: (planCloneArgs: any) => void,
   styleProps: { [key: string]: string | number }
 };
 
@@ -69,7 +71,7 @@ export const PlanEditorForm = ({ plan, editPlan, deletePlan, onClose }: PlanEdit
   </Formik>;
 };
 
-export const PlanEditor = ({ plan, editPlan, deletePlan, styleProps }: PlanEditorProps) => {
+export const PlanEditor = ({ plan, editPlan, deletePlan, clonePlan, styleProps }: PlanEditorProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return <><IconButton aria-label="Edit"
     {...styleProps}
@@ -79,12 +81,12 @@ export const PlanEditor = ({ plan, editPlan, deletePlan, styleProps }: PlanEdito
   <Modal isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalCloseButton />
       <Tabs>
         <ModalHeader>
           <TabList>
             <Tab>Edit</Tab>
             <Tab>Upload</Tab>
+            <Tab>Clone</Tab>
           </TabList>
         </ModalHeader>
         <TabPanels>
@@ -102,8 +104,12 @@ export const PlanEditor = ({ plan, editPlan, deletePlan, styleProps }: PlanEdito
               <Button variant={"ghost"} onClick={onClose}>Close</Button>
             </ModalFooter>
           </TabPanel>
+          <TabPanel>
+            <PlanCloneInterface plan={plan} clonePlan={clonePlan} onClose={onClose} />
+          </TabPanel>
         </TabPanels>
       </Tabs>
+      <ModalCloseButton />
     </ModalContent>
   </Modal></>;
 };

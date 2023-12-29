@@ -41,10 +41,10 @@ You mark them as "complete" within a particular day, by creating an activity on 
 - ~~Build interface for creating and managing these plans (literally just a list with CRUD - we probably want an "archived" concept too)~~
 - ~~Build an interface that makes it easy to create and edit the various kinds of workout singularly~~
 - ~~Create a mobile-first weekly view of planned workouts~~
-- Create a bulk upload/download system for plans - probably CSV based
+- ~~Create a bulk upload/download system for plans - probably CSV based~~
 - Create a data purge endpoint
 - ~~Implement the Cassandra storage layer with same interface as SQLite~~
-- Implement a way of creating and parsing recurring workouts
+- ~~Implement a way of creating and parsing recurring workouts~~
 
 That probably comprises the MVP of the system - we can then tie it into the dashboard
 

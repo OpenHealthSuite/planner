@@ -6,7 +6,7 @@ import { plannerDeleteRequest, plannerGetRequest, plannerPostRequest, plannerPut
 import { ApplicationContext } from "../App";
 import { PlanEditor } from "./PlanEditor";
 
-function PlanListItem ({ plan, editPlan, deletePlan }: {plan: Plan, editPlan: (plan: Plan) => void, deletePlan: (planId: string) => void}): JSX.Element {
+function PlanListItem ({ plan, editPlan, deletePlan, clonePlan }: {plan: Plan, editPlan: (plan: Plan) => void, deletePlan: (planId: string) => void, clonePlan: (clone: any) => void}): JSX.Element {
   return <ListItem display={"flex"} alignItems={"center"} gap={"0.5em"}>
     <ListIcon as={TimeIcon} color='green.500' />
     {plan.name}
@@ -18,6 +18,7 @@ function PlanListItem ({ plan, editPlan, deletePlan }: {plan: Plan, editPlan: (p
       plan={plan}
       editPlan={editPlan}
       deletePlan={deletePlan}
+      clonePlan={clonePlan}
     />
   </ListItem>;
 }
@@ -51,6 +52,21 @@ export const PlanManager = () => {
       .finally(() => setNewPlanId(Math.random().toString()));
   }, [setLoading, setNewPlanId]);
 
+  const clonePlan = useCallback((args: any) => {
+    setLoading(true);
+    const body: {[key:string]: any} = {
+      id: args.id
+    };
+
+    if (args.shiftOnStart) {
+      body.newStartDateTime = args.date + "T12:00:00.000Z";
+    } else {
+      body.newEndDateTime = args.date + "T12:00:00.000Z";
+    }
+    plannerPostRequest("/plans/clone", body)
+      .finally(() => setNewPlanId(Math.random().toString()));
+  }, [setLoading, setNewPlanId]);
+
   useEffect(() => {
     setLoading(true);
     plannerGetRequest<Plan[]>("/plans")
@@ -66,7 +82,7 @@ export const PlanManager = () => {
 
   return <Flex padding={"1em"}>
     <List spacing={3}>
-      {userPlans.map(plan => <PlanListItem key={plan.id} plan={plan} editPlan={editPlan} deletePlan={deletePlan}/>)}
+      {userPlans.map(plan => <PlanListItem key={plan.id} plan={plan} editPlan={editPlan} deletePlan={deletePlan} clonePlan={clonePlan} />)}
 
       <ListItem display={"flex"} alignItems={"center"} gap={"0.5em"}>
         <ListIcon as={PlusSquareIcon} color='green.500' />
